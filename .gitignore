@@ -1,0 +1,69 @@
+# ======================
+# Python / Django
+# ======================
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# 가상환경
+venv/
+env/
+backend/venv/
+
+# Django 관련
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite3
+*.db
+
+# 환경 변수
+.env
+.env.*
+
+# media/static 파일 (선택적으로 관리)
+media/
+staticfiles/
+static_root/
+
+# VSCode
+.vscode/
+
+# ======================
+# Node / React
+# ======================
+# Node modules
+node_modules/
+frontend/node_modules/
+
+# 빌드 결과물
+frontend/build/
+frontend/dist/
+
+# 로그파일
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 테스트 관련
+coverage/
+*.lcov
+
+# 환경 변수
+frontend/.env
+frontend/.env.*
+
+# ======================
+# OS & Editor
+# ======================
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
