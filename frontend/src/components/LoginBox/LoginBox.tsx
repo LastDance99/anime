@@ -89,9 +89,9 @@ const LoginBox: React.FC = () => {
               />
               <IconButton onClick={() => setShowPw(v => !v)}>
                 {showPw ? (
-                  <EyeOff size={18} color="#999" />
+                  <EyeOff size={18} color="#555" />
                 ) : (
-                  <Eye size={18} color="#999" />
+                  <Eye size={18} color="#555" />
                 )}
               </IconButton>
             </PasswordWrapper>

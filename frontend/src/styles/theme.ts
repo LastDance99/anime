@@ -3,6 +3,7 @@ const theme = {
     primary: '#FCEEF5',
     secondary: '#FFD1DC',
     bordermain: '#FFB2C6',
+    subcolor: '#F0F8FF',
     text: '#222',
     subtext: '#999',
     background: '#fff',

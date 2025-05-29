@@ -19,7 +19,7 @@ const GlobalStyle = createGlobalStyle`
     height: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Quicksand', s;ans-serif
     font-size: 1rem; /* 1rem = 16px */
     font-weight: 400;
     line-height: 1.5;
