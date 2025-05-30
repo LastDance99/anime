@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Container,
   Box,
@@ -17,7 +18,7 @@ import {
   LanguageSelected,
   LanguageDropdown,
   LanguageItem,
-} from "./LoginBox.styled";
+} from "./Login.styled";
 import { Eye, EyeOff, ChevronDown, ChevronUp} from "lucide-react";
 
 const languages = [
@@ -26,7 +27,7 @@ const languages = [
     { code: "ja", label: "日本語" },
   ];
 
-const LoginBox: React.FC = () => {
+const Login: React.FC = () => {
   const [showPw, setShowPw] = useState(false);
   const [keepLogin, setKeepLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -46,7 +47,9 @@ const LoginBox: React.FC = () => {
   return (
     <Container>
       <Box>
-        <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        <Link to="/">
+          <Logo src="/logos/mainlog.png" alt="AnTada 로고"/>
+        </Link>
         <SubBox>
           <LanguageContainer>
             <LanguageSelected onClick={() => setOpen((v) => !v)}>
@@ -116,4 +119,4 @@ const LoginBox: React.FC = () => {
   );
 };
 
-export default LoginBox;
+export default Login;

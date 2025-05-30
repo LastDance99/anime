@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import { Link } from "react-router-dom";
+
 
 export const Container = styled.div`
   width: 100vw;
@@ -49,9 +51,13 @@ export const SubTitle = styled.div`
   line-height: ${({ theme }) => theme.lineHeights.normal};
 `;
 
-export const LoginButton = styled.button`
+export const LoginButton = styled(Link)`
   width: 410px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 40px;
   background: ${({ theme }) => theme.colors.secondary};
   color: ${({ theme }) => theme.colors.text};
   border: 1px solid ${({ theme }) => theme.colors.bordermain};
@@ -63,7 +69,6 @@ export const LoginButton = styled.button`
   margin-bottom: 14px;
   transition: filter 0.2s;
   letter-spacing: ${({ theme }) => theme.letterSpacings.normal};
-
   &:hover {
     filter: brightness(0.98);
   }

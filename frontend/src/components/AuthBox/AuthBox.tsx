@@ -60,11 +60,11 @@ const AuthBox: React.FC = () => {
             </LanguageDropdown>
           )}
         </LanguageContainer>
-        <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        <Logo src="/logos/mainlog.png" alt="AnTada 로고"/>
         <Title>지금 접속해서 즐겨보세요~!</Title>
         <SubTitle>로그인 시 이용 가능합니다</SubTitle>
-        <LoginButton><Link to="/login">로그인</Link></LoginButton>
-        <SignupButton>회원가입</SignupButton>
+        <LoginButton as={Link} to="/login">로그인</LoginButton>
+        <SignupButton as={Link} to="/signup">회원가입</SignupButton>
       </Box>
     </Container>
   );

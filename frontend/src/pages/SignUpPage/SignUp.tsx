@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Container,
   MainBox,
@@ -24,7 +25,7 @@ import {
   DomainDropdownButton,
   DomainDropdownList,
   DomainDropdownItem,
-} from "./SignUpBox.styled";
+} from "./SignUp.styled";
 import { Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 
 const emailDomains = [
@@ -41,7 +42,7 @@ const languages = [
     { code: "ja", label: "日本語" },
   ];
 
-const SignUpBox: React.FC = () => {
+const SignUp: React.FC = () => {
   const [emailId, setEmailId] = useState("");
   const [emailDomain, setEmailDomain] = useState("");
   const [showJobInput, setShowJobInput] = useState(true);
@@ -90,7 +91,9 @@ const SignUpBox: React.FC = () => {
     <Container>
       <MainBox>
         {/* 로고, 언어선택 등은 생략. 위에서 구현된 대로 삽입 */}
-        <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        <Link to="/">
+          <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        </Link>
         <FormBox onSubmit={handleSubmit}>
           <LanguageContainer>
             <LanguageSelected onClick={() => setOpen((v) => !v)}>
@@ -251,4 +254,4 @@ const SignUpBox: React.FC = () => {
   );
 };
 
-export default SignUpBox;
+export default SignUp;
