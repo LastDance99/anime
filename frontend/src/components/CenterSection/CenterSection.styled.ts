@@ -9,21 +9,34 @@ export const CenterSection = styled.section`
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 40px;
   box-sizing: border-box;
-  padding: 20px;
+  padding: 40px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  &::-webkit-scrollbar-track {
+    background: #fceef5;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ff99bb;
+    border-radius: 10px;
+    border: 1px solid #fceef5;
+  }
 `;
 
 export const TopRow = styled.div`
   width: 634px;
   height: 350px;
   display: flex;
-  gap: 24px;
+  gap: 52px;
 `;
 
 export const MyRoomBox = styled.div`
   width: 380px;
-  height: 300px;
+  height: 350px;
   display: flex;
   flex-direction: column;
 `;
@@ -41,19 +54,8 @@ export const RoomImage = styled.img`
   height: 300px;
   object-fit: cover;
   border-radius: 16px;
-  border: 1px solid #D6C6E1;
+  border: 1px solid #FFB6C1;
   background: #fff;
-`;
-
-export const CommentsBox = styled.div`
-  width: 200px;
-  height: 300px;
-  background: #fff;
-  border: 1px solid #000;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
 `;
 
 export const CommentsTitle = styled.div`
@@ -64,20 +66,90 @@ export const CommentsTitle = styled.div`
   margin-bottom: 10px;
 `;
 
-export const ChatInputWrapper = styled.div`
-  width: 180px;
-  height: 30px;
+export const CommentsBox = styled.div`
+  width: 200px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const ChatContentBox = styled.div`
+  width: 200px;
+  height: 300px;
   background: #fff;
-  border: 1px solid #000;
+  border: 1px solid #FFB6C1;
   border-radius: 6px;
-  margin: 8px auto 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+export const ChatScrollArea = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  padding-right: 6px;
+  margin-right: -6px;
+  flex-direction: column;
+  gap: 8px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ff99bb;
+    border-radius: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #fceef5;
+  }
+`;
+
+export const ChatItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 6px;
+`;
+
+export const ProfileImg = styled.img`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+`;
+
+export const ChatTextBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const ChatNickname = styled.div`
+  font-size: 12px;
+  font-weight: bold;
+`;
+
+export const ChatText = styled.div`
+  font-size: 12px;
+`;
+
+export const ChatInputWrapper = styled.div`
+  width: 90%;
+  height: 28px;
+  background: #fff;
+  border: 1px solid #FFB6C1;
+  border-radius: 4px;
   display: flex;
   align-items: center;
+  padding: 0 8px;
+  margin: 10px auto;
 `;
 
 export const ChatInput = styled.input`
   width: 100%;
-  height: 100%;
+  height: 80%;
   border: none;
   font-size: 14px;
   background: transparent;
@@ -201,24 +273,21 @@ export const GalleryMore = styled.button`
 export const GallerySwiper = styled.div`
   width: 640px;
   height: 220px;
-  border: 1px solid #FFB6C1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 8px 0;
   position: relative;
+  padding: 0 10px;
+  overflow-x: auto;
+  border-bottom: 1px solid #FFB6C1;
 `;
 
 // 갤러리 이미지 카드
 export const GalleryImageCard = styled.div`
   width: 200px;
   height: 200px;
-  border-radius: 10px;
   position: relative;
   overflow: hidden;
   flex: 0 0 auto;
-  margin-right: 8px;
 `;
 
 export const GalleryImage = styled.img`
@@ -285,7 +354,7 @@ export const GalleryMetaItem = styled.div`
 
 export const AniListSectionWrapper = styled.section`
   width: 640px;
-  height: 246px;
+  // height: 246px;
 `;
 
 export const AniListHeader = styled.div`
@@ -317,13 +386,12 @@ export const AniListMore = styled.button`
 // 애니리스트 스와이프 영역
 export const AniListSwiper = styled.div`
   width: 640px;
-  height: 220px;
-  border: 1px solid #FFB6C1;
+  height: 180px;
+  border-bottom: 1px solid #FFB6C1;
   display: flex;
-  align-items: center;
-  gap: 8px;
   overflow-x: auto;
-  padding: 8px 0;
+  align-items: center;
+  padding: 10px;
   position: relative;
 `;
 
@@ -331,11 +399,9 @@ export const AniListSwiper = styled.div`
 export const AniCard = styled.div`
   width: 140px;
   height: 140px;
-  border-radius: 10px;
   position: relative;
   overflow: hidden;
   flex: 0 0 auto;
-  margin-right: 8px;
 `;
 
 export const AniCardImage = styled.img`

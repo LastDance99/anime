@@ -11,7 +11,6 @@ export const ChatBotWrapper = styled.section<{ bgImg?: string }>`
       : "#fff"};
   border: 1px solid #FFB6C1;
   box-sizing: border-box;
-  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -44,9 +43,19 @@ export const ChatArea = styled.div`
   font-family: 'Quicksand', sans-serif;
   font-weight: 500;
   color: #222;
+  padding-right: 5px;
+  margin-right: 10px;
+
   /* 스크롤바 숨기기 (선택) */
-  &::-webkit-scrollbar { width: 5px; background: transparent; }
-  &::-webkit-scrollbar-thumb { background: #eee; border-radius: 8px; }
+  &::-webkit-scrollbar {
+    width: 5px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #eee;
+    border-radius: 8px;
+  }
 `;
 
 // 각 메시지 행(유저/챗봇 말풍선 정렬)
@@ -77,60 +86,63 @@ export const ChatBubble = styled.div<{ isUser?: boolean }>`
 
 // 입력창 전체 (폼)
 export const ChatInputBox = styled.form`
-  position: absolute;
-  left: 0; right: 0; bottom: 16px;
   width: 95%;
-  margin: 0 auto;
+  min-height: 90px;
+  max-height: 200px;
+  margin: 20px auto;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column; /* 세로로 쌓기 */
+  align-items: stretch;
   background: #F0F8FF;
   border: 1px solid #CDE6F5;
   border-radius: 40px;
-  height: 54px;
-  padding: 0 18px;
+  padding: 18px 22px 14px 22px;
   box-sizing: border-box;
-  z-index: 2;
+  gap: 4px;
 `;
 
-// 입력창 텍스트 인풋
-export const ChatInput = styled.input`
-  flex: 1;
-  background: transparent;
+export const ChatInputArea = styled.textarea`
+  width: 100%;
+  min-height: 40px;
+  max-height: 80px;
+  resize: none;
   border: none;
   outline: none;
-  height: 40px;
-  font-size: 16px;
+  background: transparent;
+  font-size: 14px;
   font-family: 'Quicksand', sans-serif;
-  padding: 0 10px;
   color: #222;
+  padding: 6px auto;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ddeef5;
+    border-radius: 10px;
+  }
 `;
 
-// 입력창 왼쪽(추가) 아이콘 버튼
+export const IconsRow = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 6px;
+`;
+
 export const AddIconButton = styled.button`
-  width: 16px;
-  height: 18px;
-  border: 1px solid #CDE6F5;
-  background: #F0F8FF;
-  border-radius: 5px;
+  color: #CDE6F5;
+  background: none;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
   cursor: pointer;
+
+  svg { width: 20px; height: 20px; }
 `;
 
-// 입력창 오른쪽(전송) 아이콘 버튼
-export const SendIconButton = styled.button`
-  width: 16px;
-  height: 18px;
-  border: 1px solid #CDE6F5;
-  background: #F0F8FF;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 8px;
-  cursor: pointer;
-`;
-
+export const SendIconButton = styled(AddIconButton)``;

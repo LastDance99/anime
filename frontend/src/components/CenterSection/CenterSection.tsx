@@ -12,6 +12,13 @@ import {
   RoomImage,
   CommentsBox,
   CommentsTitle,
+  ChatContentBox,
+  ChatScrollArea,
+  ChatItem,
+  ProfileImg,
+  ChatTextBlock,
+  ChatNickname,
+  ChatText,
   ChatInputWrapper,
   ChatInput,
   BoardSection,
@@ -24,132 +31,145 @@ import {
   Tag,
   PostTitle,
   CommentCount,
-
   GallerySectionWrapper,
   GalleryHeader,
   GalleryTitle,
   GalleryMore,
   GalleryImageCard,
   GalleryImage,
+  GallerySwiper,
   GalleryShadowBox,
   GalleryCardTitle,
   GalleryCardAuthor,
   GalleryCardMeta,
   GalleryMetaItem,
-
   AniListSectionWrapper,
   AniListHeader,
   AniListTitle,
   AniListMore,
+  AniListSwiper,
   AniCard,
   AniCardImage,
   AniShadowBox,
-  AniCardTitle
+  AniCardTitle,
 } from "./CenterSection.styled";
-
-// 예시 더미 데이터 (생략)
 
 export default function CenterArea() {
   return (
     <CenterSection>
       <TopRow>
         <MyRoomBox>
-          <RoomTitle>마이룸</RoomTitle>
-          <RoomImage src="/images/myroom.png" alt="마이룸" />
+          <RoomTitle>My Room</RoomTitle>
+          <RoomImage src="/images/bgimg1.jpg" alt="마이룸" />
         </MyRoomBox>
+
         <CommentsBox>
-          <CommentsTitle>comments</CommentsTitle>
-          {/* 여기에 댓글 리스트 표시 */}
-          <ChatInputWrapper>
-            <ChatInput placeholder="댓글 입력..." />
-          </ChatInputWrapper>
+          <CommentsTitle>Comments</CommentsTitle>
+
+          <ChatContentBox>
+            <ChatScrollArea>
+              {Array(6).fill(0).map((_, i) => (
+                <ChatItem key={i}>
+                  <ProfileImg src="/images/user_profile.png" alt="profile" />
+                  <ChatTextBlock>
+                    <ChatNickname>닉네임{i + 1}</ChatNickname>
+                    <ChatText>입력된 채팅 내용</ChatText>
+                  </ChatTextBlock>
+                </ChatItem>
+              ))}
+            </ChatScrollArea>
+            
+            <ChatInputWrapper>
+              <ChatInput placeholder="채팅 입력란" />
+            </ChatInputWrapper>
+          </ChatContentBox>
         </CommentsBox>
       </TopRow>
 
       <BoardSection>
+        {/* 전체 게시판 */}
         <BoardBox>
           <BoardHeader>
             <BoardTitle>전체게시판</BoardTitle>
             <MoreBtn>더보기+</MoreBtn>
           </BoardHeader>
           <PostList>
-            <PostItem>
-              <Tag>#태그</Tag>
-              <PostTitle>게시글 제목</PostTitle>
-              <CommentCount>3</CommentCount>
-            </PostItem>
-            {/* 여러개 반복 */}
+            {Array(6).fill(0).map((_, i) => (
+              <PostItem key={i}>
+                <Tag>#자유</Tag>
+                <PostTitle>게시글 제목 예시{i + 1}</PostTitle>
+                <CommentCount>({i + 2})</CommentCount>
+              </PostItem>
+            ))}
           </PostList>
         </BoardBox>
-        {/* 오른쪽에 갤러리/애니리스트 등 추가 가능 */}
+
+        {/* --- 게시글 */}
+        <BoardBox>
+          <BoardHeader>
+            <BoardTitle>--- 게시글</BoardTitle>
+            <MoreBtn>더보기+</MoreBtn>
+          </BoardHeader>
+          <PostList>
+            {Array(6).fill(0).map((_, i) => (
+              <PostItem key={i}>
+                <Tag>#공지</Tag>
+                <PostTitle>공지사항 예시{i + 1}</PostTitle>
+                <CommentCount>({i})</CommentCount>
+              </PostItem>
+            ))}
+          </PostList>
+        </BoardBox>
       </BoardSection>
 
-      {/* --- 갤러리 Swiper --- */}
+      {/* 갤러리 Swiper */}
       <GallerySectionWrapper>
         <GalleryHeader>
           <GalleryTitle>--- 갤러리</GalleryTitle>
           <GalleryMore>더보기+</GalleryMore>
         </GalleryHeader>
-        <Swiper
-          slidesPerView={3}
-          spaceBetween={16}
-          style={{
-            width: "640px",
-            height: "220px",
-            border: "1px solid #FFB6C1",
-            borderRadius: "10px",
-            padding: "8px 0",
-            background: "#fff"
-          }}
-        >
-          {galleryList.map((item: GalleryItem) => (
-            <SwiperSlide key={item.id} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <GalleryImageCard>
-                <GalleryImage src={item.imgUrl} alt={item.title} />
-                <GalleryShadowBox>
-                  <GalleryCardTitle>{item.title}</GalleryCardTitle>
-                  <GalleryCardAuthor>{item.author}</GalleryCardAuthor>
-                  <GalleryCardMeta>
-                    <GalleryMetaItem>👁‍🗨 {item.views}</GalleryMetaItem>
-                    <GalleryMetaItem>💬 {item.comments}</GalleryMetaItem>
-                    <GalleryMetaItem>👍 {item.likes}</GalleryMetaItem>
-                  </GalleryCardMeta>
-                </GalleryShadowBox>
-              </GalleryImageCard>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <GallerySwiper>
+          <Swiper slidesPerView={3} spaceBetween={10}>
+            {galleryList.map((item: GalleryItem) => (
+              <SwiperSlide key={item.id}>
+                <GalleryImageCard>
+                  <GalleryImage src={item.imgUrl} alt={item.title} />
+                  <GalleryShadowBox>
+                    <GalleryCardTitle>{item.title}</GalleryCardTitle>
+                    <GalleryCardAuthor>{item.author}</GalleryCardAuthor>
+                    <GalleryCardMeta>
+                      <GalleryMetaItem>👁‍🗨 {item.views}</GalleryMetaItem>
+                      <GalleryMetaItem>💬 {item.comments}</GalleryMetaItem>
+                      <GalleryMetaItem>👍 {item.likes}</GalleryMetaItem>
+                    </GalleryCardMeta>
+                  </GalleryShadowBox>
+                </GalleryImageCard>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </GallerySwiper>
       </GallerySectionWrapper>
 
-      {/* --- 애니리스트 Swiper --- */}
+      {/* 애니리스트 Swiper */}
       <AniListSectionWrapper>
         <AniListHeader>
           <AniListTitle>--- 애니리스트</AniListTitle>
           <AniListMore>더보기+</AniListMore>
         </AniListHeader>
-        <Swiper
-          slidesPerView={4}
-          spaceBetween={16}
-          style={{
-            width: "640px",
-            height: "220px",
-            border: "1px solid #FFB6C1",
-            borderRadius: "10px",
-            padding: "8px 0",
-            background: "#fff"
-          }}
-        >
-          {animeList.map((item: AnimeItem) => (
-            <SwiperSlide key={item.id} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <AniCard>
-                <AniCardImage src={item.imgUrl} alt={item.title} />
-                <AniShadowBox>
-                  <AniCardTitle>{item.title}</AniCardTitle>
-                </AniShadowBox>
-              </AniCard>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <AniListSwiper>
+          <Swiper slidesPerView={4} spaceBetween={10}>
+            {animeList.map((item: AnimeItem) => (
+              <SwiperSlide key={item.id}>
+                <AniCard>
+                  <AniCardImage src={item.imgUrl} alt={item.title} />
+                  <AniShadowBox>
+                    <AniCardTitle>{item.title}</AniCardTitle>
+                  </AniShadowBox>
+                </AniCard>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </AniListSwiper>
       </AniListSectionWrapper>
     </CenterSection>
   );
