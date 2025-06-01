@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
 
 from pathlib import Path
 
@@ -25,8 +26,11 @@ SECRET_KEY = 'django-insecure-&8$*-=i8uro%b8@!qrtyzqyq9w3rt=_!=#_wokivx0a0ff7*-9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    '127.0.0.1',      # 자기 자신 (로컬 개발용)
+    'localhost',      # 자기 자신 도메인 방식
+    '192.168.0.9',   # ✅ 너의 내부 IP (프론트에서 접근할 주소!)]
+]
 
 # Application definition
 
@@ -37,9 +41,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework', # Django REST Framework
+    'rest_framework_simplejwt.token_blacklist', # JWT 토큰 블랙리스트 기능
+    'corsheaders', # 프론트와 API가 다른 포트나 도메인일 경우 CORS(보안) 문제 해결
+    'drf_yasg', # API 문서 자동 생성 (Swagger/OpenAPI)
+
+    # 앱 목록
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -54,7 +66,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR.parent, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,8 +86,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'anime_db',
+        'USER': 'postgres',
+        'PASSWORD': 'a2039305',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -102,21 +118,69 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
-USE_TZ = True
+# USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Media 파일 설정
+MEDIA_URL = '/media/' 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# CORS 설정
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+# Django REST Framework 설정
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    
+}
+
+#google gmail SMTP 설정
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'simyuong68@gmail.com'  # 본인 Gmail 주소
+EMAIL_HOST_PASSWORD = 'lymi zpvz sttj kyhg'         # Gmail 앱 비밀번호
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+#Tip: 실제 코드에서는 EMAIL_HOST_PASSWORD에 절대로 평문을 두지 말고, 반드시 .env나 AWS/GCP Secret Manager 등에 보관
+
+from datetime import timedelta
+#JWT Tokken 설정
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'BLACKLIST_AFTER_ROTATION': True,
+}
