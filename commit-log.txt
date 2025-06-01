@@ -4,3 +4,9 @@ Author: kimdaewon
 Message: 프로젝트 초기 세팅(프론트엔드 + 백엔드)
 Commit: 6f30feb62daf5262b0f7c234760907ed1871d5cf
 
+==== New Push ====
+Time: 2025-06-01 08:41:58
+Author: LastDance99
+Message: Merge pull request #2 from LastDance99/backend
+Commit: b77f69f64e4b2e8625a78f8b4f965f7c936037c1
+
