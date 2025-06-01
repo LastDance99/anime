@@ -28,9 +28,9 @@ backend/venv/
 .env.*
 
 # media/static 파일 (선택적으로 관리)
-media/
-staticfiles/
-static_root/
+# media/
+# staticfiles/
+# static_root/
 
 # VSCode
 .vscode/
