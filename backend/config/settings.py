@@ -43,11 +43,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework', # Django REST Framework
+    'rest_framework_simplejwt', # JWT 인증을 위한 Simple JWT
     'rest_framework_simplejwt.token_blacklist', # JWT 토큰 블랙리스트 기능
     'corsheaders', # 프론트와 API가 다른 포트나 도메인일 경우 CORS(보안) 문제 해결
     'drf_yasg', # API 문서 자동 생성 (Swagger/OpenAPI)
 
     # 앱 목록
+    'apps.users',
 ]
 
 MIDDLEWARE = [
