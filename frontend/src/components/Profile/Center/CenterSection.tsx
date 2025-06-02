@@ -1,9 +1,9 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-import { galleryList } from "../../data/galleryList";
-import { animeList } from '../../data/animeList';
-import type { GalleryItem } from "../../types/gallery";
-import type { AnimeItem } from '../../types/anime';
+import { galleryList } from "../../../data/galleryList";
+import { animeList } from '../../../data/animeList';
+import type { GalleryItem } from "../../../types/gallery";
+import type { AnimeItem } from '../../../types/anime';
 import {
   CenterSection,
   TopRow,

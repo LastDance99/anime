@@ -6,7 +6,7 @@ import {
   Nav,
   NavList,
   NavItem
-} from "./Header.styled";
+} from "./MainHeader.styled";
 
 export default function Header() {
   return (

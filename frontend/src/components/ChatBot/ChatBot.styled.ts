@@ -14,6 +14,7 @@ export const ChatBotWrapper = styled.section<{ bgImg?: string }>`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 `;
 
 // 사이드바(햄버거 등) 아이콘

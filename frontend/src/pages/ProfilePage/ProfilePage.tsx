@@ -1,6 +1,7 @@
 import ChatBot from "../../components/ChatBot/ChatBot";
-import CenterSection from "../../components/CenterSection/CenterSection";
-import ProfileCard from "../../components/ProfileCard/ProfileCard";
+import CenterSection from "../../components/Profile/Center/CenterSection";
+import ProfileCard from "../../components/Profile/ProfileCard/ProfileCard";
+import Header from "../../components/Profile/ProfileHeader/ProfileHeader";
 import { mockUsers } from "../../data/userList";
 import { useParams } from "react-router-dom";
 import { Container, MainBox, } from "./ProfilePage.styled";
@@ -16,6 +17,7 @@ export default function ProfilePage() {
 
   return (
     <Container>
+      <Header />
       <MainBox>
         <ProfileCard user={user} />
         <CenterSection />

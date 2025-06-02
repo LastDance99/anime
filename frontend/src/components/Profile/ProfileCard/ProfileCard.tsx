@@ -23,7 +23,7 @@ import {
   PointShopLink,
   Iconbox,
 } from "./ProfileCard.styled";
-import type { ProfileCardProps }  from "../../types/user"; // User 타입 정의가 필요합니다.
+import type { ProfileCardProps }  from "../../../types/user"; // User 타입 정의가 필요합니다.
 
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
