@@ -50,7 +50,12 @@ INSTALLED_APPS = [
 
     # 앱 목록
     'apps.users',
+    'apps.profiles',
+    'apps.follows',
 ]
+
+# ✅ 커스텀 유저 모델 설정
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -182,7 +187,11 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 from datetime import timedelta
 #JWT Tokken 설정
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
 }
