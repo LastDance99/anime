@@ -49,8 +49,14 @@ INSTALLED_APPS = [
     'drf_yasg', # API 문서 자동 생성 (Swagger/OpenAPI)
 
     # 앱 목록
-    'apps.users',
+    'apps.users', # 사용자 인증 및 관리 앱
+    'apps.profiles', # 사용자 프로필 앱
+    'apps.follows', # 팔로우 기능 앱
+    'apps.boards', # 게시판 기능 앱
 ]
+
+# ✅ 커스텀 유저 모델 설정
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -166,6 +172,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,  # ✅ 페이지당 50개
     
 }
 
@@ -182,7 +190,11 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 from datetime import timedelta
 #JWT Tokken 설정
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
 }
