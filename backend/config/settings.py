@@ -49,9 +49,10 @@ INSTALLED_APPS = [
     'drf_yasg', # API 문서 자동 생성 (Swagger/OpenAPI)
 
     # 앱 목록
-    'apps.users',
-    'apps.profiles',
-    'apps.follows',
+    'apps.users', # 사용자 인증 및 관리 앱
+    'apps.profiles', # 사용자 프로필 앱
+    'apps.follows', # 팔로우 기능 앱
+    'apps.boards', # 게시판 기능 앱
 ]
 
 # ✅ 커스텀 유저 모델 설정
@@ -171,6 +172,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,  # ✅ 페이지당 50개
     
 }
 
