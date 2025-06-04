@@ -2,22 +2,28 @@ import styled from "styled-components";
 
 // 헤더 전체 래퍼
 export const HeaderWrapper = styled.header`
-  width: 100%;
+  width: 100vw; // 전체 뷰포트 기준
+  min-width: 360px;
   height: 100px;
-  // background: transparent;   // 투명!
   background: #FCEEF5;
   display: flex;
   justify-content: center;
   align-items: center;
-
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
 `;
 
 // 내부 컨테이너 (가운데 영역)
 export const HeaderInner = styled.div`
-  width: 1280px;
-  height: 100px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  height: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 `;
 
 // 로고

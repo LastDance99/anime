@@ -4,9 +4,7 @@ import BoardPage from "../BoardPage/BoardPage";
 const MainPage: React.FC = () => {
 
   return (
-    <div>
-      <BoardPage />
-    </div>
+    <BoardPage />
   );
 };
 

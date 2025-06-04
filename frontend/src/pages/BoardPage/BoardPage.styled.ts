@@ -1,11 +1,15 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  max-width: 1280px;
+  min-width: 360px;  /* 모바일 대응 */
+  // aspect-ratio: 16 / 9;
+  margin: 0 auto;
   display: flex;
   align-items: center;    /* 수직 중앙정렬 */
   justify-content: center; /* 수평 중앙정렬 */
+  padding-top: 120px;
 `;
 
 export const Wrapper = styled.div`
@@ -17,7 +21,7 @@ export const Wrapper = styled.div`
 
 export const BoardSectionBox = styled.div`
   width: 930px;
-  max-height: 920px;
+  // max-height: 920px;
   background: #fff;
   border: 1px solid #FFB6C1;
 `;

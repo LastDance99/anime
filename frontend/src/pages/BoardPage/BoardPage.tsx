@@ -18,14 +18,14 @@ import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import { boardList } from "../../data/boardList";
 
-const PAGE_SIZE = 11; // 한 페이지에 보여줄 게시글 수
+const PAGE_SIZE = 50; // 한 페이지에 보여줄 게시글 수
+
 const SORT_OPTIONS = [
   { label: "최신순", value: "latest" },
   { label: "조회순", value: "views" },
   { label: "댓글순", value: "comments" },
   { label: "추천순", value: "likes" },
 ];
-
 
 const BoardPage: React.FC = () => {
   const [page, setPage] = useState(1);
