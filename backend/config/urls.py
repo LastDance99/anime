@@ -27,6 +27,7 @@ urlpatterns = [
     path("api/profiles/", include("apps.profiles.urls")),
     path("api/follows/", include("apps.follows.urls")),
     path("api/boards/", include("apps.boards.urls")),
+    path("api/anime/", include("apps.anime.urls")),
 ]
 
 if settings.DEBUG:

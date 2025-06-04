@@ -191,3 +191,4 @@ class BoardCommentDeleteView(generics.DestroyAPIView):
             return Response({"message": "댓글 내용이 삭제 처리되었습니다."}, status=200)
 
         return super().delete(request, *args, **kwargs)
+    
