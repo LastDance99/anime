@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',      # 자기 자신 (로컬 개발용)
     'localhost',      # 자기 자신 도메인 방식
-    '192.168.0.9',   # ✅ 너의 내부 IP (프론트에서 접근할 주소!)]
+    '192.168.0.9',   # ✅ 너의 내부 IP (프론트에서 접근할 주소!
 ]
 
 # Application definition
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apps.profiles', # 사용자 프로필 앱
     'apps.follows', # 팔로우 기능 앱
     'apps.boards', # 게시판 기능 앱
+    'apps.anime', # 애니 기능 앱
 ]
 
 # ✅ 커스텀 유저 모델 설정
@@ -188,7 +189,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #Tip: 실제 코드에서는 EMAIL_HOST_PASSWORD에 절대로 평문을 두지 말고, 반드시 .env나 AWS/GCP Secret Manager 등에 보관
 
 from datetime import timedelta
-#JWT Tokken 설정
+#JWT Token 설정
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
