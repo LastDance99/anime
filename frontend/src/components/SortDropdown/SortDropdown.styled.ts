@@ -9,6 +9,9 @@ export const Dropdown = styled.div`
   justify-content: center;
   border: 1px solid #faaac6;
   background: #ffe2eb;
+  &:hover {
+    background: #FFB6C1;
+  }
 `;
 
 export const Select = styled.select`

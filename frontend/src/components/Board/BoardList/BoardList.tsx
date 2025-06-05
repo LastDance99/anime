@@ -45,7 +45,7 @@ const BoardList: React.FC<BoardListProps> = ({ page, pageSize }) => {
               <img src={item.img} alt="썸네일" width={36} height={36} style={{borderRadius:8}} />
             </Td>
             <Td style={{ width: columnWidths[2], textAlign: "left" }}>
-              <div style={{display:'flex', alignItems:'center', gap:8, justifyContent:'flex-start'}}>
+              <div style={{display:'flex', alignItems:'center', justifyContent:'flex-start'}}>
                 <Category $type={item.category}>{item.category}</Category>
                 <Title>{item.title}</Title>
                 <Comments>({item.comment})</Comments>

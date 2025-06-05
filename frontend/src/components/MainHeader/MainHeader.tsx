@@ -12,12 +12,12 @@ export default function Header() {
   return (
     <HeaderWrapper>
       <HeaderInner>
-        <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        <Logo src="/logos/sublog.png" alt="AnTada 로고" />
         <Nav>
           <NavList>
-            <NavItem as={Link} to='*'>프로필</NavItem>
-            <NavItem as={Link} to='*'>전체 게시판</NavItem>
-            <NavItem as={Link} to='*'>애니</NavItem>
+            <NavItem as={Link} to='/profile'>프로필</NavItem>
+            <NavItem as={Link} to='/mainpage'>전체 게시판</NavItem>
+            <NavItem as={Link} to='/mainpage'>애니</NavItem>
           </NavList>
         </Nav>
       </HeaderInner>

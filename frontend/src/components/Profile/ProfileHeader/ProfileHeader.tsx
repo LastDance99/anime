@@ -15,9 +15,9 @@ export default function Header() {
         <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
         <Nav>
           <NavList>
-            <NavItem as={Link} to='*'>프로필</NavItem>
-            <NavItem as={Link} to='*'>전체 게시판</NavItem>
-            <NavItem as={Link} to='*'>애니</NavItem>
+            <NavItem as={Link} to='/profile:nickname'>프로필</NavItem>
+            <NavItem as={Link} to='/mainpage'>전체 게시판</NavItem>
+            <NavItem as={Link} to='/mainpage'>애니</NavItem>
           </NavList>
         </Nav>
       </HeaderInner>

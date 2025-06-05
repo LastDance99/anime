@@ -4,7 +4,7 @@ import styled from "styled-components";
 export const HeaderWrapper = styled.header`
   width: 100vw; // 전체 뷰포트 기준
   min-width: 360px;
-  height: 100px;
+  height: 60px;
   background: #FCEEF5;
   display: flex;
   justify-content: center;
@@ -28,8 +28,7 @@ export const HeaderInner = styled.div`
 
 // 로고
 export const Logo = styled.img`
-  height: 80px;
-  margin:0px 12px;
+  height: 50px;
 `;
 
 // 네비게이션

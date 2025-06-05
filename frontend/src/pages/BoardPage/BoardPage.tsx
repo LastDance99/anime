@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Section,
   Wrapper,
   BoardSection,
   SidebarSection,
@@ -8,14 +9,16 @@ import {
   BoardHeader,
   TabSortWrapper,
   PageSearchWrapper,
+  SortWrite,
 } from "./BoardPage.styled";
 import BoardTabs from "../../components/Board/BoardTabs/BoardTabs";
 import BoardList from "../../components/Board/BoardList/BoardList";
 import BoardPagination from "../../components/Board/BoardPagination/BoardPagination";
-import BoardProfile from "../../components/Board/BoardProfile/BoardProfile";
+import BoardProfile from "../../components/ProfileCard/ProfileCard";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
+import WriteButton from "../../components/WriteButton/WriteButton";
 import { boardList } from "../../data/boardList";
 
 const PAGE_SIZE = 50; // 한 페이지에 보여줄 게시글 수
@@ -42,38 +45,43 @@ const BoardPage: React.FC = () => {
   const [sort, setSort] = useState("latest");
 
   return (
-    <Container>
-      <Wrapper>
-        <BoardSectionBox>
-          <BoardHeader>전체 게시판</BoardHeader>
-          <BoardSection>
-            <TabSortWrapper>
-              <BoardTabs />
-              <SortDropdown options={SORT_OPTIONS} value={sort} onChange={setSort} />
-            </TabSortWrapper>
-            {/* ✅ page, pageSize props 넘겨줌 */}
-            <BoardList page={page} pageSize={PAGE_SIZE} />
-              <PageSearchWrapper>
-                <BoardPagination
-                  page={page}
-                  totalPage={totalPage}
-                  onChange={setPage}
-                />
-                <SearchInput
-                  value={keyword}
-                  onChange={e => setKeyword(e.target.value)}
-                  onSearch={handleSearch}
-                  placeholder="검색어를 입력하세요"
-                />
-            </PageSearchWrapper>
-          </BoardSection>
-        </BoardSectionBox>
-        <SidebarSection>
-          <BoardProfile />
-          <ChatBot />
-        </SidebarSection>
-      </Wrapper>
-    </Container>
+    <Section>
+      <Container>
+        <Wrapper>
+          <BoardSectionBox>
+            <BoardHeader>전체 게시판</BoardHeader>
+            <BoardSection>
+              <TabSortWrapper>
+                <BoardTabs />
+                <SortWrite>
+                  <SortDropdown options={SORT_OPTIONS} value={sort} onChange={setSort} />
+                  <WriteButton />
+                </SortWrite>
+              </TabSortWrapper>
+              {/* ✅ page, pageSize props 넘겨줌 */}
+              <BoardList page={page} pageSize={PAGE_SIZE} />
+                <PageSearchWrapper>
+                  <BoardPagination
+                    page={page}
+                    totalPage={totalPage}
+                    onChange={setPage}
+                  />
+                  <SearchInput
+                    value={keyword}
+                    onChange={e => setKeyword(e.target.value)}
+                    onSearch={handleSearch}
+                    placeholder="검색어를 입력하세요"
+                  />
+              </PageSearchWrapper>
+            </BoardSection>
+          </BoardSectionBox>
+          <SidebarSection>
+            <BoardProfile />
+            <ChatBot />
+          </SidebarSection>
+        </Wrapper>
+      </Container>
+    </Section>
   );
 };
 

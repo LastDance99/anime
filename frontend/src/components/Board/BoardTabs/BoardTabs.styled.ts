@@ -20,6 +20,10 @@ export const Tab = styled.button<{ selected: boolean }>`
   cursor: pointer;
   transition: background 0.15s;
 
+  &:hover {
+    background: #FFB6C1;
+  }
+
   &:nth-child(1),
   &:nth-child(2),
   &:nth-child(3),

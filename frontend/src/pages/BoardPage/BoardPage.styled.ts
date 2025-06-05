@@ -1,5 +1,11 @@
 import styled from "styled-components";
 
+export const Section = styled.div`
+  width: 100%;
+  height: 100%;
+  // background: #FCEEF5;
+`;
+
 export const Container = styled.div`
   width: 100%;
   max-width: 1280px;
@@ -9,7 +15,7 @@ export const Container = styled.div`
   display: flex;
   align-items: center;    /* 수직 중앙정렬 */
   justify-content: center; /* 수평 중앙정렬 */
-  padding-top: 120px;
+  padding-top: 80px;
 `;
 
 export const Wrapper = styled.div`
@@ -48,6 +54,10 @@ export const TabSortWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+`;
+
+export const SortWrite = styled.div`
+  display: flex;
 `;
 
 export const SidebarSection = styled.aside`
