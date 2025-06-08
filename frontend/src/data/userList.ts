@@ -2,6 +2,7 @@ import type { User } from "../types/user";
 
 export const mockUsers: User[] = [
   {
+    backimg: "/images/bgimg1.jpg",
     avatar: "/images/eximg.gif",
     name: "킴카사디안",
     email: "kim@example.com",
@@ -10,6 +11,7 @@ export const mockUsers: User[] = [
     points: 1024,
   },
   {
+    backimg: "/images/bgimg1.jpg",
     avatar: "/images/eximg.gif",
     name: "이개발",
     email: "lee@example.com",

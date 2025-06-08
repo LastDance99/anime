@@ -5,7 +5,10 @@ import {
   Logo,
   Nav,
   NavList,
-  NavItem
+  NavItem,
+  GearIcon,
+  BottomBtn,
+  Iconbox,
 } from "./ProfileHeader.styled";
 
 export default function Header() {
@@ -20,6 +23,10 @@ export default function Header() {
             <NavItem as={Link} to='/mainpage'>애니</NavItem>
           </NavList>
         </Nav>
+        <Iconbox as={Link} to="*" >
+          <GearIcon size={16} />
+        </Iconbox>
+        <BottomBtn>로그아웃</BottomBtn>
       </HeaderInner>
     </HeaderWrapper>
   );

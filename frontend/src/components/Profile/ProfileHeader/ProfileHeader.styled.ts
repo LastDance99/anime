@@ -1,14 +1,17 @@
 import styled from "styled-components";
+import { Settings } from "lucide-react";
 
 // 헤더 전체 래퍼
 export const HeaderWrapper = styled.header`
-  width: 100%;
-  height: 100px;
-  background: transparent;   // 투명!
+  width: 100vw; // 전체 뷰포트 기준
+  min-width: 360px;
+  height: 60px;
+  // background: transparent;   // 투명
+  background: rgba(252, 238, 245, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute; // 필요시 (배경 위에 띄우려면)
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 10;
@@ -24,7 +27,7 @@ export const HeaderInner = styled.div`
 
 // 로고
 export const Logo = styled.img`
-  height: 80px;
+  height: 50px;
   margin:0px 12px;
 `;
 
@@ -49,3 +52,33 @@ export const NavItem = styled.li`
   cursor: pointer;
 `;
 
+export const Iconbox = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #fff;
+  }
+`;
+
+export const BottomBtn = styled.button`
+  width: 60px;
+  height: 30px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-family: 'Cafe24SsurroundAir', sans-serif;
+  color: #222;
+  cursor: pointer;
+  &:hover {
+    background: #fff;
+  }
+`;
+
+export const GearIcon = styled(Settings)`
+  color: #222;
+`;

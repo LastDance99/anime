@@ -2,19 +2,16 @@
 import styled from "styled-components";
 
 // 전체 챗봇 래퍼
-export const ChatBotWrapper = styled.section<{ bgImg?: string }>`
+export const ChatBotWrapper = styled.section`
   width: 340px;
   height: 715px;
-  background: ${({ bgImg }) =>
-    bgImg
-      ? `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url(${bgImg}) center/cover no-repeat`
-      : "#fff"};
-  border: 1px solid #FFB6C1;
+  background: #FFB6C1;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  margin-top: 20px;
 `;
 
 // 사이드바(햄버거 등) 아이콘
