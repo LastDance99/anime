@@ -15,6 +15,16 @@ export const ProfileBackgroundImg = styled.img`
   display: block;
 `;
 
+export const ShadowOverlay = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 55px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  pointer-events: none;
+  `;
+
 export const ProfileFloatingCard = styled.div`
   position: absolute;
   left: 50%;
@@ -27,35 +37,15 @@ export const ProfileFloatingCard = styled.div`
   pointer-events: none;
 `;
 
-export const HeartIcon = styled(Heart)`
-  cursor: pointer;
-  color: #ff6fbc;
-  transition: transform 0.15s, fill 0.2s;
-
-  &:hover {
-    transform: scale(1.13);
-    color: #c2185b;
-  }
-`;
-
 export const RowBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  position: relative;
 `;
 
 export const CharacterImgBox = styled.div`
-  position: relative;
   display: inline-block;
-`;
-
-export const HeartIconBox = styled.div`
-  position: absolute;
-  left: 52%;
-  top: -30px;
-  transform: translateX(-50%);
-  z-index: 2;
-  pointer-events: auto;
 `;
 
 export const CharacterImg = styled.img`
@@ -65,13 +55,37 @@ export const CharacterImg = styled.img`
   display: block;
 `;
 
+export const HeartIconBox = styled.div`
+  // position: absolute;
+  // left: 190%;
+  // bottom: -2px;
+  // transform: translateX(-50%);
+  // z-index: 2;
+  margin-left: 6px;
+  margin-bottom: -4px;
+`;
+
+export const HeartIcon = styled(Heart)`
+  cursor: pointer;
+  color: #ff6fbc;
+  pointer-events: auto;
+  transition: transform 0.15s, fill 0.2s;
+
+  &:hover {
+    transform: scale(1.13);
+    color: #c2185b;
+  }
+`;
+
 export const UserName = styled.div`
   position: absolute;
   left: 100%;
   bottom: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 10px;
   font-size: 20px;
   color: #fff;
-  text-shadow: 2px 2px 6px #222;
   white-space: nowrap;
 `;

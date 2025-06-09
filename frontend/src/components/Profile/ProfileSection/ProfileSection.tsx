@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   ProfileSectionWrapper,
+  ShadowOverlay,
   ProfileBackgroundImg,
   ProfileFloatingCard,
   HeartIconBox,
@@ -18,23 +19,26 @@ const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
 
   return (
     <ProfileSectionWrapper>
-      <ProfileBackgroundImg src={user.backimg} alt="프로필 배경" />
+      <ShadowOverlay />
+      <ProfileBackgroundImg src={user.background_image} alt="프로필 배경" />
       <ProfileFloatingCard>
         <RowBox>
           <CharacterImgBox>
-            <HeartIconBox>
-              <HeartIcon
-                size={30}
-                fill={liked ? "#ff6fbc" : "none"}
-                strokeWidth={2}
-                onClick={() => setLiked(liked => !liked)}
-                aria-label="좋아요"
-                role="button"
-              />
-            </HeartIconBox>
-            <CharacterImg src={user.avatar} alt="프로필" />
-            <UserName>{user.name}</UserName>
+            <CharacterImg src={user.profile_image} alt="프로필" />
           </CharacterImgBox>
+          <UserName>
+              {user.nickname}
+              <HeartIconBox>
+                <HeartIcon
+                  size={20}
+                  fill={liked ? "#ff6fbc" : "none"}
+                  strokeWidth={2}
+                  onClick={() => setLiked(liked => !liked)}
+                  aria-label="좋아요"
+                  role="button"
+                />
+              </HeartIconBox>
+            </UserName>
         </RowBox>
       </ProfileFloatingCard>
     </ProfileSectionWrapper>

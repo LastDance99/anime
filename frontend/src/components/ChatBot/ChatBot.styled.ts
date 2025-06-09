@@ -5,13 +5,12 @@ import styled from "styled-components";
 export const ChatBotWrapper = styled.section`
   width: 340px;
   height: 715px;
-  background: #FFB6C1;
+  background: ${({ theme }) => theme.colors.secondary};
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  margin-top: 20px;
 `;
 
 // 사이드바(햄버거 등) 아이콘

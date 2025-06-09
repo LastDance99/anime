@@ -1,12 +1,29 @@
+import type { Activity } from './activity';
+
 export interface User {
-  backimg: string;
-  avatar: string;
-  name: string;
+  id: number;
   email: string;
-  likes: number;
-  intro: string;
-  points: number;
-};
+  password: string;
+  nickname: string;
+  gender: string;
+  profile_image: string;
+  background_image: string;
+  myroom_image: string;
+  about: string;      // 자기소개(소개글)
+  language: string;
+  created_at: string; // ISO 문자열 (예: 2024-06-08T12:34:56Z)
+  updated_at: string;
+  activity?: Activity[];
+}
+
+export interface ProfileComment {
+  id: number;
+  user_id: number;    // 프로필 주인
+  author_id: number;  // 댓글 단 사람
+  content: string;
+  created_at: string;
+  author?: User;
+}
 
 export interface ProfileCardProps {
   user: User;
