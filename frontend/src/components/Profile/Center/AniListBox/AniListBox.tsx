@@ -13,7 +13,7 @@ export default function AniListBox({ animeList }: { animeList: AnimeItem[] }) {
   return (
     <AniListSectionWrapper>
       <AniListHeader>
-        <AniListTitle>--- 애니리스트</AniListTitle>
+        <AniListTitle>애니리스트</AniListTitle>
       </AniListHeader>
       <CardBox>
         {animeList.slice(0, 20).map((item: AnimeItem) => (

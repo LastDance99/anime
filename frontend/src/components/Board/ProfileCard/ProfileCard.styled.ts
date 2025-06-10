@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Button } from "../WriteButton/WriteButton.styled";
+import { Button } from "../../WriteButton/WriteButton.styled";
 
 export const Card = styled.div`
   width: 100%;
@@ -17,6 +17,7 @@ export const TopBox = styled.div`
   height: 80px;
   display: flex;
   gap: 20px;
+  position: relative;
 `;
 
 export const Avatar = styled.div`
@@ -38,6 +39,7 @@ export const FontBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding-right: 4px;
   gap: 4px;
 `;
 
@@ -57,6 +59,29 @@ export const Font = styled.div`
   color: #222;
   font-family: 'Cafe24 Ssurround air', sans-serif;
   font-weight: 300;
+`;
+
+export const FontRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+  color: #222;
+  font-family: 'Cafe24 Ssurround air', sans-serif;
+  font-weight: 300;
+`;
+
+export const LogoutButton = styled.button`
+  background: #FFD4DF;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 18px;
+  color: #c44e6d;
+  font-size: 12px;
+  cursor: pointer;
+  position: absolute;
+  right: -10px;
+  top: 0px;
 `;
 
 export const BottomBox = styled.div`

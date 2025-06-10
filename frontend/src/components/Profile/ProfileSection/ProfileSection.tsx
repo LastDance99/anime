@@ -4,8 +4,8 @@ import {
   ShadowOverlay,
   ProfileBackgroundImg,
   ProfileFloatingCard,
-  HeartIconBox,
-  HeartIcon,
+  // HeartIconBox,
+  // HeartIcon,
   CharacterImgBox,
   RowBox,
   CharacterImg,
@@ -15,7 +15,7 @@ import {
 import type { ProfileCardProps } from "../../../types/user";
 
 const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
-  const [liked, setLiked] = useState(false);
+  // const [liked, setLiked] = useState(false);
 
   return (
     <ProfileSectionWrapper>
@@ -28,7 +28,8 @@ const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
           </CharacterImgBox>
           <UserName>
               {user.nickname}
-              <HeartIconBox>
+              {/* 팔로우 기능 추후 추가 예정 */}
+              {/* <HeartIconBox>
                 <HeartIcon
                   size={20}
                   fill={liked ? "#ff6fbc" : "none"}
@@ -37,7 +38,7 @@ const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
                   aria-label="좋아요"
                   role="button"
                 />
-              </HeartIconBox>
+              </HeartIconBox> */} 
             </UserName>
         </RowBox>
       </ProfileFloatingCard>

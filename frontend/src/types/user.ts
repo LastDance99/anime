@@ -13,6 +13,10 @@ export interface User {
   language: string;
   created_at: string; // ISO 문자열 (예: 2024-06-08T12:34:56Z)
   updated_at: string;
+  point: number;      // 포인트
+  postCount?: number; // 작성한 게시글 수
+  commentCount?: number; // 작성한 댓글 수
+  attendance?: number; // 출석일 수
   activity?: Activity[];
 }
 

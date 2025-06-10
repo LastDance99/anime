@@ -14,12 +14,14 @@ import {
 import BoardTabs from "../../components/Board/BoardTabs/BoardTabs";
 import BoardList from "../../components/Board/BoardList/BoardList";
 import BoardPagination from "../../components/Board/BoardPagination/BoardPagination";
-import BoardProfile from "../../components/ProfileCard/ProfileCard";
+import BoardProfile from "../../components/Board/ProfileCard/ProfileCard";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import WriteButton from "../../components/WriteButton/WriteButton";
 import { boardList } from "../../data/boardList";
+import { User } from "lucide-react";
+import { mockUsers } from "../../data/userList";
 
 const PAGE_SIZE = 50; // 한 페이지에 보여줄 게시글 수
 
@@ -76,7 +78,7 @@ const BoardPage: React.FC = () => {
             </BoardSection>
           </BoardSectionBox>
           <SidebarSection>
-            <BoardProfile />
+            <BoardProfile user={mockUsers[0]} />
             <ChatBot />
           </SidebarSection>
         </Wrapper>

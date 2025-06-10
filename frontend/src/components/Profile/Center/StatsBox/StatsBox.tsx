@@ -5,12 +5,12 @@ import { StatsRow, StatBox, StatNumber, StatLabel } from "./StatsBox.styled";
 export default function StatsBox({
   totalAnime,
   avgScore,
-  heartCount,
+  // heartCount,
   attendance,
 }: {
   totalAnime: number;
   avgScore: number;
-  heartCount: number;
+  // heartCount: number;
   attendance: number;
 }) {
   return (
@@ -23,10 +23,10 @@ export default function StatsBox({
         <StatNumber>{avgScore}</StatNumber>
         <StatLabel>평균 점수</StatLabel>
       </StatBox>
-      <StatBox>
+      {/* <StatBox>
         <StatNumber>{heartCount}</StatNumber>
         <StatLabel>받은 하트 수</StatLabel>
-      </StatBox>
+      </StatBox> */}
       <StatBox>
         <StatNumber>{attendance}</StatNumber>
         <StatLabel>출석일</StatLabel>

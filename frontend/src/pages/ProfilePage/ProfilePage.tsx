@@ -44,7 +44,7 @@ export default function ProfilePage() {
           <StatsBox
             totalAnime={56}
             avgScore={4.5}
-            heartCount={136}
+            // heartCount={136}
             attendance={103}
           />
           <ActivityList list={user.activity ?? []} />

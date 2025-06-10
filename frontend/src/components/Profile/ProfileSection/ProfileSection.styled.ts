@@ -1,6 +1,6 @@
 // components/ProfileSection/ProfileSection.styled.ts
 import styled from "styled-components";
-import { Heart } from "lucide-react";
+// import { Heart } from "lucide-react";
 
 export const ProfileSectionWrapper = styled.section`
   position: relative;
@@ -55,27 +55,28 @@ export const CharacterImg = styled.img`
   display: block;
 `;
 
-export const HeartIconBox = styled.div`
-  // position: absolute;
-  // left: 190%;
-  // bottom: -2px;
-  // transform: translateX(-50%);
-  // z-index: 2;
-  margin-left: 6px;
-  margin-bottom: -4px;
-`;
+// 팔로우 기능 추후 추가 예정
+// export const HeartIconBox = styled.div`
+//   // position: absolute;
+//   // left: 190%;
+//   // bottom: -2px;
+//   // transform: translateX(-50%);
+//   // z-index: 2;
+//   margin-left: 6px;
+//   margin-bottom: -4px;
+// `;
 
-export const HeartIcon = styled(Heart)`
-  cursor: pointer;
-  color: #ff6fbc;
-  pointer-events: auto;
-  transition: transform 0.15s, fill 0.2s;
+// export const HeartIcon = styled(Heart)`
+//   cursor: pointer;
+//   color: #ff6fbc;
+//   pointer-events: auto;
+//   transition: transform 0.15s, fill 0.2s;
 
-  &:hover {
-    transform: scale(1.13);
-    color: #c2185b;
-  }
-`;
+//   &:hover {
+//     transform: scale(1.13);
+//     color: #c2185b;
+//   }
+// `;
 
 export const UserName = styled.div`
   position: absolute;

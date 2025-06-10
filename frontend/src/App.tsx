@@ -5,6 +5,7 @@ import Login from './pages/LoginPage/Login';
 import SignUp from "./pages/SignUpPage/SignUp";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import MainPage from "./pages/MainPage/MainPage";
+import AniMain from "./pages/AnimationPage/AnimationPage";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/mainpage" element={<MainPage />} />
+            <Route path="/anime" element={<AniMain />} />
           </Route>
           <Route path='/profile/:nickname' element={<ProfilePage />} />
           <Route path="/" element={<AuthBox />} />
