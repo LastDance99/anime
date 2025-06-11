@@ -3,10 +3,12 @@ import styled from "styled-components";
 export const BroadcastSection = styled.section`
   width: 180px;
   margin-bottom: 24px;
+  border-bottom: 1px solid #f99;
+  padding-bottom: 20px;
 `;
 
 export const BroadcastTitle = styled.div`
-  font-size: 1.08rem;
+  font-size: 16px;
   font-weight: 700;
   margin-bottom: 10px;
 `;

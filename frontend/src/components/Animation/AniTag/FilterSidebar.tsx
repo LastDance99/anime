@@ -25,7 +25,7 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
       <ResetButton
         onClick={() =>
           setFilters({
-            genre: "",
+            genre: [],
             season: "",
             year: "",
             broadcast: "",
@@ -34,8 +34,8 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
         }
       />
       <Genre value={filters.genre} onChange={v => setFilters(f => ({ ...f, genre: v }))} />
-      <Season value={filters.season} onChange={v => setFilters(f => ({ ...f, season: v }))} />
       <Year value={filters.year} onChange={v => setFilters(f => ({ ...f, year: v }))} />
+      <Season value={filters.season} onChange={v => setFilters(f => ({ ...f, season: v }))} />
       <Broadcast value={filters.broadcast} onChange={v => setFilters(f => ({ ...f, broadcast: v }))} />
     </FilterSidebarContainer>
   );

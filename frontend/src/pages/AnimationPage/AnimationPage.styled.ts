@@ -10,6 +10,7 @@ export const Container = styled.div`
   width: 100%;
   max-width: 1280px;
   min-width: 360px;  /* 모바일 대응 */
+  max-height: 970px;
   // aspect-ratio: 16 / 9;
   margin: 0 auto;
   display: flex;
@@ -37,7 +38,7 @@ export const AnimeHeader = styled.header`
   height: 50px;
   padding: 10px 20px;
   border-bottom: 1px solid #FFB6C1;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   font-size: 20px;
   font-weight: 500;
   font-family: 'UhBee Se_hyun', sans-serif;
@@ -48,6 +49,7 @@ export const AnimeListBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
 `;
 
 export const SidebarSection = styled.aside`
@@ -55,5 +57,5 @@ export const SidebarSection = styled.aside`
   max-height: 920px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
 `;

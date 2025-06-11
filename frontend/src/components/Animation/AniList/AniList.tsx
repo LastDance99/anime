@@ -1,18 +1,37 @@
 import React from "react";
-import { AniListGrid } from "./AniList.styled";
+import AniListFilter from "./AniListFilter/AniListFilter";
+import { AniListFlex, AniListWrapper } from "./AniList.styled";
 import AniListCard from "./AniListCard/AniListCard";
-import type { AnimeItem } from "../../../types/anime"; // 경로는 실제 프로젝트 구조에 맞게 조정
+import type { AnimeItem } from "../../../types/anime";
 
 interface AniListProps {
   list: AnimeItem[];
+  total?: number;
+  sort: string;
+  sortOptions: { label: string; value: string }[];
+  onSortChange: (value: string) => void;
 }
 
-export default function AniList({ list }: AniListProps) {
+export default function AniList({
+  list,
+  total,
+  sort,
+  sortOptions,
+  onSortChange,
+}: AniListProps) {
   return (
-    <AniListGrid>
-      {list.map(anime => (
-        <AniListCard key={anime.id} anime={anime} />
-      ))}
-    </AniListGrid>
+    <AniListWrapper>
+      <AniListFilter
+        total={total ?? list.length}
+        sort={sort}
+        sortOptions={sortOptions}
+        onSortChange={onSortChange}
+      />
+      <AniListFlex>
+        {list.map(anime => (
+          <AniListCard key={anime.id} anime={anime} />
+        ))}
+      </AniListFlex>
+    </AniListWrapper>
   );
 }

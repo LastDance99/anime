@@ -3,10 +3,12 @@ import styled from "styled-components";
 export const YearSection = styled.section`
   width: 180px;
   margin-bottom: 24px;
+  border-bottom: 1px solid #f99;
+  padding-bottom: 20px;
 `;
 
 export const YearTitle = styled.div`
-  font-size: 1.08rem;
+  font-size: 16px;
   font-weight: 700;
   margin-bottom: 10px;
 `;
@@ -36,4 +38,28 @@ export const YearButton = styled.button<{ $selected?: boolean }>`
     background: #ffe4ec;
     border: 2px solid #fdafd8;
   }
+`;
+
+export const YearToggleButton = styled.button`
+  margin: 12px 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  min-height: 28px;
+  &:hover .toggle-line {
+    border-color: #fdafd8;
+  }
+`;
+
+export const ToggleLine = styled.span`
+  flex: 1;
+  border-bottom: 1.5px solid #f99;
+  margin: 0 10px;
+  transition: border-color 0.15s;
+  height: 0;
 `;
