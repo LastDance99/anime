@@ -714,7 +714,7 @@ export const ANIME_DATA = [
     genreKor: ['드라마', '판타지'],
     season: '여름',
     year: 2011,
-    broadcast: '방영 종료',
+    broadcast: '방영 종료', 
     imgUrl: '/images/hosobi.png',
     rating: 4.0,
     popularity: 1800,

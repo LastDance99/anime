@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import FilterSidebar from "../../components/Animation/AniTag/FilterSidebar";
 import AniList from "../../components/Animation/AniList/AniList";
 import ChatBot from "../../components/ChatBot/ChatBot";
@@ -64,7 +64,27 @@ export default function AniMain() {
     }
   }, [filteredList, sort]);
 
-  // 5. 리턴
+  const [showCount, setShowCount] = useState(50);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!loaderRef.current || !scrollRef.current) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setShowCount(count => Math.min(sortedList.length, count + 50));
+        }
+      },
+      {
+        root: scrollRef.current,
+        threshold: 1,
+      }
+    );
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [loaderRef.current, scrollRef.current, sortedList.length]);
+
   return (
     <Section>
       <Container>
@@ -74,11 +94,13 @@ export default function AniMain() {
             <AnimeListBox>
               <FilterSidebar filters={filters} setFilters={setFilters} />
               <AniList 
-                list={sortedList}
+                list={sortedList.slice(0, showCount)}
                 total={sortedList.length}
                 sort={SORT_OPTIONS.find(opt => opt.value === sort)?.label || "인기순"}
                 sortOptions={SORT_OPTIONS}
                 onSortChange={setSort}
+                scrollRef={scrollRef}
+                loaderRef={loaderRef}
               />
             </AnimeListBox>
           </AnimeSectionBox>

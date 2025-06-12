@@ -11,22 +11,3 @@ export const AniListWrapper = styled.div`
   flex-direction: column;
   gap: 20px;
 `;
-
-export const AniListFlex = styled.main`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-  align-content: flex-start;
-  gap: 10px;
-
-  overflow-y: auto;       // 세로 스크롤 활성화
-
-  /* 크롬/엣지/사파리용 스크롤바 숨김 */
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  /* 파이어폭스용 스크롤바 숨김 */
-  scrollbar-width: none;
-`;

@@ -35,7 +35,7 @@ export const mockUsers:User[] = [
         nickname: "킴카사디안",
         profile_image: "/images/eximg.gif",
         anime_title: "체인소맨",
-        anime_img: "/images/chain.png",
+        anime_img: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20464-ooZUyBe4ptp9.png",
         created_at: "2024-06-09T12:30:00Z",
       },
       {
@@ -44,7 +44,7 @@ export const mockUsers:User[] = [
         nickname: "킴카사디안",
         profile_image: "/images/eximg.gif",
         anime_title: "체인소맨",
-        anime_img: "/images/chain.png",
+        anime_img: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20464-ooZUyBe4ptp9.png",
         created_at: "2024-06-09T12:29:00Z",
       },
       {
@@ -64,7 +64,7 @@ export const mockUsers:User[] = [
         nickname: "킴카사디안",
         profile_image: "/images/eximg.gif",
         anime_title: "귀멸의칼날",
-        anime_img: "/images/demon.png",
+        anime_img: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20464-ooZUyBe4ptp9.png",
         created_at: "2024-06-09T12:27:00Z",
       },
       {
@@ -73,10 +73,11 @@ export const mockUsers:User[] = [
         nickname: "킴카사디안",
         profile_image: "/images/eximg.gif",
         anime_title: "귀멸의칼날",
-        anime_img: "/images/demon.png",
+        anime_img: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx113415-LHBAeoZDIsnF.jpg",
         review: "진짜 꿀잼!",
         created_at: "2024-06-09T12:26:00Z",
       },
+      
     ],
   
   },
