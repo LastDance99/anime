@@ -32,6 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     language = models.CharField(max_length=10, choices=[("ko", "한국어"), ("en", "English"), ("es", "Español")], default="ko")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    nickname_changed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

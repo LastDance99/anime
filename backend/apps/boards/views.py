@@ -3,7 +3,6 @@ from rest_framework.generics import ListCreateAPIView
 from django.db.models import Count, Q
 from .models import BoardPost, PostLike, BoardComment, CommentLike
 from .serializers import BoardPostSummarySerializer
-from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 from .serializers import BoardPostDetailSerializer, BoardPostCreateSerializer, BoardCommentSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -12,10 +11,10 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
+from apps.profiles.utils.activity import create_user_activity
 
 
-
-# 게시판 목록 조회 API
+# 게시판 목록 조회/게시글 생성 API
 class BoardPostListCreateView(ListCreateAPIView):
 
     def get_permissions(self):
@@ -58,7 +57,15 @@ class BoardPostListCreateView(ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        post = serializer.save(author=self.request.user)
+
+        create_user_activity(
+            user=self.request.user,
+            type="post_create",
+            target_id=post.id,
+            target_title=post.title
+        )
+        
 
 # 게시판 게시글 상세 조회 API
 class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -148,11 +155,24 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
         parent_id = self.request.data.get('parent_id')
         tagged_nickname = self.request.data.get('tagged_nickname')
 
-        serializer.save(
+        comment = serializer.save(
             author=self.request.user,
             post_id=post_id,
             parent_id=parent_id,
             tagged_nickname=tagged_nickname
+        )
+
+        # 활동 기록
+        # 댓글 단 게시글 정보 조회 (게시글/갤러리 모두 대응)
+        post = BoardPost.objects.get(id=post_id)
+
+        create_user_activity(
+            user=self.request.user,
+            type="comment_create",
+            target_id=post.id,
+            parent_author_nickname=post.author.nickname,
+            parent_author_profile_image=post.author.profile_image.url if post.author.profile_image else None,
+            parent_title=post.title
         )
 
 

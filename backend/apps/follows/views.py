@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 
+# 하트 기능을 구현하는 APIView
 class FollowHeartView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -33,3 +34,4 @@ class MyHeartedUsersView(generics.ListAPIView):
 
     def get_queryset(self):
         return FollowHeart.objects.filter(follower=self.request.user).select_related('following')
+    

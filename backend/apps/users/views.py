@@ -84,3 +84,4 @@ class EmailVerificationConfirmView(APIView):
             serializer.save()
             return Response({"message": "이메일 인증이 완료되었습니다."})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    

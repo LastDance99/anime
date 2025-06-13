@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'apps.follows', # 팔로우 기능 앱
     'apps.boards', # 게시판 기능 앱
     'apps.anime', # 애니 기능 앱
+    'apps.settings', # 사용자 설정 앱
 ]
 
 # ✅ 커스텀 유저 모델 설정
