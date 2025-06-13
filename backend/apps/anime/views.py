@@ -7,7 +7,6 @@ from operator import itemgetter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import status
-from django.shortcuts import get_object_or_404
 from apps.profiles.utils.activity import create_user_activity
 from apps.profiles.utils.localization import get_localized_title
 

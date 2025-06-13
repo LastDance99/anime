@@ -22,13 +22,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # 관리자 페이지 URL
     path("admin/", admin.site.urls),
-    path("api/users/", include("apps.users.urls")),
-    path("api/profiles/", include("apps.profiles.urls")),
-    path("api/follows/", include("apps.follows.urls")),
-    path("api/boards/", include("apps.boards.urls")),
-    path("api/anime/", include("apps.anime.urls")),
-    path("api/settings/", include("apps.settings.urls")),
+    # API 엔드포인트 URL
+    path("api/users/", include("apps.users.urls")), # 사용자 인증 및 관리
+    path("api/profiles/", include("apps.profiles.urls")), # 사용자 프로필 관련
+    path("api/follows/", include("apps.follows.urls")), # 팔로우 기능 관련
+    path("api/boards/", include("apps.boards.urls")), # 게시판 기능 관련
+    path("api/anime/", include("apps.anime.urls")), # 애니 관련 기능
+    path("api/settings/", include("apps.settings.urls")), # 사용자 설정 관련
 ]
 
 if settings.DEBUG:

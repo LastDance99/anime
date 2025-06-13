@@ -63,7 +63,7 @@ class PasswordResetConfirmView(APIView):
             return Response({"message": "비밀번호가 성공적으로 변경되었습니다."})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-# 6. 이메일 인증 요청 (추가 기능)
+# 6. 이메일 인증 요청
 class EmailVerificationRequestView(APIView):
     permission_classes = []  # 누구나 접근 가능
 
@@ -74,7 +74,7 @@ class EmailVerificationRequestView(APIView):
             return Response({"message": "인증 코드가 이메일로 전송되었습니다."})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-# 7. 이메일 인증 확인 (추가 기능)
+# 7. 이메일 인증 확인 
 class EmailVerificationConfirmView(APIView):
     permission_classes = []
 
