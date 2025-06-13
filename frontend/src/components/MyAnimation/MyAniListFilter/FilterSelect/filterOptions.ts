@@ -3,13 +3,30 @@ export const formatOptions = [
   { value: "tv", label: "TV" },
   { value: "movie", label: "극장판" },
   { value: "ova", label: "OVA" },
+  { value: "ona", label: "ONA" },
+];
+
+export const originOptions = [
+  { value: "", label: "전체" },
+  { value: "만화", label: "만화" },
+  { value: "라노벨", label: "라노벨" },
+  { value: "비디오게임", label: "비디오게임" },
+  { value: "오리지널", label: "오리지널" },
+];
+
+export const sortOptions = [
+  { value: "", label: "전체" },
+  { value: "favorite", label: "최애의 애니" },
+  { value: "latest", label: "최신순" },
+  { value: "oldest", label: "오래된 순" },
+  { value: "score", label: "평점" },
 ];
 
 export const statusOptions = [
   { value: "", label: "전체" },
-  { value: "ongoing", label: "방영중" },
-  { value: "ended", label: "종영" },
-  { value: "upcoming", label: "예정" },
+  { value: "방영중", label: "방영중" },
+  { value: "방영 종료", label: "방영 종료" },
+  { value: "방영 예정", label: "방영 예정" },
 ];
 
 export const seasonOptions = [

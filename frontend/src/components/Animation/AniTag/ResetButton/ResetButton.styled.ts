@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const ResetButtonBox = styled.div`
-  width: 180px;
+  width: 100%;
   margin-bottom: 20px;
   text-align: right;
   display: flex;
@@ -18,8 +18,7 @@ export const FilterTitle = styled.div`
 export const ResetButtonStyled = styled.button`
   color: #d75a85;
   border: none;
-  border-radius: 10px;
-  padding: 0 12px;
+  border-radius: 50%;
   font-weight: 500;
   font-size: 10px;
   cursor: pointer;

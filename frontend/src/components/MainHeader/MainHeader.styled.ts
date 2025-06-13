@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 // 헤더 전체 래퍼
-export const HeaderWrapper = styled.header`
+export const HeaderWrapper = styled.header<{ $show?: boolean }>`
   width: 100vw; // 전체 뷰포트 기준
   min-width: 360px;
   height: 60px;
@@ -13,6 +13,8 @@ export const HeaderWrapper = styled.header`
   top: 0;
   left: 0;
   z-index: 100;
+  transition: transform 0.35s cubic-bezier(.47,1.64,.41,.8);
+  transform: ${({ $show }) => ($show === false ? "translateY(-100%)" : "translateY(0)")};
 `;
 
 // 내부 컨테이너 (가운데 영역)

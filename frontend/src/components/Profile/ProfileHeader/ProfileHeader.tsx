@@ -11,9 +11,9 @@ import {
   Iconbox,
 } from "./ProfileHeader.styled";
 
-export default function Header() {
+export default function Header({ show = true }) {
   return (
-    <HeaderWrapper>
+    <HeaderWrapper $show={show}>
       <HeaderInner>
         <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
         <Nav>

@@ -27,7 +27,7 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
           setFilters({
             genre: [],
             season: "",
-            year: "",
+            year: 0,
             broadcast: "",
             keyword: "",
           })

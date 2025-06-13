@@ -19,7 +19,7 @@ const initialMessages = [
   { id: 2, text: "무엇을 도와드릴까요?", isUser: false },
 ];
 
-export default function ChatBot({ bgImg }: { bgImg?: string }) {
+export default function ChatBot() {
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
   const chatAreaRef = useRef<HTMLDivElement>(null);
@@ -59,7 +59,7 @@ export default function ChatBot({ bgImg }: { bgImg?: string }) {
   }, [messages]);
 
   return (
-    <ChatBotWrapper bgImg={bgImg}>
+    <ChatBotWrapper>
       <SidebarIcon>
         <Menu size={20} />
       </SidebarIcon>

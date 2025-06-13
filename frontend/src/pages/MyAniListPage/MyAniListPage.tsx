@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import MyAniListFilter from "../../components/MyAniList/MyAniListFilter/MyAniListFilter";
-import MyAniList from "../../components/MyAniList/MyAniList/MyAniList";
+import MyAniListFilter from "../../components/MyAnimation/MyAniListFilter/MyAniListFilter";
+import MyAniList from "../../components/MyAnimation/MyAniList/MyAniList";
+import ChatBot from "../../components/ChatBot/ChatBot";
 import type { AniListFilters } from "../../types/AniListFilters";
+import { PageWrapper, MainLayout } from "./MyAniListPage.styled";
 
 export default function MyAniListPage() {
   // 1. 필터 상태 관리
@@ -11,15 +13,22 @@ export default function MyAniListPage() {
     season: "",
     status: "",
     format: "",
+    keyword: "",
+    original: "",
+    sort: "",
   });
 
   return (
-    <div>
-      {/* 2. 필터 컴포넌트에 필터 상태와 변경함수 전달 */}
-      <MyAniListFilter filters={filters} setFilters={setFilters} />
+    <PageWrapper>
+      <MainLayout>
+        {/* 2. 필터 컴포넌트에 필터 상태와 변경함수 전달 */}
+        <MyAniListFilter filters={filters} setFilters={setFilters} />
 
-      {/* 3. 리스트 컴포넌트에 filters 전달 */}
-      <MyAniList filters={filters} />
-    </div>
+        {/* 3. 리스트 컴포넌트에 filters 전달 */}
+        <MyAniList filters={filters} />
+
+        <ChatBot />
+      </MainLayout>    
+    </PageWrapper>
   );
 }

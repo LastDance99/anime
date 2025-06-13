@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const BroadcastSection = styled.section`
-  width: 180px;
+  width: 100%;
   margin-bottom: 24px;
   border-bottom: 1px solid #f99;
   padding-bottom: 20px;
@@ -16,6 +16,7 @@ export const BroadcastTitle = styled.div`
 export const BroadcastButtonList = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 8px;
 `;
 

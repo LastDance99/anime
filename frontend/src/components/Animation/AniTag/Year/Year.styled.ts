@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const YearSection = styled.section`
-  width: 180px;
+  width: 100%s;
   margin-bottom: 24px;
   border-bottom: 1px solid #f99;
   padding-bottom: 20px;
@@ -17,7 +17,8 @@ export const YearButtonList = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-`;
+  justify-content: center;
+  `;
 
 export const YearButton = styled.button<{ $selected?: boolean }>`
   border: ${({ $selected }) => $selected ? "2px solid #f99" : "1px solid #f99"};

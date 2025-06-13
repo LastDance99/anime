@@ -8,9 +8,9 @@ import {
   NavItem
 } from "./MainHeader.styled";
 
-export default function Header() {
+export default function Header({ show = true }) {
   return (
-    <HeaderWrapper>
+    <HeaderWrapper $show={show}>
       <HeaderInner>
         <Logo src="/logos/sublog.png" alt="AnTada 로고" />
         <Nav>

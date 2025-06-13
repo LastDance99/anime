@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const SearchBox = styled.div`
-  width: 180px;
+  width: 100%;
   margin-bottom: 20px;
 `;
 

@@ -47,7 +47,6 @@ export const AnimeHeader = styled.header`
 export const AnimeListBox = styled.div`
   width: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
   gap: 8px;
 `;

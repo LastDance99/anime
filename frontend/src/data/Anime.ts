@@ -10,6 +10,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/onepiece.png',
     rating: 4.9,
     popularity: 9999,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:05:00Z"
   },
   {
     id: 2,
@@ -22,6 +25,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/naruto.png',
     rating: 4.6,
     popularity: 9800,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:15:00Z"
   },
   {
     id: 3,
@@ -34,6 +40,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/bleach.png',
     rating: 4.3,
     popularity: 8700,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:18:00Z"
   },
   {
     id: 4,
@@ -46,6 +55,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/shingeki.png',
     rating: 4.8,
     popularity: 9400,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:30:00Z"
   },
   {
     id: 5,
@@ -58,6 +70,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/conan.png',
     rating: 4.7,
     popularity: 9500,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:33:00Z"
   },
   {
     id: 6,
@@ -70,6 +85,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/kimetsu.png',
     rating: 4.5,
     popularity: 9200,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:37:00Z"
   },
   {
     id: 7,
@@ -82,6 +100,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/doraemon.png',
     rating: 4.2,
     popularity: 7000,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:38:00Z"
   },
   {
     id: 8,
@@ -94,6 +115,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/dragonball.png',
     rating: 4.7,
     popularity: 9600,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:42:00Z"
   },
   {
     id: 9,
@@ -106,6 +130,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/deathnote.png',
     rating: 4.8,
     popularity: 8700,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T08:48:00Z"
   },
   {
     id: 10,
@@ -118,6 +145,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/suzume.png',
     rating: 4.3,
     popularity: 3000,
+    format: "movie",
+    original: "오리지널",
+    addedAt: "2024-06-14T09:05:00Z"
   },
   {
     id: 11,
@@ -130,6 +160,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/totoro.png',
     rating: 4.7,
     popularity: 7500,
+    format: "movie",
+    original: "오리지널",
+    addedAt: "2024-06-14T09:12:00Z"
   },
   {
     id: 12,
@@ -142,6 +175,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/pokemon.png',
     rating: 4.6,
     popularity: 9500,
+    format: "tv",
+    original: "비디오게임",
+    addedAt: "2024-06-14T09:21:00Z"
   },
   {
     id: 13,
@@ -154,6 +190,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/haikyuu.png',
     rating: 4.9,
     popularity: 8000,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T09:24:00Z"
   },
   {
     id: 14,
@@ -166,6 +205,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/jujutsu.png',
     rating: 4.6,
     popularity: 9100,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T09:33:00Z"
   },
   {
     id: 15,
@@ -178,6 +220,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/angelbeats.png',
     rating: 4.4,
     popularity: 5200,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T09:37:00Z"
   },
   {
     id: 16,
@@ -190,6 +235,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/evangelion.png',
     rating: 5.0,
     popularity: 8800,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T09:40:00Z"
   },
   {
     id: 17,
@@ -202,6 +250,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/ccsakura.png',
     rating: 4.5,
     popularity: 5400,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T09:44:00Z"
   },
   {
     id: 18,
@@ -214,6 +265,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/clannad.png',
     rating: 4.7,
     popularity: 4900,
+    format: "tv",
+    original: "비디오게임",
+    addedAt: "2024-06-14T09:52:00Z"
   },
   {
     id: 19,
@@ -226,6 +280,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/bebop.png',
     rating: 4.8,
     popularity: 7000,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T10:03:00Z"
   },
   {
     id: 20,
@@ -238,6 +295,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/onepunch.png',
     rating: 4.5,
     popularity: 8700,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T10:10:00Z"
   },
   {
     id: 21,
@@ -250,6 +310,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/spyfamily.png',
     rating: 4.6,
     popularity: 7700,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T10:20:00Z"
   },
   {
     id: 22,
@@ -262,6 +325,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/fma.png',
     rating: 4.9,
     popularity: 9100,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T10:23:00Z"
   },
   {
     id: 23,
@@ -274,6 +340,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/monogatari.png',
     rating: 4.7,
     popularity: 6000,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T10:26:00Z"
   },
   {
     id: 24,
@@ -286,6 +355,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/orange.png',
     rating: 4.2,
     popularity: 3700,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T10:29:00Z"
   },
   {
     id: 25,
@@ -298,6 +370,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/rezero.png',
     rating: 4.5,
     popularity: 8200,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T10:31:00Z"
   },
   {
     id: 26,
@@ -310,6 +385,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/inuyasha.png',
     rating: 4.4,
     popularity: 6100,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T10:36:00Z"
   },
   {
     id: 27,
@@ -322,6 +400,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/ngnl.png',
     rating: 4.3,
     popularity: 5900,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T10:41:00Z"
   },
   {
     id: 28,
@@ -334,6 +415,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/sao.png',
     rating: 4.1,
     popularity: 9400,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T10:43:00Z"
   },
   {
     id: 29,
@@ -346,6 +430,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/madoka.png',
     rating: 4.8,
     popularity: 7500,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T10:47:00Z"
   },
   {
     id: 30,
@@ -358,6 +445,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/gintama.png',
     rating: 4.9,
     popularity: 8600,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T10:52:00Z"
   },
   {
     id: 31,
@@ -370,6 +460,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/lovelive.png',
     rating: 4.1,
     popularity: 4700,
+    format: "tv",
+    original: "비디오게임",
+    addedAt: "2024-06-14T10:55:00Z"
   },
   {
     id: 32,
@@ -382,6 +475,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/princeoftennis.png',
     rating: 4.0,
     popularity: 4300,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T10:57:00Z"
   },
   {
     id: 33,
@@ -394,6 +490,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/overlord.png',
     rating: 4.4,
     popularity: 7800,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T11:01:00Z"
   },
   {
     id: 34,
@@ -406,6 +505,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/yyh.png',
     rating: 4.3,
     popularity: 8000,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:04:00Z"
   },
   {
     id: 35,
@@ -418,6 +520,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/luckystar.png',
     rating: 4.0,
     popularity: 4500,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:08:00Z"
   },
   {
     id: 36,
@@ -430,6 +535,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/goblin.png',
     rating: 4.2,
     popularity: 6000,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T11:13:00Z"
   },
   {
     id: 37,
@@ -442,6 +550,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/toradora.png',
     rating: 4.7,
     popularity: 6600,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T11:16:00Z"
   },
   {
     id: 38,
@@ -454,6 +565,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/bakemonogatari.png',
     rating: 4.5,
     popularity: 5300,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T11:19:00Z"
   },
   {
     id: 39,
@@ -466,6 +580,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/planetes.png',
     rating: 4.6,
     popularity: 3800,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:22:00Z"
   },
   {
     id: 40,
@@ -478,6 +595,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/violet.png',
     rating: 4.8,
     popularity: 8500,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T11:27:00Z"
   },
   {
     id: 41,
@@ -490,6 +610,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/kingdom.png',
     rating: 4.4,
     popularity: 7200,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:31:00Z"
   },
   {
     id: 42,
@@ -502,6 +625,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/hunter.png',
     rating: 4.9,
     popularity: 9500,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:34:00Z"
   },
   {
     id: 43,
@@ -514,6 +640,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/chihaya.png',
     rating: 4.3,
     popularity: 4200,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:36:00Z"
   },
   {
     id: 44,
@@ -526,6 +655,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/worldtrigger.png',
     rating: 4.2,
     popularity: 6100,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:38:00Z"
   },
   {
     id: 45,
@@ -538,6 +670,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/3gatsu.png',
     rating: 4.8,
     popularity: 4200,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:41:00Z"
   },
   {
     id: 46,
@@ -550,6 +685,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/assassination.png',
     rating: 4.2,
     popularity: 6700,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:44:00Z"
   },
   {
     id: 47,
@@ -562,6 +700,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/jormungand.png',
     rating: 4.1,
     popularity: 4200,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T11:48:00Z"
   },
   {
     id: 48,
@@ -574,6 +715,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/psycho.png',
     rating: 4.4,
     popularity: 7100,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T11:52:00Z"
   },
   {
     id: 49,
@@ -586,6 +730,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/hyouka.png',
     rating: 4.3,
     popularity: 5400,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T11:56:00Z"
   },
   {
     id: 50,
@@ -598,6 +745,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/silver.png',
     rating: 4.1,
     popularity: 3200,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T12:00:00Z"
   },
   {
     id: 51,
@@ -610,6 +760,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/nisekoi.png',
     rating: 4.2,
     popularity: 5100,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T12:04:00Z"
   },
   {
     id: 52,
@@ -622,6 +775,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/fatezero.png',
     rating: 4.7,
     popularity: 7900,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T12:08:00Z"
   },
   {
     id: 53,
@@ -634,6 +790,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/aotfinal.png',
     rating: 4.9,
     popularity: 9900,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T12:13:00Z"
   },
   {
     id: 54,
@@ -646,6 +805,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/victorika.png',
     rating: 4.0,
     popularity: 2100,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T12:18:00Z"
   },
   {
     id: 55,
@@ -658,6 +820,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/fairytail.png',
     rating: 4.4,
     popularity: 7700,
+    format: "tv",
+    original: "만화",
+    addedAt: "2024-06-14T12:22:00Z"
   },
   {
     id: 56,
@@ -670,6 +835,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/bunnygirl.png',
     rating: 4.7,
     popularity: 6100,
+    format: "tv",
+    original: "라노벨",
+    addedAt: "2024-06-14T12:28:00Z"
   },
   {
     id: 57,
@@ -682,6 +850,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/kaze.png',
     rating: 4.2,
     popularity: 2900,
+    format: "movie",
+    original: "오리지널",
+    addedAt: "2024-06-14T12:31:00Z"
   },
   {
     id: 58,
@@ -694,6 +865,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/codegeass.png',
     rating: 4.8,
     popularity: 8900,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T12:33:00Z"
   },
   {
     id: 59,
@@ -706,6 +880,9 @@ export const ANIME_DATA = [
     imgUrl: '/images/gundamseed.png',
     rating: 4.1,
     popularity: 5700,
+    format: "tv",
+    original: "오리지널",
+    addedAt: "2024-06-14T12:38:00Z"
   },
   {
     id: 60,
@@ -718,5 +895,8 @@ export const ANIME_DATA = [
     imgUrl: '/images/hosobi.png',
     rating: 4.0,
     popularity: 1800,
+    format: "movie",
+    original: "오리지널",
+    addedAt: "2024-06-14T12:45:00Z"
   },
 ];

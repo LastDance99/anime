@@ -4,7 +4,7 @@ import styled from "styled-components";
 // 전체 챗봇 래퍼
 export const ChatBotWrapper = styled.section`
   width: 340px;
-  height: 715px;
+  height: 670px;
   background: ${({ theme }) => theme.colors.secondary};
   box-sizing: border-box;
   display: flex;

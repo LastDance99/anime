@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const SeasonSection = styled.section`
-  width: 180px;
+  width: 100%;
   margin-bottom: 24px;
   border-bottom: 1px solid #f99;
   padding-bottom: 20px;
@@ -17,6 +17,7 @@ export const SeasonButtonList = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
 `;
 
 export const SeasonButton = styled.button<{ $selected?: boolean }>`
