@@ -61,6 +61,7 @@ export const Iconbox = styled.div`
   padding: 4px;
   border-radius: 50%;
   transition: background 0.15s;
+  margin-right: 10px;
 
   &:hover {
     background: #fff;

@@ -9,11 +9,12 @@ import type { AnimeItem } from "../types/anime";
 import { ANIME_DATA } from "../data/Anime";
 import { userAnimeList } from "../data/userAnimeList";
 import type { UserAnimeItem } from "../types/anime";
-
+import type { User } from "../types/user";
 
 export default function ProfileLayout() {
   const { nickname } = useParams<{ nickname: string }>();
-  const user = mockUsers.find(u => u.nickname === nickname);
+  const foundUser = mockUsers.find(u => u.nickname === nickname);
+  const [user, setUser] = useState<User | null>(foundUser ?? null);
   const [showHeader, setShowHeader] = useState(true);
   const lastScroll = useRef(window.scrollY);
 
@@ -40,7 +41,7 @@ export default function ProfileLayout() {
       author: mockUsers.find(u => u.id === c.author_id),
     }));
 
-  // ★ 유저의 애니리스트만 추출
+  // 유저의 애니리스트만 추출
   const userAnimeRows = userAnimeList.filter(row => row.userId === user.id);
   const userAnimeListData: UserAnimeItem[] = userAnimeRows.map(row => {
     const anime = ANIME_DATA.find(a => a.id === row.animeId);
@@ -49,13 +50,13 @@ export default function ProfileLayout() {
       ...anime,
       is_favorite: row.is_favorite,
       addedAt: row.addedAt,
-      my_rating: row.my_rating ?? 0,  // 평점 없으면 0
+      my_rating: row.my_rating ?? 0,
     };
-  }).filter(Boolean) as UserAnimeItem[];;
+  }).filter(Boolean) as UserAnimeItem[];
 
-  return (  
+  return (
     <>
-      <ProfileHeader show={showHeader} />
+      <ProfileHeader show={showHeader} user={user} setUser={setUser} />
       <ProfileSection user={user} />
       <NavTabBar />
       <Outlet context={{ user, comments, userAnimeList: userAnimeListData }} />
