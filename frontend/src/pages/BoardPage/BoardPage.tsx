@@ -20,10 +20,10 @@ import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import WriteButton from "../../components/WriteButton/WriteButton";
 import { boardList } from "../../data/boardList";
-import { User } from "lucide-react";
 import { mockUsers } from "../../data/userList";
+import DetailModal from "../../components/Board/DetailModal"; // 추가
 
-const PAGE_SIZE = 50; // 한 페이지에 보여줄 게시글 수
+const PAGE_SIZE = 50;
 
 const SORT_OPTIONS = [
   { label: "최신순", value: "latest" },
@@ -35,16 +35,21 @@ const SORT_OPTIONS = [
 const BoardPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
+  const [sort, setSort] = useState("latest");
+
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+  const [selectedType, setSelectedType] = useState<"post" | "gallery" | null>(null);
+
   const totalPage = Math.ceil(boardList.length / PAGE_SIZE);
 
-  // 엔터치거나 버튼 누를 때 실행
   const handleSearch = () => {
-    // 여기에 검색 로직
     alert(`검색어: ${keyword}`);
-    // 혹은 fetch/필터링 등
   };
 
-  const [sort, setSort] = useState("latest");
+  const handleItemClick = (id: number, type: "post" | "gallery") => {
+    setSelectedPostId(id);
+    setSelectedType(type);
+  };
 
   return (
     <Section>
@@ -60,20 +65,19 @@ const BoardPage: React.FC = () => {
                   <WriteButton />
                 </SortWrite>
               </TabSortWrapper>
-              {/* ✅ page, pageSize props 넘겨줌 */}
-              <BoardList page={page} pageSize={PAGE_SIZE} />
-                <PageSearchWrapper>
-                  <BoardPagination
-                    page={page}
-                    totalPage={totalPage}
-                    onChange={setPage}
-                  />
-                  <SearchInput
-                    value={keyword}
-                    onChange={e => setKeyword(e.target.value)}
-                    onSearch={handleSearch}
-                    placeholder="검색어를 입력하세요"
-                  />
+              <BoardList page={page} pageSize={PAGE_SIZE} onItemClick={handleItemClick} />
+              <PageSearchWrapper>
+                <BoardPagination
+                  page={page}
+                  totalPage={totalPage}
+                  onChange={setPage}
+                />
+                <SearchInput
+                  value={keyword}
+                  onChange={e => setKeyword(e.target.value)}
+                  onSearch={handleSearch}
+                  placeholder="검색어를 입력하세요"
+                />
               </PageSearchWrapper>
             </BoardSection>
           </BoardSectionBox>
@@ -83,6 +87,18 @@ const BoardPage: React.FC = () => {
           </SidebarSection>
         </Wrapper>
       </Container>
+
+      {/* ✅ 상세 모달 연결 */}
+      {selectedPostId !== null && selectedType !== null && (
+        <DetailModal
+          id={selectedPostId}
+          type={selectedType}
+          onClose={() => {
+            setSelectedPostId(null);
+            setSelectedType(null);
+          }}
+        />
+      )}
     </Section>
   );
 };

@@ -6,18 +6,20 @@ import CommentsBox from "../../components/Profile/Center/CommentsBox/CommentsBox
 import AniListBox from "../../components/Profile/Center/AniListBox/AniListBox";
 import ActivityList from "../../components/Profile/Center/ActivityFeed/ActivityList";
 import StatsBox from "../../components/Profile/Center/StatsBox/StatsBox";
-import { ANIME_DATA } from "../../data/Anime";
 import { useOutletContext } from "react-router-dom";
 import { Container, MainBox, ProfileLeftColumn, ProfileRightColumn, } from "./ProfilePage.styled";
 import type { User, ProfileComment } from "../../types/user";
+import type { UserAnimeItem } from "../../types/anime"
 
 type ProfileContext = {
   user: User;
   comments: ProfileComment[];
+  userAnimeList: UserAnimeItem[];
 };
 
 export default function ProfilePage() {
-  const { user, comments } = useOutletContext<ProfileContext>();
+  const { user, comments, userAnimeList } = useOutletContext<ProfileContext>();
+  const favoriteAnimeList = userAnimeList.filter(item => item.is_favorite);
 
   return (
     <Container>
@@ -26,7 +28,7 @@ export default function ProfilePage() {
           <MyRoomBox myroom_image={user.myroom_image} />
           <Introduction about={user.about} />
           <CommentsBox comments={comments} />
-          <AniListBox animeList={ANIME_DATA} />
+          <AniListBox animeList={favoriteAnimeList} />
         </ProfileLeftColumn>
         <ProfileRightColumn>
           <StatsBox
