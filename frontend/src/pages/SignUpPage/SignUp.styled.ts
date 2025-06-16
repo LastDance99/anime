@@ -322,3 +322,10 @@ export const SignUpButton = styled.button`
   }
 `;
 
+export const ErrorText = styled.div`
+  color: #d44;
+  font-size: 0.92rem;
+  margin-top: 10px;
+  font-weight: 500;
+  min-height: 1.3em;
+`;

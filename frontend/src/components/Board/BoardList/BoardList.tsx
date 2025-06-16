@@ -1,4 +1,5 @@
 import React from "react";
+import type { BoardItem } from "../../../types/board";
 import {
   Table,
   Th,
@@ -11,20 +12,17 @@ import {
   Comments,
   Title,
 } from "./BoardList.styled";
-import { boardList } from "../../../data/boardList";
+
+const columnWidths = [42, 40, 362, 74, 46, 70, 57];
 
 type BoardListProps = {
+  list: BoardItem[];
   page: number;
   pageSize: number;
   onItemClick?: (id: number, type: "post" | "gallery") => void;
 };
 
-const columnWidths = [42, 40, 362, 74, 46, 70, 57];
-
-const BoardList: React.FC<BoardListProps> = ({ page, pageSize, onItemClick }) => {
-  const startIdx = (page - 1) * pageSize;
-  const pagedData = boardList.slice(startIdx, startIdx + pageSize);
-
+const BoardList: React.FC<BoardListProps> = ({ list, page, pageSize, onItemClick }) => {
   return (
     <Table>
       <Thead>
@@ -39,27 +37,67 @@ const BoardList: React.FC<BoardListProps> = ({ page, pageSize, onItemClick }) =>
         </TheadTr>
       </Thead>
       <Tbody>
-        {pagedData.map((item) => (
+        {list.map((item) => (
           <TbodyTr
             key={item.id}
-            onClick={() => onItemClick?.(item.id, item.boardType as "post" | "gallery")}
-            style={{ cursor: "pointer" }} // 클릭 가능하단 느낌을 주기 위해
+            onClick={() => onItemClick?.(item.id, item.board_type as "post" | "gallery")}
+            style={{ cursor: "pointer" }}
           >
             <Td style={{ width: columnWidths[0] }}>{item.id}</Td>
             <Td style={{ width: columnWidths[1] }}>
-              <img src={item.img} alt="썸네일" width={36} height={36} style={{ borderRadius: 8 }} />
+              {item.images && item.images.length > 0 ? (
+                <img
+                  src={item.images[0]}
+                  alt={`${item.title} 썸네일`}
+                  width={46}
+                  height={46}
+                  style={{ borderRadius: 8, objectFit: "cover" }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 8,
+                    border: "1px solid #ccc",
+                    backgroundColor: "#fafafa",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 12,
+                    color: "#999",
+                  }}
+                >
+                  이미지 없음
+                </div>
+              )}
             </Td>
             <Td style={{ width: columnWidths[2], textAlign: "left" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
                 <Category $type={item.category}>{item.category}</Category>
                 <Title>{item.title}</Title>
-                <Comments>({item.comment})</Comments>
+                <Comments>({item.comment_count})</Comments>
               </div>
             </Td>
-            <Td style={{ width: columnWidths[3], textAlign: "left" }}>{item.nickname}</Td>
-            <Td style={{ width: columnWidths[4] }}>{item.time}</Td>
+            <Td style={{ width: columnWidths[3], textAlign: "left" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {item.author.profile_image && (
+                  <img
+                    src={item.author.profile_image}
+                    alt={`${item.author.nickname} 프로필`}
+                    width={24}
+                    height={24}
+                    style={{ borderRadius: "50%" }}
+                  />
+                )}
+                <span>{item.author.nickname}</span>
+              </div>
+            </Td>
+            <Td style={{ width: columnWidths[4] }}>
+              {item.created_at ? new Date(item.created_at).toLocaleDateString("ko-KR") : "-"}
+            </Td>
             <Td style={{ width: columnWidths[5] }}>{item.views}</Td>
-            <Td style={{ width: columnWidths[6] }}>{item.likes}</Td>
+            <Td style={{ width: columnWidths[6] }}>{item.like_count}</Td>
           </TbodyTr>
         ))}
       </Tbody>

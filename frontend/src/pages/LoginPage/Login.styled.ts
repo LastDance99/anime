@@ -200,3 +200,11 @@ export const LinkArea = styled.div`
     }
   }
 `;
+
+export const ErrorText = styled.div`
+  color: #d44;
+  font-size: 0.92rem;
+  margin-top: 8px;
+  font-weight: 500;
+  min-height: 1.3em;  // (에러 안 보일 때도 영역 유지, 선택사항)
+`;

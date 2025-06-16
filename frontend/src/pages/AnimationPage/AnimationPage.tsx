@@ -3,6 +3,7 @@ import FilterSidebar from "../../components/Animation/AniTag/FilterSidebar";
 import AniList from "../../components/Animation/AniList/AniList";
 import ChatBot from "../../components/ChatBot/ChatBot";
 import AnimeProfile from "../../components/Animation/ProfileCard/ProfileCard";
+import AnimeDetailModal from "../../components/AnimeDetailModal/AnimeDetailModal";
 import { ANIME_DATA } from "../../data/Anime";
 import type { AnimeItem, AnimeFilter } from "../../types/anime";
 import {
@@ -32,6 +33,8 @@ export default function AniMain() {
     keyword: "",
   });
 
+  const [selectedAnime, setSelectedAnime] = useState<AnimeItem | null>(null);
+
   // 2. 정렬 상태 선언
   const [sort, setSort] = useState("popular");
 
@@ -40,7 +43,7 @@ export default function AniMain() {
     return ANIME_DATA.filter(anime => {
       if (
         filters.genre.length > 0 &&
-        !filters.genre.every(g => anime.genreKor.includes(g))
+        !filters.genre.every(g => anime.genre_kor.includes(g))
       ) return false;
       if (filters.season && anime.season !== filters.season) return false;
       if (filters.year && anime.year !== Number(filters.year)) return false;
@@ -101,7 +104,14 @@ export default function AniMain() {
                 onSortChange={setSort}
                 scrollRef={scrollRef}
                 loaderRef={loaderRef}
+                onAnimeClick={setSelectedAnime}
               />
+              {selectedAnime && (
+                <AnimeDetailModal
+                  anime={selectedAnime}
+                  onClose={() => setSelectedAnime(null)}
+                />
+              )}
             </AnimeListBox>
           </AnimeSectionBox>
           <SidebarSection>

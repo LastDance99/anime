@@ -1,18 +1,18 @@
 export interface BoardItem {
   id: number;
   category: string;
-  boardType: string;
-  img: string;
+  board_type: string;
   title: string;
   content: string;
-  nickname: string;
-  authorId: number;
-  authorProfileImage: string;
-  time: string;
-  comment: number;
   views: number;
-  likes: number;
-  createdAt: string;
-  updatedAt: string;
+  comment_count: number;
+  like_count: number;
   images: string[];
+  created_at: string;
+  updated_at?: string | null;
+  author: {
+    id: number;
+    nickname: string;
+    profile_image?: string;
+  };
 }

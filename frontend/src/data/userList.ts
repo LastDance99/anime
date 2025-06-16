@@ -1,7 +1,8 @@
 import type { User } from "../types/user";
 import type { Activity } from "../types/activity";
 
-export const mockUsers:User[] = [
+type InternalMockUser = User & { password: string };
+export const mockUsers: InternalMockUser[] = [
   {
     id: 1,
     email: "kim@example.com",

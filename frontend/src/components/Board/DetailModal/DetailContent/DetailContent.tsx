@@ -69,7 +69,7 @@ export default function DetailContent({ id }: { id: number }) {
 
       <ContentBox>
         <ScrollableContent>
-          {isGallery &&
+          {item.images && item.images.length > 0 &&
             item.images.map((src, i) => (
               <MainImage
                 key={i}

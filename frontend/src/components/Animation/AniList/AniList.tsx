@@ -1,6 +1,6 @@
 import React from "react";
 import AniListFilter from "./AniListFilter/AniListFilter";
-import {AniListWrapper } from "./AniList.styled";
+import { AniListWrapper } from "./AniList.styled";
 import { AniListFlex } from "./AniListFlex.styled";
 import AniListCard from "./AniListCard/AniListCard";
 import type { AnimeItem } from "../../../types/anime";
@@ -11,10 +11,9 @@ interface AniListProps {
   sort: string;
   sortOptions: { label: string; value: string }[];
   onSortChange: (value: string) => void;
-  // scrollRef?: React.RefObject<HTMLDivElement>;
-  // loaderRef?: React.RefObject<HTMLDivElement>;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   loaderRef?: React.RefObject<HTMLDivElement | null>;
+  onAnimeClick?: (anime: AnimeItem) => void;
 }
 
 export default function AniList({
@@ -25,8 +24,8 @@ export default function AniList({
   onSortChange,
   scrollRef,
   loaderRef,
+  onAnimeClick,
 }: AniListProps) {
-
   if (!list || list.length === 0) {
     return <AniListWrapper>애니메이션 목록이 없습니다.</AniListWrapper>;
   }
@@ -41,9 +40,12 @@ export default function AniList({
       />
       <AniListFlex ref={scrollRef}>
         {list.map(anime => (
-          <AniListCard key={anime.id} anime={anime} />
+          <AniListCard
+            key={anime.id}
+            anime={anime}
+            onClick={onAnimeClick ? () => onAnimeClick(anime) : undefined}
+          />
         ))}
-        {/* loader를 여기로! */}
         <div ref={loaderRef} style={{ height: 30, background: "yellow" }} />
       </AniListFlex>
     </AniListWrapper>
