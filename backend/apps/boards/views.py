@@ -1,11 +1,9 @@
-from rest_framework import permissions
 from rest_framework.generics import ListCreateAPIView
 from django.db.models import Count, Q
 from .models import BoardPost, PostLike, BoardComment, CommentLike
 from .serializers import BoardPostSummarySerializer
 from rest_framework.response import Response
 from .serializers import BoardPostDetailSerializer, BoardPostCreateSerializer, BoardCommentSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -16,11 +14,6 @@ from apps.profiles.utils.activity import create_user_activity
 
 # 게시판 목록 조회/게시글 생성 API
 class BoardPostListCreateView(ListCreateAPIView):
-
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]
-        return [AllowAny()]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -71,7 +64,6 @@ class BoardPostListCreateView(ListCreateAPIView):
 class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BoardPost.objects.all()
     serializer_class = BoardPostDetailSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_field = 'id'
     lookup_url_kwarg = 'post_id'
 
@@ -98,7 +90,6 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     
 # 게시글 좋아요/좋아요 취소 API
 class BoardPostLikeView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, post_id):
         post = get_object_or_404(BoardPost, id=post_id)
@@ -127,7 +118,6 @@ class BoardPostLikeView(APIView):
 # 댓글/대댓글 목록 조회 + 작성
 class BoardCommentListCreateView(generics.ListCreateAPIView):
     serializer_class = BoardCommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         post_id = self.kwargs['post_id']
@@ -178,7 +168,6 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
 
 # 댓글 좋아요 등록 (취소 불가)
 class BoardCommentLikeView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, comment_id):
         comment = get_object_or_404(BoardComment, id=comment_id)
@@ -194,7 +183,6 @@ class BoardCommentLikeView(APIView):
 # 댓글 삭제 (대댓글 존재 시 soft delete)
 class BoardCommentDeleteView(generics.DestroyAPIView):
     queryset = BoardComment.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
         comment = self.get_object()

@@ -17,7 +17,7 @@ User = get_user_model()
 
 # 1. 회원가입
 class UserSignupView(APIView):
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
@@ -29,10 +29,10 @@ class UserSignupView(APIView):
 # 2. 로그인 (JWT 토큰 발급)
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [permissions.AllowAny]
 
 # 3. 로그아웃 (리프레시 토큰 무효화)
 class UserLogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = LogoutSerializer(data=request.data)
@@ -65,7 +65,7 @@ class PasswordResetConfirmView(APIView):
     
 # 6. 이메일 인증 요청
 class EmailVerificationRequestView(APIView):
-    permission_classes = []  # 누구나 접근 가능
+    permission_classes = [permissions.AllowAny]  # 누구나 접근 가능
 
     def post(self, request):
         serializer = EmailVerificationRequestSerializer(data=request.data)
@@ -76,7 +76,7 @@ class EmailVerificationRequestView(APIView):
     
 # 7. 이메일 인증 확인 
 class EmailVerificationConfirmView(APIView):
-    permission_classes = []
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = EmailVerificationConfirmSerializer(data=request.data)

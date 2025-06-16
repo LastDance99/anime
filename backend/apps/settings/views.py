@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from .serializers import (
     UserSettingsSerializer, 
     UserAccountUpdateSerializer,
@@ -11,7 +10,6 @@ from .serializers import (
 
 # 사용자 설정 조회 API
 class UserSettingsView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserSettingsSerializer(request.user)
@@ -19,7 +17,6 @@ class UserSettingsView(APIView):
     
 # 사용자 닉네임 업데이트 API
 class UserAccountUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def put(self, request):
         serializer = UserAccountUpdateSerializer(request.user, data=request.data)
@@ -30,7 +27,6 @@ class UserAccountUpdateView(APIView):
     
 # 사용자 언어 설정 업데이트 API
 class UserLanguageUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def put(self, request):
         serializer = UserLanguageUpdateSerializer(request.user, data=request.data)
@@ -41,7 +37,6 @@ class UserLanguageUpdateView(APIView):
     
 # 사용자 이미지 업데이트 API
 class UserImageUpdateView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def put(self, request):
         serializer = UserImageUpdateSerializer(request.user, data=request.data, files=request.FILES, partial=True)
@@ -52,7 +47,6 @@ class UserImageUpdateView(APIView):
     
 # 사용자 이미지 삭제 API
 class UserImageDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def delete(self, request):
         user = request.user

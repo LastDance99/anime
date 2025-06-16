@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     # 앱 목록
     'apps.users', # 사용자 인증 및 관리 앱
     'apps.profiles', # 사용자 프로필 앱
-    'apps.follows', # 팔로우 기능 앱
     'apps.boards', # 게시판 기능 앱
     'apps.anime', # 애니 기능 앱
     'apps.settings', # 사용자 설정 앱
@@ -169,7 +168,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',

@@ -1,8 +1,7 @@
-from rest_framework import generics, permissions
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from .utils.pagination import ActivityPagePagination, CommentPagePagination, ContentPagePagination
 from rest_framework.generics import ListAPIView
@@ -32,7 +31,6 @@ User = get_user_model()
 
 # 프로필 개요 뷰
 class ProfileOverviewView(APIView):
-    permission_classes = [AllowAny]
 
     def get(self, request, user_id=None):
         # 1. 유저 결정
@@ -94,7 +92,6 @@ class ProfileOverviewView(APIView):
 
 # 자기소개 업데이트 뷰
 class UpdateAboutView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def patch(self, request):
         user = request.user
@@ -106,7 +103,6 @@ class UpdateAboutView(APIView):
 # 1. 코멘트 리스트 조회 & 작성 (GET/POST)
 class ProfileCommentListCreateView(generics.ListCreateAPIView):
     serializer_class = ProfileCommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = CommentPagePagination
 
     def get_queryset(self):
@@ -120,7 +116,6 @@ class ProfileCommentListCreateView(generics.ListCreateAPIView):
 # 2. 코멘트 삭제 (DELETE)
 class ProfileCommentDeleteView(generics.DestroyAPIView):
     queryset = ProfileComment.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         comment = super().get_object()
@@ -194,7 +189,6 @@ class FavoriteAnimeListView(generics.ListAPIView):
     
 # 애니메이션 최애 추가/제거 토글 뷰
 class AnimeFavoriteToggleView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def patch(self, request, anime_id):
         serializer = AnimeFavoriteToggleSerializer(data=request.data)
@@ -225,7 +219,6 @@ class AnimeFavoriteToggleView(APIView):
 # 프로필 내활동 목록 조회 뷰
 class UserActivityListView(generics.ListAPIView):
     serializer_class = UserActivitySerializer
-    permission_classes = [permissions.AllowAny]
     pagination_class = ActivityPagePagination
 
     def get_queryset(self):
@@ -235,7 +228,6 @@ class UserActivityListView(generics.ListAPIView):
 
 # 프로필 컨텐츠 뷰
 class ProfileContentListView(ListAPIView):
-    permission_classes = [AllowAny]
     pagination_class = ContentPagePagination
 
     # --- 시리얼라이저 분기 ---

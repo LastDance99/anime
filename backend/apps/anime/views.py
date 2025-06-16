@@ -5,7 +5,6 @@ from .models import Anime, AnimeReview, ReviewLike, AnimeList
 from .serializers import AnimeSimpleSerializer, AnimeDetailSerializer, AnimeReviewSerializer, AnimeReviewCreateSerializer
 from operator import itemgetter
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import status
 from apps.profiles.utils.activity import create_user_activity
 from apps.profiles.utils.localization import get_localized_title
@@ -140,7 +139,6 @@ class AnimeDetailView(APIView):
 
 # Anime 리뷰 목록 조회/리뷰 작성 API
 class AnimeReviewListCreateView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, anime_id):
         sort = request.GET.get("sort", "latest")
@@ -182,7 +180,6 @@ class AnimeReviewListCreateView(APIView):
 
 # Anime 리뷰 좋아요 API
 class AnimeReviewLikeView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, anime_id, review_id):
         review = get_object_or_404(AnimeReview, id=review_id, anime_id=anime_id)
@@ -197,7 +194,6 @@ class AnimeReviewLikeView(APIView):
 
 # Anime 리뷰 수정/삭제 API
 class AnimeReviewUpdateDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get_review(self, anime_id, review_id):
         return get_object_or_404(AnimeReview, id=review_id, anime_id=anime_id)
@@ -238,7 +234,6 @@ class AnimeReviewUpdateDeleteView(APIView):
 
 # Anime 평점 등록/수정/삭제 API
 class AnimeRatingView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, anime_id):
         anime = get_object_or_404(Anime, id=anime_id)
@@ -272,7 +267,6 @@ class AnimeRatingView(APIView):
 
 # Anime 리스트 추가/제거 API
 class AnimeListToggleView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, anime_id):
         anime = get_object_or_404(Anime, id=anime_id)
