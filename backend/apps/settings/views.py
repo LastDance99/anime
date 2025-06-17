@@ -38,8 +38,8 @@ class UserLanguageUpdateView(APIView):
 # 사용자 이미지 업데이트 API
 class UserImageUpdateView(APIView):
 
-    def put(self, request):
-        serializer = UserImageUpdateSerializer(request.user, data=request.data, files=request.FILES, partial=True)
+    def patch(self, request):
+        serializer = UserImageUpdateSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({"detail": "이미지가 성공적으로 업로드되었습니다."})

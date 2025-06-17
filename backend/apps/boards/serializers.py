@@ -76,7 +76,7 @@ class BoardPostCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop('images', [])
-        user = self.context['request'].user
+        user = self.context['request'].user # author는 여기서만 사용
 
         post = BoardPost.objects.create(author=user, **validated_data)
 

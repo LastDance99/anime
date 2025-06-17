@@ -50,7 +50,7 @@ class BoardPostListCreateView(ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        post = serializer.save(author=self.request.user)
+        post = serializer.save()
 
         create_user_activity(
             user=self.request.user,

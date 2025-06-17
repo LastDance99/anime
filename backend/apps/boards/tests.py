@@ -1,3 +1,239 @@
-from django.test import TestCase
-
+from rest_framework.test import APITestCase
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+from apps.boards.models import BoardPost, PostLike, BoardComment, CommentLike
+from rest_framework import status
 # Create your tests here.
+
+User = get_user_model()
+
+def auth_headers(token):
+    return {"HTTP_AUTHORIZATION": f"Bearer {token}"}
+
+class BoardAPITest(APITestCase):
+    def setUp(self):
+        # 유저 2명 생성 (권한/댓글테스트용)
+        self.user = User.objects.create_user(
+            email="user@abc.com", password="pw123456", nickname="유저", language="ko"
+        )
+        self.user2 = User.objects.create_user(
+            email="other@abc.com", password="pw123456", nickname="상대", language="ko"
+        )
+
+        # 토큰 발급
+        resp = self.client.post('/api/users/login/', {"email": "user@abc.com", "password": "pw123456"})
+        self.access = resp.data["access"]
+
+        resp2 = self.client.post('/api/users/login/', {"email": "other@abc.com", "password": "pw123456"})
+        self.access2 = resp2.data["access"]
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access}")
+
+    def test_create_board_post(self):
+        url = "/api/boards/"
+        data = {
+            "title": "첫글",
+            "content": "내용테스트",
+            "board_type": "post"
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(BoardPost.objects.count(), 1)
+        post = BoardPost.objects.first()
+        self.assertEqual(post.title, "첫글")
+
+    def test_list_board_posts(self):
+        BoardPost.objects.create(author=self.user, title="글1", content="내용", board_type="post")
+        BoardPost.objects.create(author=self.user, title="글2", content="내용", board_type="gallery")
+        url = "/api/boards/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertGreaterEqual(len(response.data), 2)
+
+    def test_board_post_detail_retrieve(self):
+        post = BoardPost.objects.create(author=self.user, title="글상세", content="내용", board_type="post")
+        url = f"/api/boards/{post.id}/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["title"], "글상세")
+
+    def test_board_post_update_and_delete_auth(self):
+        post = BoardPost.objects.create(author=self.user, title="글수정", content="내용", board_type="post")
+        url = f"/api/boards/{post.id}/"
+
+        # 본인 수정
+        response = self.client.put(url, {"title": "수정후", "content": "수정내용", "board_type": "post"})
+        self.assertEqual(response.status_code, 200)
+        post.refresh_from_db()
+        self.assertEqual(post.title, "수정후")
+
+        # 본인 삭제
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(BoardPost.objects.count(), 0)
+
+        # 타인 권한 테스트
+        post2 = BoardPost.objects.create(author=self.user, title="타인글", content="내용", board_type="post")
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access2}")
+        url2 = f"/api/boards/{post2.id}/"
+        response = self.client.put(url2, {"title": "불가", "content": "불가", "board_type": "post"})
+        self.assertEqual(response.status_code, 403)
+        response = self.client.delete(url2)
+        self.assertEqual(response.status_code, 403)
+
+    def test_board_post_like_unlike(self):
+        post = BoardPost.objects.create(author=self.user, title="좋아요", content="내용", board_type="post")
+        url = f"/api/boards/{post.id}/like/"
+        # 좋아요
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(PostLike.objects.count(), 1)
+        # 중복 좋아요 방지
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 400)
+        # 좋아요 취소
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(PostLike.objects.count(), 0)
+        # 취소 중복 방지
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 400)
+
+    def test_comment_create_and_list(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글테스트", content="c", board_type="post")
+        url = f"/api/boards/{post.id}/comments/"
+        # 댓글 작성
+        response = self.client.post(url, {"content": "댓글", "parent_id": None})
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(BoardComment.objects.count(), 1)
+        # 대댓글 작성
+        comment = BoardComment.objects.first()
+        response = self.client.post(url, {"content": "대댓글", "parent_id": comment.id})
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(BoardComment.objects.count(), 2)
+        # 목록 조회
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.data) >= 1)
+
+    def test_comment_like(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
+        comment = BoardComment.objects.create(post=post, author=self.user, content="댓글")
+        url = f"/api/boards/comments/{comment.id}/like/"
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 201)
+        # 중복 좋아요 방지
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 400)
+
+    def test_comment_delete_and_soft_delete(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
+        comment = BoardComment.objects.create(post=post, author=self.user, content="댓글")
+        reply = BoardComment.objects.create(post=post, author=self.user, content="대댓글", parent=comment)
+        url = f"/api/boards/{post.id}/comments/{comment.id}/"
+        # soft delete (자식 대댓글 있을 때)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 200)
+        comment.refresh_from_db()
+        self.assertTrue(comment.is_deleted)
+        self.assertEqual(comment.content, "")
+
+        # 대댓글(자식이 없는 댓글) 완전 삭제
+        url_reply = f"/api/boards/{post.id}/comments/{reply.id}/"
+        response = self.client.delete(url_reply)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(BoardComment.objects.count(), 1)
+
+    def test_comment_delete_permission(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
+        comment = BoardComment.objects.create(post=post, author=self.user, content="댓글")
+        url = f"/api/boards/{post.id}/comments/{comment.id}/"
+        # 타인이 삭제 시도
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access2}")
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_board_post_list_filter_sort_search(self):
+        # 게시글/갤러리/추천순/검색어 필터 동작 테스트
+        user = self.user
+        # 게시글 1, 2, 갤러리 1, 2 생성
+        BoardPost.objects.create(author=user, title="일반글", content="본문", board_type="post")
+        BoardPost.objects.create(author=user, title="갤러리글", content="이미지", board_type="gallery")
+        # 추천수 10, 30 테스트용
+        post10 = BoardPost.objects.create(author=user, title="추천10", content="본문", board_type="post")
+        post30 = BoardPost.objects.create(author=user, title="추천30", content="본문", board_type="post")
+        # 좋아요 각각 10/30개씩 생성
+        for _ in range(10):
+            u = User.objects.create_user(email=f"tmp{_}@a.com", password="pw123456", nickname=f"tmp{_}", language="ko")
+            PostLike.objects.create(post=post10, user=u)
+        for _ in range(30):
+            u = User.objects.create_user(email=f"tmpx{_}@a.com", password="pw123456", nickname=f"tmpx{_}", language="ko")
+            PostLike.objects.create(post=post30, user=u)
+    
+        url = "/api/boards/"
+        # 전체 조회 (type=all)
+        resp = self.client.get(url)
+        self.assertGreaterEqual(len(resp.data), 4)
+        # 게시글만
+        resp = self.client.get(url, {"type": "post"})
+        self.assertTrue(all(x["board_type"] == "post" for x in resp.data))
+        # 갤러리만
+        resp = self.client.get(url, {"type": "gallery"})
+        self.assertTrue(all(x["board_type"] == "gallery" for x in resp.data))
+        # 추천 10이상
+        resp = self.client.get(url, {"type": "like10"})
+        self.assertTrue(any("추천10" in x["title"] for x in resp.data))
+        # 추천 30이상
+        resp = self.client.get(url, {"type": "like30"})
+        self.assertTrue(any("추천30" in x["title"] for x in resp.data))
+        # 검색(제목/본문)
+        resp = self.client.get(url, {"search": "이미지"})
+        self.assertTrue(any("갤러리글" in x["title"] for x in resp.data))
+        # 정렬 테스트 (oldest)
+        resp = self.client.get(url, {"sort": "oldest"})
+        self.assertLessEqual(resp.data[0]["created_at"], resp.data[-1]["created_at"])
+
+    def test_board_post_not_found(self):
+        resp = self.client.get("/api/boards/999999/")
+        self.assertEqual(resp.status_code, 404)
+
+    def test_post_like_nonexistent(self):
+        resp = self.client.post("/api/boards/999999/like/")
+        self.assertEqual(resp.status_code, 404)
+
+    def test_comment_create_missing_content(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
+        url = f"/api/boards/{post.id}/comments/"
+        resp = self.client.post(url, {"parent_id": ""})
+        self.assertEqual(resp.status_code, 400)
+
+    def test_board_post_create_missing_field(self):
+        url = "/api/boards/"
+        # title 빠짐
+        resp = self.client.post(url, {"content": "본문", "board_type": "post"})
+        self.assertEqual(resp.status_code, 400)
+        # board_type 빠짐
+        resp = self.client.post(url, {"title": "테스트", "content": "본문"})
+        self.assertEqual(resp.status_code, 400)
+
+    def test_comment_like_on_deleted_comment(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
+        comment = BoardComment.objects.create(post=post, author=self.user, content="댓글", is_deleted=True)
+        url = f"/api/boards/comments/{comment.id}/like/"
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 201)  # 삭제된 댓글도 좋아요 가능(비즈니스 규칙 따라 다름, 바꿔도 됨)
+
+    def test_reply_to_nonexistent_comment(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
+        url = f"/api/boards/{post.id}/comments/"
+        resp = self.client.post(url, {"content": "대댓글", "parent_id": 999999})
+        self.assertEqual(resp.status_code, 400)
+
+    def test_comment_delete_twice(self):
+        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
+        comment = BoardComment.objects.create(post=post, author=self.user, content="댓글")
+        url = f"/api/boards/{post.id}/comments/{comment.id}/"
+        resp = self.client.delete(url)
+        self.assertIn(resp.status_code, [200, 204])
+        resp2 = self.client.delete(url)
+        self.assertEqual(resp2.status_code, 404)

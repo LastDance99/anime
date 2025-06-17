@@ -8,12 +8,18 @@ from .views import (
     PasswordResetConfirmView,
     EmailVerificationRequestView,
     EmailVerificationConfirmView,
+    EmailDuplicateCheckView,
+    NicknameDuplicateCheckView,
 )
 
 
 urlpatterns = [
     # 사용자 회원가입
     path('signup/', UserSignupView.as_view(), name='user-signup'),
+    # 실시간 이메일 중복 체크
+    path('check-email/', EmailDuplicateCheckView.as_view()),
+    # 실시간 닉네임 중복 체크
+    path('check-nickname/', NicknameDuplicateCheckView.as_view()),
     # 사용자 로그인 (JWT 토큰 발급)
     path('login/', CustomTokenObtainPairView.as_view(), name='user-login'),
     # 사용자 로그아웃 (리프레시 토큰 무효화)

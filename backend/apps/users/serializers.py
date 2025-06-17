@@ -28,13 +28,37 @@ class UserSignupSerializer(serializers.ModelSerializer):
         }
 
     def validate_email(self, value):
+        email = value.strip().lower()
         try:
-            record = EmailVerification.objects.get(email=value.lower())
+            record = EmailVerification.objects.get(email=email)
         except EmailVerification.DoesNotExist:
             raise serializers.ValidationError("이메일 인증이 필요합니다.")
-
         if not record.is_verified:
             raise serializers.ValidationError("이메일 인증이 완료되지 않았습니다.")
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("이미 가입된 이메일입니다.")
+        return email
+
+    def validate_nickname(self, value):
+        nickname = value.strip()
+        # 1. 길이 제한 (2~16자)
+        if len(nickname) < 2 or len(nickname) > 16:
+            raise serializers.ValidationError("닉네임은 2자 이상 16자 이하로 입력해야 합니다.")
+        # 2. 한글/영문/숫자만 허용 (특수문자, 공백 포함 시 거부)
+        #   - ^ : 시작, $ : 끝
+        #   - 한글: \uac00-\ud7a3, 영문: a-zA-Z, 숫자: 0-9
+        if not re.match(r'^[\uac00-\ud7a3a-zA-Z0-9]+$', nickname):
+            raise serializers.ValidationError("닉네임은 한글, 영문, 숫자만 사용할 수 있습니다. (특수문자/공백 불가)")
+        # 3. 대소문자 구분 없이 중복 체크
+        if User.objects.filter(nickname__iexact=nickname).exists():
+            raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
+        return nickname
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("비밀번호는 최소 8자리여야 합니다.")
+        if not re.search(r'[A-Za-z]', value) or not re.search(r'\d', value):
+            raise serializers.ValidationError("비밀번호는 영문과 숫자를 모두 포함해야 합니다.")
         return value
 
     def validate(self, data):
@@ -43,6 +67,8 @@ class UserSignupSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        validated_data['email'] = validated_data['email'].strip().lower()
+        validated_data['nickname'] = validated_data['nickname'].strip()
         validated_data.pop('password2')
         password = validated_data.pop('password')
         user = User(**validated_data)

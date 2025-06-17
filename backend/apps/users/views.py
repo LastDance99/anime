@@ -1,3 +1,4 @@
+import re
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,6 +26,29 @@ class UserSignupView(APIView):
             serializer.save()
             return Response({"message": "회원가입이 완료되었습니다."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# 실시간 이메일 중복 체크
+class EmailDuplicateCheckView(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self, request):
+        email = request.query_params.get('email', '').strip().lower()
+        if not email:
+            return Response({"valid": False, "message": "이메일을 입력해주세요."})
+        if User.objects.filter(email=email).exists():
+            return Response({"exists": True, "valid": False, "message": "이미 가입된 이메일입니다."})
+        return Response({"exists": False, "valid": True, "message": "사용 가능한 이메일입니다."})
+
+# 실시간 닉네임 중복 체크
+class NicknameDuplicateCheckView(APIView):
+    permission_classes = [permissions.AllowAny]
+    def get(self, request):
+        nickname = request.query_params.get('nickname', '').strip()
+        # 닉네임 유효성(길이, 한글/영문/숫자)
+        if not re.match(r'^[\uac00-\ud7a3a-zA-Z0-9]{2,16}$', nickname):
+            return Response({"valid": False, "exists": False, "message": "닉네임은 2~16자 한글/영문/숫자만 사용 가능합니다."})
+        if User.objects.filter(nickname__iexact=nickname).exists():
+            return Response({"exists": True, "valid": False, "message": "이미 사용 중인 닉네임입니다."})
+        return Response({"exists": False, "valid": True, "message": "사용 가능한 닉네임입니다."})
 
 # 2. 로그인 (JWT 토큰 발급)
 class CustomTokenObtainPairView(TokenObtainPairView):
