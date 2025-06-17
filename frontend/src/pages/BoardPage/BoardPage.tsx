@@ -21,20 +21,25 @@ import SearchInput from "../../components/SearchInput/SearchInput";
 import WriteButton from "../../components/WriteButton/WriteButton";
 import { mockUsers } from "../../data/userList";
 import DetailModal from "../../components/Board/DetailModal";
+import { useNavigate } from "react-router-dom";
+
 import type { BoardItem } from "../../types/board";
+import { boardList as boardListData } from "../../data/boardList"; // rename to avoid naming conflict
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ko";
+dayjs.extend(relativeTime);
+dayjs.locale("ko");
 
 type TabType = "all" | "post" | "gallery" | "thirty" | "ten";
 const PAGE_SIZE = 50;
 
 const SORT_OPTIONS = [
   { label: "최신순", value: "latest" },
-  { label: "조회순", value: "views" },
-  { label: "댓글순", value: "comments" },
+  { label: "오래된순", value: "oldest" },
   { label: "추천순", value: "likes" },
 ];
-
-// 여기는 임시 더미, 실제론 API로 받아오는 걸로 교체하세요
-import { boardList } from "../../data/boardList";
 
 const BoardPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -42,15 +47,15 @@ const BoardPage: React.FC = () => {
   const [sort, setSort] = useState("latest");
   const [selectedTab, setSelectedTab] = useState<TabType>("all");
 
-  const [boardItems, setBoardItems] = useState<BoardItem[]>(boardList);
+  const navigate = useNavigate();
 
+  const [boardList, setBoardList] = useState<BoardItem[]>(boardListData);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<"post" | "gallery" | null>(null);
 
   const filteredList = useMemo(() => {
-    let data = [...boardItems];
+    let data = [...boardList];
 
-    // 탭 필터링
     if (selectedTab === "post") {
       data = data.filter(item => item.board_type === "post");
     } else if (selectedTab === "gallery") {
@@ -61,7 +66,6 @@ const BoardPage: React.FC = () => {
       data = data.filter(item => (item.like_count ?? 0) >= 10);
     }
 
-    // 검색 필터링 (title, content, author.nickname)
     if (keyword.trim()) {
       const kw = keyword.trim().toLowerCase();
       data = data.filter(
@@ -72,16 +76,12 @@ const BoardPage: React.FC = () => {
       );
     }
 
-    // 정렬
     switch (sort) {
       case "latest":
-        data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        data.sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf());
         break;
-      case "views":
-        data.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
-        break;
-      case "comments":
-        data.sort((a, b) => (b.comment_count ?? 0) - (a.comment_count ?? 0));
+      case "oldest":
+        data.sort((a, b) => dayjs(a.created_at).valueOf() - dayjs(b.created_at).valueOf());
         break;
       case "likes":
         data.sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0));
@@ -89,9 +89,8 @@ const BoardPage: React.FC = () => {
     }
 
     return data;
-  }, [selectedTab, keyword, sort, boardItems]);
+  }, [selectedTab, keyword, sort, boardList]);
 
-  // 페이지네이션
   const pagedList = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
     return filteredList.slice(start, start + PAGE_SIZE);
@@ -99,7 +98,6 @@ const BoardPage: React.FC = () => {
 
   const totalPage = Math.max(1, Math.ceil(filteredList.length / PAGE_SIZE));
 
-  // 탭/검색/정렬 바뀌면 1페이지로
   useEffect(() => {
     setPage(1);
   }, [selectedTab, keyword, sort]);
@@ -113,6 +111,10 @@ const BoardPage: React.FC = () => {
     setSelectedType(type);
   };
 
+  const handleWrite = () => {
+    navigate(`/board/write?type=${selectedTab === "gallery" ? "gallery" : "post"}`);
+  };
+
   return (
     <Section>
       <Container>
@@ -124,7 +126,7 @@ const BoardPage: React.FC = () => {
                 <BoardTabs selected={selectedTab} onChange={setSelectedTab} />
                 <SortWrite>
                   <SortDropdown options={SORT_OPTIONS} value={sort} onChange={setSort} />
-                  <WriteButton />
+                  <WriteButton to={`/write`} />
                 </SortWrite>
               </TabSortWrapper>
               <BoardList
@@ -134,20 +136,17 @@ const BoardPage: React.FC = () => {
                 onItemClick={handleItemClick}
               />
               <PageSearchWrapper>
-                <BoardPagination
-                  page={page}
-                  totalPage={totalPage}
-                  onChange={setPage}
-                />
+                <BoardPagination page={page} totalPage={totalPage} onChange={setPage} />
                 <SearchInput
                   value={keyword}
-                  onChange={e => setKeyword(e.target.value)}
+                  onChange={(e) => setKeyword(e.target.value)}
                   onSearch={handleSearch}
                   placeholder="검색어를 입력하세요"
                 />
               </PageSearchWrapper>
             </BoardSection>
           </BoardSectionBox>
+
           <SidebarSection>
             <BoardProfile user={mockUsers[0]} />
             <ChatBot />

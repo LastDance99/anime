@@ -7,6 +7,7 @@ export const CardBox = styled.div`
   position: relative;
   background: white;
   overflow: hidden;
+  cursor: pointer;
 `;
 
 // 이미지+오버레이+타이틀+버튼 감싸는 박스

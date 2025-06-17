@@ -12,6 +12,9 @@ export interface AnimeItem {
   format: string;
   original: string;
   added_at: string;
+  description?: string;
+  studio?: string;
+  episodes?: string | number;
 }
 
 export interface AnimeFilter {

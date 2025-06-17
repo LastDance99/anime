@@ -4,13 +4,15 @@ import styled from "styled-components";
 // 전체 챗봇 래퍼
 export const ChatBotWrapper = styled.section`
   width: 340px;
-  height: 670px;
+  height: 600px;
   background: ${({ theme }) => theme.colors.secondary};
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: relative;
+  position: fixed;
+  bottom: 14px;
+  right: 312px;
 `;
 
 // 사이드바(햄버거 등) 아이콘

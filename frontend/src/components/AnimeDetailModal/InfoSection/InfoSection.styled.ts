@@ -1,54 +1,108 @@
 import styled from "styled-components";
 
-// InfoSection 스타일
 export const InfoSectionWrapper = styled.section`
   display: flex;
-  gap: 32px;
-  align-items: flex-start;
-  padding: 24px;
-  background: #fdeaf4;
-  border-radius: 0 0 16px 16px;
+  background: #FCEEF5;
+  width: 100%;
+  height: 240px;
+  border-radius: 0;
+  padding: 32px 32px 32px 32px;
+  box-sizing: border-box;
+`;
+
+export const InfoLeft = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+`;
+
+export const ScoreBadge = styled.div`
+  color: #ef5da8;
+  border: 1px solid #FFB6C1;
+  border-radius: 6px;
+  font-famaily: ${({ theme }) => theme.fonts.cafe24};
+  font-weight: ${({ theme }) => theme.Weights.bold};
+  font-size: 10px;
+  display: inline-block;
+  padding: 2px 8px;
+  margin-bottom: 8px;
+  width: fit-content;
+`;
+
+export const Title = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-famaily: ${({ theme }) => theme.fonts.cafe24};
+  font-weight: ${({ theme }) => theme.Weights.bold};
+  color: ${({ theme }) => theme.colors.text};
+  margin-bottom: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+export const MetaRow = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-famaily: ${({ theme }) => theme.fonts.cafe24Light};
+  color: ${({ theme }) => theme.colors.subtext};
+  margin-bottom: 8px;
+  span {
+    margin-right: 4px;
+  }
+`;
+
+export const Desc = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-famaily: ${({ theme }) => theme.fonts.cafe24Light};
+  color: ${({ theme }) => theme.colors.text};
+  font-weight: ${({ theme }) => theme.Weights.normal};
+  line-height: 1.5;
+  margin-bottom: 14px;
+  white-space: pre-line;
+  word-break: keep-all;
+`;
+
+export const MoreButton = styled.button`
+  color: #e05a8b;
+  background: none;
+  border: none;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-famaily: ${({ theme }) => theme.fonts.cafe24Light};
+  font-weight: ${({ theme }) => theme.Weights.medium};
+  margin-left: 7px;
+  cursor: pointer;
+  padding: 0;
+  &:hover { text-decoration: underline; }
+`;
+
+export const AddButton = styled.button`
+  color: #e05a8b;
+  border: 1px solid #FFB6C1;
+  border-radius: 6px;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-famaily: ${({ theme }) => theme.fonts.cafe24Light};
+  padding: 4px 10px;
+  font-weight: ${({ theme }) => theme.Weights.medium};
+  cursor: pointer;
+  width: fit-content;
+  margin-top: 2px;
+  transition: background 0.15s;
+  &:hover {
+    background: #ffe2ee;
+  }
+`;
+
+export const InfoRight = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: 24px;
 `;
 
 export const PosterImg = styled.img`
-  width: 108px;
-  height: 150px;
-  border-radius: 12px;
+  width: 110px;
+  height: 154px;
   object-fit: cover;
-  flex-shrink: 0;
-`;
-
-export const TitleBox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-
-export const Badge = styled.span`
-  font-size: 0.93rem;
-  padding: 2px 8px;
-  border-radius: 12px;
-  background: #f7d9e9;
-  color: #c35577;
-  font-weight: bold;
-`;
-
-export const Title = styled.h2`
-  font-size: 1.28rem;
-  font-weight: bold;
-  margin: 0;
-  color: #333;
-`;
-
-export const MetaBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 4px;
-`;
-
-export const MetaText = styled.span`
-  font-size: 0.97rem;
-  color: #6a6a6a;
+  box-shadow: 0 2px 8px rgba(120, 92, 119, 0.10);
+  background: #fff;
 `;

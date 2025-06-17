@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import AccountSettings from "../../components/Settings/AccountSettings/AccountSettings";
 import ImageSettings from "../../components/Settings/ImageSettings/ImageSettings";
 import {
@@ -16,6 +16,7 @@ type SettingsPageProps = {
   tempUser: User;
   setTempUser: (user: User) => void;
   setSubModalOpen: (open: boolean) => void;
+  onSave: () => void;
   onClose: () => void;
 };
 
@@ -25,16 +26,10 @@ export default function SettingsPage({
   tempUser,
   setTempUser,
   setSubModalOpen,
+  onSave,
   onClose,
 }: SettingsPageProps) {
   const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
-
-  const handleSave = () => {
-    const confirmed = window.confirm("설정을 저장하시겠습니까?");
-    if (!confirmed) return;
-    setUser(tempUser);
-    onClose();
-  };
 
   const handleTryClose = () => {
     if (hasChanges) {
@@ -56,8 +51,8 @@ export default function SettingsPage({
       <Divider />
       <ImageSettings user={tempUser} setUser={setTempUser} />
       <BottomBar>
-        <ActionButton onClick={handleSave}>저장</ActionButton>
-        <ActionButton onClick={handleTryClose}>닫기</ActionButton>
+        <ActionButton onClick={onSave}>저장</ActionButton>
+        <ActionButton onClick={onClose}>닫기</ActionButton>
       </BottomBar>
     </Wrapper>
   );

@@ -11,6 +11,7 @@ type MyAniListCardProps = {
   isFavorite: boolean;
   onToggleFavorite?: () => void;
   onDelete?: () => void;
+  onClick?: () => void;
 };
 
 export default function MyAniListCard({
@@ -22,6 +23,7 @@ export default function MyAniListCard({
   isFavorite,
   onToggleFavorite,
   onDelete,
+  onClick,
 }: MyAniListCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -39,17 +41,29 @@ export default function MyAniListCard({
   }, [menuOpen]);
 
   return (
-    <CardWrapper onMouseLeave={() => setMenuOpen(false)}>
+    <CardWrapper
+      tabIndex={0}
+      role="button"
+      aria-label={`${title} 상세보기`}
+      onClick={onClick}
+      onMouseLeave={() => setMenuOpen(false)}
+    >
       <Thumbnail src={imgUrl} alt={title} />
       <Title>{title}</Title>
       <Genre>{genres.join(", ")}</Genre>
       <Score>{myRating.toFixed(1)}</Score>
-      
-      <MenuBtn onClick={() => setMenuOpen(v => !v)} aria-label="더보기">
+
+      <MenuBtn
+        onClick={e => {
+          e.stopPropagation(); // 카드 클릭 방지!
+          setMenuOpen(v => !v);
+        }}
+        aria-label="더보기"
+      >
         <MoreVertical size={22} />
       </MenuBtn>
       {menuOpen && (
-        <MenuDropdown>
+        <MenuDropdown ref={menuRef} onClick={e => e.stopPropagation()}>
           <MenuItem onClick={onDelete}>리스트에서 삭제</MenuItem>
           <MenuItem onClick={onToggleFavorite}>
             {isFavorite ? "최애의 애니 취소" : "최애의 애니 등록"}

@@ -18,17 +18,16 @@ type Props = {
 };
 
 export default function ImageSettings({ user, setUser }: Props) {
-  const [profileImg, setProfileImg] = useState(user.profile_image);
-  const [bgImg, setBgImg] = useState(user.background_image);
-  const [roomImg, setRoomImg] = useState(user.myroom_image);
+  const [profileImg, setProfileImg] = useState<string>(user.profile_image ?? "");
+  const [bgImg, setBgImg] = useState<string>(user.background_image ?? "");
+  const [roomImg, setRoomImg] = useState<string>(user.myroom_image ?? "");
 
   const handleUpload = (
-  type: "profile" | "background" | "myroom",
-  setter: React.Dispatch<React.SetStateAction<string>>
+    type: "profile" | "background" | "myroom",
+    setter: React.Dispatch<React.SetStateAction<string>>
   ) => (file: File) => {
     const url = URL.createObjectURL(file);
     setter(url);
-
     setUser({
       ...user,
       ...(type === "profile" && { profile_image: url }),
@@ -38,11 +37,10 @@ export default function ImageSettings({ user, setUser }: Props) {
   };
 
   const handleDelete = (
-  type: "profile" | "background" | "myroom",
-  setter: React.Dispatch<React.SetStateAction<string>>
+    type: "profile" | "background" | "myroom",
+    setter: React.Dispatch<React.SetStateAction<string>>
   ) => () => {
     setter("");
-
     setUser({
       ...user,
       ...(type === "profile" && { profile_image: "" }),
@@ -70,8 +68,8 @@ export default function ImageSettings({ user, setUser }: Props) {
           <ImageLabel>배경 이미지</ImageLabel>
           <StyledImage src={bgImg} alt="배경 이미지" shape="rect" />
           <ButtonGroup>
-            <ImageUploadButton onChange={handleUpload("profile", setBgImg)} />
-            <ActionButton onClick={handleDelete("profile", setBgImg)}>삭제</ActionButton>
+            <ImageUploadButton onChange={handleUpload("background", setBgImg)} />
+            <ActionButton onClick={handleDelete("background", setBgImg)}>삭제</ActionButton>
           </ButtonGroup>
         </ImageBox>
 
@@ -80,8 +78,8 @@ export default function ImageSettings({ user, setUser }: Props) {
           <ImageLabel>마이룸</ImageLabel>
           <StyledImage src={roomImg} alt="마이룸 이미지" shape="square" />
           <ButtonGroup>
-            <ImageUploadButton onChange={handleUpload("profile", setRoomImg)} />
-            <ActionButton onClick={handleDelete("profile", setRoomImg)}>삭제</ActionButton>
+            <ImageUploadButton onChange={handleUpload("myroom", setRoomImg)} />
+            <ActionButton onClick={handleDelete("myroom", setRoomImg)}>삭제</ActionButton>
           </ButtonGroup>
         </ImageBox>
       </ImageRow>

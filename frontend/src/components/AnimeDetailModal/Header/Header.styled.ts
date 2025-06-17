@@ -5,7 +5,6 @@ export const HeaderWrapper = styled.div`
   width: 100%;
   height: 180px;
   background: #f6e7ef;
-  border-radius: 16px 16px 0 0;
   overflow: hidden;
 `;
 
@@ -13,6 +12,8 @@ export const BannerImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  margin-bottom: 0;
+  border-radius: 0;
 `;
 
 export const CloseBtn = styled.button`

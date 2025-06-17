@@ -12,7 +12,7 @@ export const Container = styled.div`
 
 // 메인 내용 박스 (양쪽 컬럼 감쌈)
 export const MainBox = styled.div`
-  width: 1280px;
+  width: 1200px;
   display: flex;
   flex-direction: row;         // 좌우로 컬럼 배치
   gap: 40px;
@@ -42,3 +42,7 @@ export const ProfileRightColumn = styled.div`
   box-sizing: border-box;
 `;
 
+export const Sidebar = styled.aside`
+  width: 300px;
+  flex-shrink: 0;
+`;

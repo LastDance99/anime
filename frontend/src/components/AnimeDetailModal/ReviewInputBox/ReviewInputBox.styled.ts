@@ -1,55 +1,64 @@
 import styled from "styled-components";
 
-export const Box = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-`;
-
-export const StarBox = styled.div`
-  display: flex;
-  gap: 2px;
-  padding-top: 7px;
-`;
-
-export const Star = styled.span<{ $active?: boolean }>`
-  font-size: 1.5rem;
-  color: ${({ $active }) => ($active ? "#FFD36B" : "#ddd")};
-  cursor: pointer;
-  transition: color 0.18s;
-  user-select: none;
-`;
-
-export const InputArea = styled.textarea`
-  flex: 1;
-  min-height: 38px;
-  max-height: 70px;
-  font-size: 1.02rem;
+export const InputBox = styled.div`
+  width: 600px;
+  height: auto;
+  position: relative;
+  border: 1.5px solid #F8A0BC;
   background: #fff;
-  border: 1px solid #f3cfe3;
-  border-radius: 10px;
-  padding: 10px 13px;
-  resize: none;
-  outline: none;
-  color: #333;
-  font-family: inherit;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 10px 12px;
 `;
 
-export const SubmitBtn = styled.button`
-  background: #ed7cb8;
-  color: #fff;
-  font-weight: bold;
+export const StyledTextarea = styled.textarea`
+  width: 100%;
+  height: 100%;
   border: none;
-  border-radius: 8px;
-  padding: 9px 18px;
-  font-size: 1rem;
-  margin-left: 6px;
-  cursor: pointer;
-  transition: background 0.18s;
-  &:disabled {
-    background: #f3d0e6;
-    color: #d8aacd;
-    cursor: not-allowed;
+  resize: none;
+  font-size: 15px;
+  color: #555;
+  background: transparent;
+  outline: none;
+  padding: 10px 58px 10px 12px;
+  box-sizing: border-box;
+  font-family: inherit;
+
+  &::placeholder {
+    color: #d3b7c3;
+    font-size: 15px;
+    letter-spacing: 0.01em;
   }
+`;
+
+export const SubmitButton = styled.button`
+  position: absolute;
+  bottom: 7px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #F8A0BC;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  opacity: 1;
+  transition: color 0.15s, opacity 0.1s;
+  &:hover:not(:disabled) {
+    color: #e05a8b;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+`;
+
+export const SliderRow = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
 `;

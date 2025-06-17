@@ -16,16 +16,39 @@ export default function SettingsModal({
 }: SettingsModalProps) {
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [tempUser, setTempUser] = useState(user);
+  const [justSaved, setJustSaved] = useState(false); // ⭐
 
   const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
 
+  // user가 변경될 때 tempUser도 동기화
+  useEffect(() => {
+    setTempUser(user);
+  }, [user]);
+
+  // 저장 후, justSaved 플래그 세우기
+  const handleSave = () => {
+    const confirmed = window.confirm("설정을 저장하시겠습니까?");
+    if (!confirmed) return;
+    setUser(tempUser);
+    setJustSaved(true); // ⭐ 저장됨 표시
+    onClose();
+  };
+
+  // 닫기 시, justSaved면 무조건 닫음 (경고 스킵)
   const handleTryClose = () => {
-    if (hasChanges) {
+    if (!justSaved && hasChanges) {
       const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
       if (!confirmed) return;
     }
     onClose();
   };
+
+  // justSaved는 닫힌 뒤 1회성으로만 쓰게 리셋
+  useEffect(() => {
+    if (!isSubModalOpen && justSaved) {
+      setJustSaved(false);
+    }
+  }, [isSubModalOpen, justSaved]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -35,7 +58,7 @@ export default function SettingsModal({
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [hasChanges, onClose, isSubModalOpen]);
+  }, [hasChanges, onClose, isSubModalOpen, justSaved]);
 
   return (
     <Overlay onClick={handleTryClose}>
@@ -46,7 +69,8 @@ export default function SettingsModal({
           tempUser={tempUser}
           setTempUser={setTempUser}
           setSubModalOpen={setIsSubModalOpen}
-          onClose={handleTryClose}
+          onSave={handleSave}      // ⭐ 콜백으로 저장
+          onClose={handleTryClose} // 닫기
         />
       </ModalBox>
     </Overlay>

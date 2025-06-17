@@ -1,52 +1,51 @@
 import React from "react";
 import {
-  Box,
-  StarBox,
-  Star,
-  InputArea,
-  SubmitBtn,
+  InputBox,
+  StyledTextarea,
+  SubmitButton
 } from "./ReviewInputBox.styled";
 
-type Props = {
+interface ReviewInputBoxProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onSubmit: (content: string, rating: number) => void;
-  rating: number;
-  onRatingChange: (val: number) => void;
+  onSubmit: () => void;
   disabled?: boolean;
-};
+  placeholder?: string;
+}
 
 export default function ReviewInputBox({
   value,
   onChange,
   onSubmit,
-  rating,
-  onRatingChange,
-  disabled = false,
-}: Props) {
+  disabled,
+  placeholder = "이 작품에 대한 평가를 남겨보세요!"
+}: ReviewInputBoxProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!disabled && value.trim().length > 0) {
+        onSubmit();
+      }
+    }
+  };
+
   return (
-    <Box>
-      <StarBox>
-        {[1, 2, 3, 4, 5].map(i => (
-          <Star
-            key={i}
-            $active={i <= rating}
-            onClick={() => onRatingChange(i)}
-          >
-            ★
-          </Star>
-        ))}
-      </StarBox>
-      <InputArea
+    <InputBox>
+      <StyledTextarea
         value={value}
         onChange={onChange}
-        placeholder="이 작품에 대한 당신의 감상을 남겨보세요!"
         maxLength={500}
+        rows={2}
+        placeholder={placeholder}
         disabled={disabled}
+        onKeyDown={handleKeyDown}
       />
-      <SubmitBtn onClick={() => onSubmit(value, rating)} disabled={disabled || !value.trim() || rating === 0}>
+      <SubmitButton
+        onClick={onSubmit}
+        disabled={disabled || value.trim().length === 0}
+      >
         등록
-      </SubmitBtn>
-    </Box>
+      </SubmitButton>
+    </InputBox>
   );
 }

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Dropdown = styled.div`
-  width: 70px;
+  width: 80px;
   height: 30px;
   position: relative;
   display: flex;

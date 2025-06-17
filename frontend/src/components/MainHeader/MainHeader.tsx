@@ -15,9 +15,9 @@ export default function Header({ show = true }) {
         <Logo src="/logos/sublog.png" alt="AnTada 로고" />
         <Nav>
           <NavList>
-            <NavItem as={Link} to='/profile'>프로필</NavItem>
-            <NavItem as={Link} to='/mainpage'>전체 게시판</NavItem>
-            <NavItem as={Link} to='/mainpage'>애니</NavItem>
+            <NavItem as={Link} to='/profile/:nickname'>프로필</NavItem>
+            <NavItem as={Link} to='/board'>전체 게시판</NavItem>
+            <NavItem as={Link} to='/anime'>애니</NavItem>
           </NavList>
         </Nav>
       </HeaderInner>

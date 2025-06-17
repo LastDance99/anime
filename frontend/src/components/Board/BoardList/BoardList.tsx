@@ -13,6 +13,12 @@ import {
   Title,
 } from "./BoardList.styled";
 
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ko";
+dayjs.extend(relativeTime);
+dayjs.locale("ko");
+
 const columnWidths = [42, 40, 362, 74, 46, 70, 57];
 
 type BoardListProps = {
@@ -94,7 +100,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, page, pageSize, onItemClick
               </div>
             </Td>
             <Td style={{ width: columnWidths[4] }}>
-              {item.created_at ? new Date(item.created_at).toLocaleDateString("ko-KR") : "-"}
+              {item.created_at ? dayjs(item.created_at).fromNow() : "-"}
             </Td>
             <Td style={{ width: columnWidths[5] }}>{item.views}</Td>
             <Td style={{ width: columnWidths[6] }}>{item.like_count}</Td>

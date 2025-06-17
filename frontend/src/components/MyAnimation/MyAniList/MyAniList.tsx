@@ -19,15 +19,16 @@ type ProfileContext = {
 
 type Props = {
   filters: AniListFilters;
+  onAnimeClick?: (anime: UserAnimeItem) => void; // ⭐️ 추가!
 };
 
-export default function MyAniList({ filters }: Props) {
+export default function MyAniList({ filters, onAnimeClick }: Props) {
   const { userAnimeList } = useOutletContext<ProfileContext>();
   const [list, setList] = useState(userAnimeList);
 
   const filteredList = list.filter(
     (item) =>
-      (!filters.genre || item.genreKor.includes(filters.genre)) &&
+      (!filters.genre || item.genre_kor.includes(filters.genre)) &&
       (!filters.season || item.season === filters.season) &&
       (!filters.status || item.broadcast === filters.status) &&
       (!filters.format || item.format === filters.format) &&
@@ -38,11 +39,11 @@ export default function MyAniList({ filters }: Props) {
   const sortedList = filteredList.slice();
   if (filters.sort === "latest") {
     sortedList.sort(
-      (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
+      (a, b) => new Date(b.added_at).getTime() - new Date(a.added_at).getTime()
     );
   } else if (filters.sort === "oldest") {
     sortedList.sort(
-      (a, b) => new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime()
+      (a, b) => new Date(a.added_at).getTime() - new Date(b.added_at).getTime()
     );
   }
 
@@ -70,24 +71,25 @@ export default function MyAniList({ filters }: Props) {
 
       {/* 헤더 */}
       <ListHeader>
-        <HeaderCol style={{ minWidth: 40, }} />
-        <HeaderCol style={{ minWidth: 360, textAlign: "left", }}>제목</HeaderCol>
-        <HeaderCol style={{ minWidth: 120, textAlign: "center", }}>장르</HeaderCol>
-        <HeaderCol style={{ minWidth: 36, textAlign: "left", marginRight: 10, }}>내 점수</HeaderCol>
+        <HeaderCol style={{ minWidth: 40 }} />
+        <HeaderCol style={{ minWidth: 360, textAlign: "left" }}>제목</HeaderCol>
+        <HeaderCol style={{ minWidth: 120, textAlign: "center" }}>장르</HeaderCol>
+        <HeaderCol style={{ minWidth: 36, textAlign: "left", marginRight: 10 }}>내 점수</HeaderCol>
       </ListHeader>
       {/* 카드 리스트 */}
       <AniListContainer>
         {sortedList.map((item) => (
           <MyAniListCard
             key={item.id}
-            imgUrl={item.imgUrl}
+            imgUrl={item.image_url}
             title={item.title}
-            genres={item.genreKor}
+            genres={item.genre_kor}
             rating={item.rating}
             myRating={item.my_rating}
             isFavorite={item.is_favorite ?? false}
             onToggleFavorite={() => handleToggleFavorite(item.id)}
             onDelete={() => handleDelete(item.id)}
+            onClick={() => onAnimeClick?.(item)} // ⭐️ 카드 클릭시 상세모달용!
           />
         ))}
       </AniListContainer>

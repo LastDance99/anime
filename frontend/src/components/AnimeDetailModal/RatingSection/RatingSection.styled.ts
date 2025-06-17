@@ -1,63 +1,61 @@
 import styled from "styled-components";
 
-export const Section = styled.section`
+export const RatingSectionWrapper = styled.section`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #fff8fc;
-  border-bottom: 1px solid #f4cfe3;
-  padding: 22px 36px 18px 36px;
+  width: 700px;
+  height: 100px;
+  background: #fff;
+  border-radius: 0;
+  margin: 10px auto 50px auto;
+  align-items: flex-start;
 `;
 
-export const RatingBox = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-`;
-
-export const SubTitle = styled.div`
-  font-size: 1.03rem;
-  color: #b47aac;
-  margin-bottom: 3px;
-  font-weight: 600;
-`;
-
-export const StarBox = styled.div`
-  display: flex;
-  gap: 3px;
-`;
-
-export const Star = styled.span<{ $active?: boolean }>`
-  font-size: 1.65rem;
-  color: ${({ $active }) => ($active ? "#FFD36B" : "#ddd")};
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.18s;
-`;
-
-export const StatBox = styled.div`
-  display: flex;
-  gap: 38px;
-`;
-
-export const StatItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-`;
-
-export const StatLabel = styled.span`
-  font-size: 0.94rem;
-  color: #a7a7a7;
-  line-height: 1.16;
+export const RatingCol = styled.div`
+  flex: 1;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
 `;
 
-export const StatValue = styled.span`
-  font-size: 1.23rem;
-  color: #6c3566;
-  font-weight: bold;
-  letter-spacing: 0.02em;
+export const RatingTitle = styled.div`
+  font-size: 14px;
+  color: #222;
+  margin-top: 6px;
+  margin-bottom: 2px;
+`;
+
+export const RatingScore = styled.div`
+font-size: ${({ theme }) => theme.fontSizes.xl};
+font-famaily: ${({ theme }) => theme.fonts.cafe24Light};
+font-weight: ${({ theme }) => theme.Weights.bold};
+`;
+
+export const StarRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 3px;
+  margin-bottom: 1px;
+`;
+
+export const ListAddRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const ListAddIcon = styled.span`
+  display: flex;
+  align-items: center;
+  margin-right: 7px;
+`;
+
+export const ListCount = styled.span`
+  font-size: 2rem;
+  font-family: 'Quicksand', 'Cafe24 Ssurround', sans-serif;
+  color: #232020;
+  letter-spacing: 2px;
 `;

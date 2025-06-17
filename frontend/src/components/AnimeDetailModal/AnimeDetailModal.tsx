@@ -1,7 +1,12 @@
 import React, { useState, useMemo } from "react";
 import type { AnimeItem, AnimeReview } from "../../types/anime";
 import { ANIME_REVIEWS } from "../../data/animeReviews";
-import { Overlay, Modal, Content } from "./AnimeDetailModal.styled";
+import {
+  Overlay,
+  Modal,
+  Content,
+  ReviewBoxGroup,
+} from "./AnimeDetailModal.styled";
 import Header from "./Header/Header";
 import InfoSection from "./InfoSection/InfoSection";
 import RatingSection from "./RatingSection/RatingSection";
@@ -21,25 +26,39 @@ type Props = {
 };
 
 export default function AnimeDetailModal({ anime, onClose }: Props) {
-  // --- 상태 관리
   const initialReviews = ANIME_REVIEWS.filter(r => r.anime_id === anime.id);
   const [reviews, setReviews] = useState<AnimeReview[]>(initialReviews);
+
+  const [myAnimeList, setMyAnimeList] = useState<AnimeItem[]>([]);
+  const isAdded = myAnimeList.some(item => item.id === anime.id);
+
+  const [addedUserCount, setAddedUserCount] = useState(0);
+
+  const handleToggleList = () => {
+    if (isAdded) {
+      setMyAnimeList(prev => prev.filter(item => item.id !== anime.id));
+      setAddedUserCount(prev => Math.max(prev - 1, 0));
+    } else {
+      setMyAnimeList(prev => [...prev, anime]);
+      setAddedUserCount(prev => prev + 1);
+    }
+  };
 
   const [myRating, setMyRating] = useState(0);
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState("");
-
-  // ⭐ 추가: 리뷰 입력 상태
+  const [editedRating, setEditedRating] = useState(0);
   const [reviewInput, setReviewInput] = useState("");
-  const [reviewRating, setReviewRating] = useState(0);
 
-  // 평균 평점
-  const avgRating = useMemo(() =>
-    reviews.length === 0 ? 0 : reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-  , [reviews]);
+  const avgRating = useMemo(
+    () =>
+      reviews.length === 0
+        ? 0
+        : reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length,
+    [reviews]
+  );
 
-  // 리뷰 등록
-  const handleAddReview = (content: string, rating: number) => {
+  const handleAddReview = (content: string) => {
     const newReview: AnimeReview = {
       id: Date.now(),
       anime_id: anime.id,
@@ -48,58 +67,62 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
         nickname: "임시유저",
         profile_image: "/images/default_profile.png",
       },
-      rating,
+      rating: myRating,
       content,
       created_at: new Date().toISOString(),
     };
     setReviews(prev => [newReview, ...prev]);
-    setMyRating(rating);
   };
 
-  // 입력박스 핸들러
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setReviewInput(e.target.value);
   };
-  const handleRatingChange = (val: number) => {
-    setReviewRating(val);
-  };
+
   const handleSubmitReview = () => {
-    if (!reviewInput.trim() || reviewRating === 0) return;
-    handleAddReview(reviewInput, reviewRating);
+    if (!reviewInput.trim()) return;
+    if (myRating === 0) {
+      alert("먼저 평점을 선택해주세요.");
+      return;
+    }
+    handleAddReview(reviewInput);
     setReviewInput("");
-    setReviewRating(0);
   };
 
-  // 리뷰 삭제
   const handleDelete = (id: number) => {
     setReviews(prev => prev.filter(r => r.id !== id));
   };
 
-  // 리뷰 수정 시작
   const handleEditStart = (review: AnimeReview) => {
     setEditingReviewId(review.id);
     setEditedContent(review.content);
+    setEditedRating(review.rating);
   };
 
-  // 리뷰 수정 취소
   const handleEditCancel = () => {
     setEditingReviewId(null);
     setEditedContent("");
+    setEditedRating(0);
   };
 
-  // 리뷰 수정 완료
   const handleEditSubmit = (id: number) => {
     if (!editedContent.trim()) return;
     setReviews(prev =>
       prev.map(r =>
-        r.id === id ? { ...r, content: editedContent.trim(), created_at: new Date().toISOString() } : r
+        r.id === id
+          ? {
+              ...r,
+              content: editedContent.trim(),
+              rating: editedRating,
+              created_at: new Date().toISOString(),
+            }
+          : r
       )
     );
     setEditingReviewId(null);
     setEditedContent("");
+    setEditedRating(0);
   };
 
-  // 내 평점 선택
   const handleChangeMyRating = (rating: number) => {
     setMyRating(rating);
   };
@@ -109,31 +132,38 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
       <Modal onClick={e => e.stopPropagation()}>
         <Header image_url={anime.image_url} onClose={onClose} />
         <Content>
-          <InfoSection anime={anime} />
+          <InfoSection
+            anime={anime}
+            onAddList={handleToggleList}
+            isAdded={isAdded}
+          />
           <RatingSection
             myRating={myRating}
             onChangeMyRating={handleChangeMyRating}
             avgRating={avgRating}
-            listCount={reviews.length}
+            listCount={addedUserCount}
           />
-          <ReviewInputBox
-            value={reviewInput}
-            onChange={handleInputChange}
-            onSubmit={handleSubmitReview}
-            rating={reviewRating}
-            onRatingChange={handleRatingChange}
-          />
-          <ReviewList
-            reviews={reviews}
-            myUserId={MY_USER_ID}
-            editingReviewId={editingReviewId}
-            editedContent={editedContent}
-            onEditStart={handleEditStart}
-            onEditCancel={handleEditCancel}
-            onEditSubmit={handleEditSubmit}
-            setEditedContent={setEditedContent}
-            onDelete={handleDelete}
-          />
+
+          <ReviewBoxGroup>
+            <ReviewInputBox
+              value={reviewInput}
+              onChange={handleInputChange}
+              onSubmit={handleSubmitReview}
+            />
+            <ReviewList
+              reviews={reviews}
+              myUserId={MY_USER_ID}
+              editingReviewId={editingReviewId}
+              editedContent={editedContent}
+              editedRating={editedRating}
+              onEditStart={handleEditStart}
+              onEditCancel={handleEditCancel}
+              onEditSubmit={handleEditSubmit}
+              setEditedContent={setEditedContent}
+              setEditedRating={setEditedRating}
+              onDelete={handleDelete}
+            />
+          </ReviewBoxGroup>
         </Content>
       </Modal>
     </Overlay>
