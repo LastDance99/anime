@@ -3,14 +3,20 @@ from django.db.models import Count, Q
 from .models import BoardPost, PostLike, BoardComment, CommentLike
 from .serializers import BoardPostSummarySerializer
 from rest_framework.response import Response
-from .serializers import BoardPostDetailSerializer, BoardPostCreateSerializer, BoardCommentSerializer
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
+from apps.core.utils.extractor import extract_thumbnail_from_html 
+from apps.core.utils.sanitizer import sanitize_html
 from apps.profiles.utils.activity import create_user_activity
-
+from .serializers import (
+    BoardPostDetailSerializer, 
+    BoardPostCreateSerializer, 
+    BoardCommentSerializer,
+)
 
 # 게시판 목록 조회/게시글 생성 API
 class BoardPostListCreateView(ListCreateAPIView):
@@ -50,7 +56,11 @@ class BoardPostListCreateView(ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        post = serializer.save()
+        content = self.request.data.get("content", "")
+        sanitized_content = sanitize_html(content)
+        thumbnail_url = extract_thumbnail_from_html(sanitized_content)
+
+        post = serializer.save(content=sanitized_content, thumbnail_url=thumbnail_url)
 
         create_user_activity(
             user=self.request.user,
@@ -80,7 +90,12 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
         post = self.get_object()
         if post.author != self.request.user:
             raise PermissionDenied("게시글 수정 권한이 없습니다.")
-        serializer.save()
+
+        content = self.request.data.get("content", post.content)
+        sanitized_content = sanitize_html(content)
+        thumbnail_url = extract_thumbnail_from_html(sanitized_content)
+
+        serializer.save(content=sanitized_content, thumbnail_url=thumbnail_url)
 
     # ✅ 삭제 권한: 작성자 본인만
     def perform_destroy(self, instance):
@@ -125,7 +140,8 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
 
         qs = BoardComment.objects.filter(
             post_id=post_id,
-            parent__isnull=True
+            parent__isnull=True,
+            is_deleted=False
         ).annotate(
             like_count=Count('likes')
         )
@@ -142,20 +158,32 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         post_id = self.kwargs['post_id']
+        post = BoardPost.objects.get(id=post_id)
         parent_id = self.request.data.get('parent_id')
         tagged_nickname = self.request.data.get('tagged_nickname')
+        content = self.request.data.get("content", "")
+
+        # content 필드 XSS 방어 처리
+        from apps.core.utils.sanitizer import sanitize_html
+        sanitized_content = sanitize_html(content)
+
+        parent = None
+        if parent_id is not None:
+            try:
+                parent = BoardComment.objects.get(id=parent_id, post_id=post_id)
+            except BoardComment.DoesNotExist:
+                raise ValidationError({"parent_id": "존재하지 않는 댓글입니다."})
 
         comment = serializer.save(
             author=self.request.user,
-            post_id=post_id,
+            post=post,
             parent_id=parent_id,
-            tagged_nickname=tagged_nickname
+            tagged_nickname=tagged_nickname,
+            content=sanitized_content,
         )
 
         # 활동 기록
         # 댓글 단 게시글 정보 조회 (게시글/갤러리 모두 대응)
-        post = BoardPost.objects.get(id=post_id)
-
         create_user_activity(
             user=self.request.user,
             type="comment_create",

@@ -14,15 +14,10 @@ class BoardPost(models.Model):
     board_type = models.CharField(max_length=20, choices=BOARD_TYPE_CHOICES)
     title = models.CharField(max_length=200)
     content = models.TextField()
+    thumbnail_url = models.URLField(null=True, blank=True)
     views = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-# 게시글에 이미지 업로드 모델 정의
-class PostImage(models.Model):
-    post = models.ForeignKey(BoardPost, on_delete=models.CASCADE, related_name='images')
-    image_url = models.URLField()  # S3 URL이 저장될 예정
-    created_at = models.DateTimeField(auto_now_add=True)
 
 # 게시글에 좋아요 모델 정의
 class PostLike(models.Model):

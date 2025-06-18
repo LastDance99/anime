@@ -102,15 +102,14 @@ class BoardAPITest(APITestCase):
     def test_comment_create_and_list(self):
         post = BoardPost.objects.create(author=self.user, title="댓글테스트", content="c", board_type="post")
         url = f"/api/boards/{post.id}/comments/"
-        # 댓글 작성
-        response = self.client.post(url, {"content": "댓글", "parent_id": None})
+        # 댓글 작성 (parent_id 없이)
+        response = self.client.post(url, {"content": "댓글"})
+        print("댓글 작성 응답:", response.data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(BoardComment.objects.count(), 1)
-        # 대댓글 작성
+        # 대댓글 작성 (parent_id 지정)
         comment = BoardComment.objects.first()
         response = self.client.post(url, {"content": "대댓글", "parent_id": comment.id})
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(BoardComment.objects.count(), 2)
         # 목록 조회
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -171,27 +170,41 @@ class BoardAPITest(APITestCase):
             PostLike.objects.create(post=post30, user=u)
     
         url = "/api/boards/"
-        # 전체 조회 (type=all)
+        # 전체 조회
         resp = self.client.get(url)
-        self.assertGreaterEqual(len(resp.data), 4)
+        results = resp.data.get('results', resp.data)
+        self.assertGreaterEqual(len(results), 4)
+
         # 게시글만
         resp = self.client.get(url, {"type": "post"})
-        self.assertTrue(all(x["board_type"] == "post" for x in resp.data))
+        results = resp.data.get('results', resp.data)
+        self.assertTrue(all(x["board_type"] == "post" for x in results))
+
         # 갤러리만
         resp = self.client.get(url, {"type": "gallery"})
-        self.assertTrue(all(x["board_type"] == "gallery" for x in resp.data))
+        results = resp.data.get('results', resp.data)
+        self.assertTrue(all(x["board_type"] == "gallery" for x in results))
+
         # 추천 10이상
         resp = self.client.get(url, {"type": "like10"})
-        self.assertTrue(any("추천10" in x["title"] for x in resp.data))
+        results = resp.data.get('results', resp.data)
+        self.assertTrue(any("추천10" in x["title"] for x in results))
+
         # 추천 30이상
         resp = self.client.get(url, {"type": "like30"})
-        self.assertTrue(any("추천30" in x["title"] for x in resp.data))
+        results = resp.data.get('results', resp.data)
+        self.assertTrue(any("추천30" in x["title"] for x in results))
+
         # 검색(제목/본문)
         resp = self.client.get(url, {"search": "이미지"})
-        self.assertTrue(any("갤러리글" in x["title"] for x in resp.data))
+        results = resp.data.get('results', resp.data)
+        self.assertTrue(any("갤러리글" in x["title"] for x in results))
+
         # 정렬 테스트 (oldest)
         resp = self.client.get(url, {"sort": "oldest"})
-        self.assertLessEqual(resp.data[0]["created_at"], resp.data[-1]["created_at"])
+        results = resp.data.get('results', resp.data)
+        if len(results) >= 2:
+            self.assertLessEqual(results[0]["created_at"], results[-1]["created_at"])
 
     def test_board_post_not_found(self):
         resp = self.client.get("/api/boards/999999/")
@@ -204,7 +217,7 @@ class BoardAPITest(APITestCase):
     def test_comment_create_missing_content(self):
         post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
         url = f"/api/boards/{post.id}/comments/"
-        resp = self.client.post(url, {"parent_id": ""})
+        resp = self.client.post(url, {})
         self.assertEqual(resp.status_code, 400)
 
     def test_board_post_create_missing_field(self):

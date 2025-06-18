@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from apps.core.utils.sanitizer import sanitize_html
 from .models import Anime, AnimeReview, AnimeList, ReviewLike
 from django.db.models import Avg
 
@@ -130,3 +131,12 @@ class AnimeReviewCreateSerializer(serializers.ModelSerializer):
         if value < 1 or value > 5:
             raise serializers.ValidationError("평점은 1점 이상 5점 이하로 입력하세요.")
         return value
+    
+    def create(self, validated_data):
+        validated_data["content"] = sanitize_html(validated_data.get("content", ""))
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        if "content" in validated_data:
+            validated_data["content"] = sanitize_html(validated_data["content"])
+        return super().update(instance, validated_data)

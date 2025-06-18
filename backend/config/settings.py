@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',      # 자기 자신 (로컬 개발용)
     'localhost',      # 자기 자신 도메인 방식
-    '192.168.0.9',   # ✅ 너의 내부 IP (프론트에서 접근할 주소!
+    '192.168.0.9',   # ✅ 너의 내부 IP (프론트에서 접근할 주소!)
 ]
 
 # Application definition
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apps.profiles', # 사용자 프로필 앱
     'apps.boards', # 게시판 기능 앱
     'apps.anime', # 애니 기능 앱
+    'apps.core', # 공통 기능 앱
     'apps.settings', # 사용자 설정 앱
 ]
 
@@ -199,3 +200,9 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
 }
+
+# AWS S3 설정
+AWS_ACCESS_KEY_ID='AKIAZB7AEDKDR6SWG4VD'
+AWS_SECRET_ACCESS_KEY='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'
+AWS_S3_BUCKET_NAME='anime-project-image-bucket'
+AWS_REGION='ap-northeast-2' 

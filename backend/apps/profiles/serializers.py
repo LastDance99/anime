@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import ProfileComment, UserActivity
 from apps.boards.models import BoardPost
 from apps.anime.models import AnimeList, AnimeReview
+from apps.core.utils.sanitizer import sanitize_html
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -20,6 +21,11 @@ class AboutUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("about",)
+
+    def update(self, instance, validated_data):
+        about = validated_data.get("about", "")
+        validated_data["about"] = sanitize_html(about)
+        return super().update(instance, validated_data)
 
 # 프로필 통계(애니의 총 갯수 / 평균 점수) 시리얼라이저
 class AnimeListStatsSerializer(serializers.Serializer):
@@ -60,8 +66,7 @@ class ProfileCommentSerializer(serializers.ModelSerializer):
     def validate_content(self, value):
         if not value or not value.strip():
             raise serializers.ValidationError("코멘트 내용이 비어있을 수 없습니다.")
-        return value
-
+        return sanitize_html(value)
 # 유저 활동 시리얼라이저
 class UserActivitySerializer(serializers.ModelSerializer):
     

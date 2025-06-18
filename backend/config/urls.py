@@ -25,10 +25,11 @@ urlpatterns = [
     # 관리자 페이지 URL
     path("admin/", admin.site.urls),
     # API 엔드포인트 URL
-    path("api/users/", include("apps.users.urls")), # 사용자 인증 및 관리
-    path("api/profiles/", include("apps.profiles.urls")), # 사용자 프로필 관련
+    path("api/users/", include("apps.users.urls")), # 사용자 인증 및 관리 기능 관련
+    path("api/profiles/", include("apps.profiles.urls")), # 사용자 프로필 기능 관련
     path("api/boards/", include("apps.boards.urls")), # 게시판 기능 관련
-    path("api/anime/", include("apps.anime.urls")), # 애니 관련 기능
+    path("api/anime/", include("apps.anime.urls")), # 애니 기능 관련 
+    path("api/core/", include("apps.core.urls")), # 공통 기능 관련
     path("api/settings/", include("apps.settings.urls")), # 사용자 설정 관련
 ]
 
