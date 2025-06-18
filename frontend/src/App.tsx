@@ -11,21 +11,24 @@ import MyAniListPage from "./pages/MyAniListPage/MyAniListPage";
 import MyBoardPage from "./pages/MyBoardPage/MyBoardPage";
 import MyGalleryPage from "./pages/MyGalleryPage/MyGalleryPage";
 import WritePage from "./pages/WritePage/WritePage";
+import ChatbotLayout from "./layouts/ChatbotLayout";
 
 function App() {
   return (
     <BrowserRouter>
         <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/board" element={<BoardPage />} />
-            <Route path="/anime" element={<AniMain />} />
-            <Route path="/write" element={<WritePage />} />
-          </Route>
-          <Route element={<ProfileLayout />}>
-            <Route path='/profile/:nickname' element={<ProfilePage />} />
-            <Route path='/profile/:nickname/myanilist' element={<MyAniListPage />} />
-            <Route path='/profile/:nickname/myboard' element={<MyBoardPage />} />
-            <Route path='/profile/:nickname/mygallery' element={<MyGalleryPage />} />
+          <Route element={<ChatbotLayout />}>
+            <Route element={<MainLayout />}>
+              <Route path="/board" element={<BoardPage />} />
+              <Route path="/anime" element={<AniMain />} />
+              <Route path="/board/write" element={<WritePage />} />
+            </Route>
+            <Route element={<ProfileLayout />}>
+              <Route path='/profile/:nickname' element={<ProfilePage />} />
+              <Route path='/profile/:nickname/myanilist' element={<MyAniListPage />} />
+              <Route path='/profile/:nickname/myboard' element={<MyBoardPage />} />
+              <Route path='/profile/:nickname/mygallery' element={<MyGalleryPage />} />
+            </Route>
           </Route>
           <Route path="/" element={<AuthBox />} />
           <Route path="/login" element={<Login />} />

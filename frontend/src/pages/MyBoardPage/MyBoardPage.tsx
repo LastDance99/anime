@@ -119,7 +119,6 @@ const MyBoardPage: React.FC = () => {
         </Main>
 
         <Sidebar>
-          <ChatBot />
         </Sidebar>
       </Container>
     </Section>

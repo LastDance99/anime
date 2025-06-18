@@ -3,8 +3,8 @@ import styled from "styled-components";
 export const Card = styled.div`
   width: 160px;
   height: 180px;
-  background: #fefefe;
-  border: 1px solid #eee;
+  background: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.bordermain}33;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -21,15 +21,16 @@ export const Thumbnail = styled.img`
   width: 100%;
   height: 140px;
   object-fit: cover;
-  background: #ddd;
+  background: ${({ theme }) => theme.colors.subcolor};
 `;
 
 export const Caption = styled.div`
   padding: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.Weights.medium};
   text-align: center;
-  color: #333;
-  background: #fff;
+  color: ${({ theme }) => theme.colors.text};
+  background: ${({ theme }) => theme.colors.background};
   flex: 1;
+  font-family: ${({ theme }) => theme.fonts.cafe24};
 `;

@@ -7,19 +7,23 @@ import {
   BubbleRow,
   ChatBubble,
   ChatInputBox,
-  ChatInputArea, // textarea로 교체
+  ChatInputArea,
   IconsRow,
   AddIconButton,
   SendIconButton,
 } from "./ChatBot.styled";
 import { Menu, Plus, Play } from "lucide-react";
 
+type Props = {
+  visible: boolean;
+};
+
 const initialMessages = [
   { id: 1, text: "안녕하세요!", isUser: false },
   { id: 2, text: "무엇을 도와드릴까요?", isUser: false },
 ];
 
-export default function ChatBot() {
+export default function ChatBot({ visible }:Props ) {
   const [messages, setMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
   const chatAreaRef = useRef<HTMLDivElement>(null);
@@ -31,16 +35,13 @@ export default function ChatBot() {
     if (e) e.preventDefault();
     if (!input.trim()) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), text: input, isUser: true }
-    ]);
+    setMessages((prev) => [...prev, { id: Date.now(), text: input, isUser: true }]);
     setInput("");
 
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, text: "챗봇 자동응답 예시입니다.", isUser: false }
+        { id: Date.now() + 1, text: "챗봇 자동응답 예시입니다.", isUser: false },
       ]);
     }, 1000);
   };
@@ -59,7 +60,7 @@ export default function ChatBot() {
   }, [messages]);
 
   return (
-    <ChatBotWrapper>
+    <ChatBotWrapper $visible={visible}>
       <SidebarIcon>
         <Menu size={20} />
       </SidebarIcon>

@@ -5,7 +5,7 @@ export const CardBox = styled.div`
   width: 120px;
   height: 170px;
   position: relative;
-  background: white;
+  background: ${({ theme }) => theme.colors.background};
   overflow: hidden;
   cursor: pointer;
 `;
@@ -32,11 +32,12 @@ export const ShadowBox = styled.div`
   width: 100%;
   height: 50px;
   background: linear-gradient(
-  to top,
-  rgba(30, 16, 26, 0.8) 0%,
-  rgba(30, 16, 26, 0.6) 35%,
-  rgba(30, 16, 26, 0.35) 70%,
-  transparent 100%);
+    to top,
+    rgba(30, 16, 26, 0.8) 0%,
+    rgba(30, 16, 26, 0.6) 35%,
+    rgba(30, 16, 26, 0.35) 70%,
+    transparent 100%
+  );
   z-index: 1;
   pointer-events: none;
 `;
@@ -44,14 +45,14 @@ export const ShadowBox = styled.div`
 // 이미지 중앙에 제목
 export const AniTitle = styled.div`
   position: absolute;
-  left: 0; 
+  left: 0;
   bottom: 4px;
   z-index: 2;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: ${({ theme }) => theme.fontSizes.sm}; // 12px
+  font-weight: ${({ theme }) => theme.Weights.medium};
   color: #fff;
   text-align: center;
-  text-shadow: 0 1px 4px rgba(30,0,40,0.24);
+  text-shadow: 0 1px 4px rgba(30, 0, 40, 0.24);
   padding: 0 8px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -69,14 +70,17 @@ export const AddButton = styled.button`
   border-radius: 50%;
   border: none;
   background: rgba(0, 0, 0, 0.1);
-  color: #ff5892;
+  color: ${({ theme }) => theme.colors.bordermain};
   font-size: 1.22rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: 0.13s;
+
   &:hover {
-    background: #ffe0ed;
-    color: #d75a85;
+    background: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.bordermain};
   }
 `;

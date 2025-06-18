@@ -10,16 +10,16 @@ export const Wrapper = styled.div`
 
 export const CategoryText = styled.div<{ $type?: "board" | "gallery" }>`
   display: inline-block;
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-weight: ${({ theme }) => theme.Weights.medium};
   color: ${({ $type }) =>
     $type === "gallery" ? "#de3e5b" : "#2071b2"};
   letter-spacing: 0.05em;
 `;
 
 export const TitleText = styled.h2`
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: ${({ theme }) => theme.fontSizes.xxl};
+  font-weight: ${({ theme }) => theme.Weights.bold};
   margin-bottom: 4px;
 `;
 
@@ -42,28 +42,27 @@ export const UserInfo = styled.div`
 `;
 
 export const Nickname = styled.div`
-  font-weight: 600;
+  font-weight: ${({ theme }) => theme.Weights.medium};
+  font-size: ${({ theme }) => theme.fontSizes.base};
 `;
 
 export const Meta = styled.div`
-  font-size: 0.8rem;
-  color: #aaa;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.subtext};
 `;
 
 export const ContentBox = styled.div`
-  background: #fff;
-  border: 1px solid #FFB6C1;
+  background: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
   border-radius: 6px;
   padding: 16px;
   overflow: hidden;
   height: 900px;
 
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    display: none;
   }
 `;
 
@@ -93,8 +92,8 @@ export const FooterRow = styled.div`
 `;
 
 export const MoreLink = styled.div`
-  font-size: 0.85rem;
-  color: #999;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.subtext};
   cursor: pointer;
 `;
 
@@ -106,15 +105,38 @@ export const IconButtons = styled.div`
 export const IconBtn = styled.button<{ $liked?: boolean }>`
   background: none;
   border: none;
-  font-size: 0.9rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
   cursor: pointer;
-  color: ${({ $liked }) => ($liked ? "#e2486e" : "#444")};
+  color: ${({ $liked, theme }) =>
+    $liked ? theme.colors.bordermain : theme.colors.text};
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 2px;
 
   &:hover {
-    color: #e2486e;
+    color: ${({ theme }) => theme.colors.bordermain};
+  }
+`;
+
+export const HtmlContent = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  line-height: ${({ theme }) => theme.lineHeights.relaxed};
+  word-break: break-word;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 16px auto;
+    border-radius: 8px;
+  }
+
+  iframe {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 24px auto;
+    border-radius: 12px;
   }
 `;

@@ -40,7 +40,6 @@ export default function ProfilePage() {
           <ActivityList list={user.activity ?? []} />
         </ProfileRightColumn>
         <Sidebar>
-          <ChatBot />
         </Sidebar>
       </MainBox>
     </Container>

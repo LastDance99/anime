@@ -24,16 +24,17 @@ export const CommentAddButton = styled.button`
   height: 30px;
   border-radius: 50%;
   border: none;
-  color: #FF3D6C;
+  color: #ff3d6c;
   font-size: 24px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.1s;
+  transition: background 0.15s ease;
+
   &:hover {
-    background: #ffb6c1;
+    background: ${({ theme }) => theme.colors.secondary};
   }
 `;
 
@@ -60,10 +61,12 @@ export const ChatScrollArea = styled.div`
   &::-webkit-scrollbar {
     width: 6px;
   }
+
   &::-webkit-scrollbar-thumb {
-    background-color: #ff99bb;
+    background-color: ${({ theme }) => theme.colors.bordermain};
     border-radius: 6px;
   }
+
   &::-webkit-scrollbar-track {
     background-color: ${({ theme }) => theme.colors.primary};
   }
@@ -75,7 +78,7 @@ export const ChatItem = styled.div`
   gap: 8px;
   background: ${({ theme }) => theme.colors.secondary};
   border-radius: 8px;
-  border: none;
+  padding: 8px 10px;
 `;
 
 export const ProfileImg = styled.img`
@@ -88,15 +91,19 @@ export const ProfileImg = styled.img`
 export const ChatTextBlock = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 2px;
 `;
 
 export const ChatNickname = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.Weights.bold};
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 export const ChatText = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text};
+  line-height: 1.4;
 `;
 
 export const ChatInputWrapper = styled.div`
@@ -104,11 +111,11 @@ export const ChatInputWrapper = styled.div`
   height: 40px;
   background: ${({ theme }) => theme.colors.background};
   border: 1px solid ${({ theme }) => theme.colors.secondary};
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   padding: 0 8px;
-  margin: 10px auto;
+  margin: 12px auto 0;
 `;
 
 export const ChatInput = styled.input`
@@ -119,4 +126,6 @@ export const ChatInput = styled.input`
   background: transparent;
   outline: none;
   padding: 0 8px;
+  font-family: ${({ theme }) => theme.fonts.main};
+  color: ${({ theme }) => theme.colors.text};
 `;

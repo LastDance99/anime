@@ -10,18 +10,21 @@ export const Tab = styled.button<{ selected: boolean }>`
   height: 30px;
   text-align: center;
   line-height: 30px;
-  padding: 7px auto;
-  border: 1px solid #FFB6C1;
-  background: ${({ selected }) => (selected ? "#FFB6C1" : "#FFD1DC")};
-  color: ${({ selected }) => (selected ? "#222" : "#666")};
-  font-size: 12px;
-  font-family: 'Cafe24 Ssurround air', sans-serif;
-  font-weight: 300;
+  padding: 0;
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
+  background: ${({ selected, theme }) =>
+    selected ? theme.colors.bordermain : theme.colors.secondary};
+  color: ${({ selected, theme }) =>
+    selected ? theme.colors.text : theme.colors.subtext};
+  font-size: ${({ theme }) => theme.fontSizes.sm}; // 12px
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
+  font-weight: ${({ theme }) => theme.Weights.light};
   cursor: pointer;
   transition: background 0.15s;
 
   &:hover {
-    background: #FFB6C1;
+    background: ${({ theme }) => theme.colors.bordermain};
+    color: ${({ theme }) => theme.colors.text};
   }
 
   &:nth-child(1),

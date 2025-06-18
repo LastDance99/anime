@@ -3,14 +3,15 @@ import styled from "styled-components";
 export const SeasonSection = styled.section`
   width: 100%;
   margin-bottom: 24px;
-  border-bottom: 1px solid #f99;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.bordermain};
   padding-bottom: 20px;
 `;
 
 export const SeasonTitle = styled.div`
-  font-size: 16px;
-  font-weight: 700;
+  font-size: ${({ theme }) => theme.fontSizes.base}; // 16px
+  font-weight: ${({ theme }) => theme.Weights.bold};
   margin-bottom: 10px;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 export const SeasonButtonList = styled.div`
@@ -21,22 +22,25 @@ export const SeasonButtonList = styled.div`
 `;
 
 export const SeasonButton = styled.button<{ $selected?: boolean }>`
-  border: ${({ $selected }) => $selected ? "2px solid #f99" : "1px solid #f99"};
-  background: ${({ $selected }) => $selected ? "#ffe4ec" : "white"};
+  border: ${({ $selected, theme }) =>
+    $selected ? `2px solid ${theme.colors.bordermain}` : `1px solid ${theme.colors.bordermain}`};
+  background: ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary : theme.colors.background};
   border-radius: 18px;
   width: 86px;
   min-height: 16px;
-  font-size: 20px;
-  font-weight: 700;
-  font-family: 'UhBee mysen', sans-serif;
+  font-size: ${({ theme }) => theme.fontSizes.xl}; // 20px
+  font-weight: ${({ theme }) => theme.Weights.bold};
+  font-family: ${({ theme }) => theme.fonts.cute};
   align-items: center;
   display: flex;
   justify-content: center;
-  color: #d75a85;
+  color: ${({ theme }) => theme.colors.bordermain};
   cursor: pointer;
   transition: 0.1s;
+
   &:hover {
-    background: #ffe4ec;
-    border: 2px solid #fdafd8;
+    background: ${({ theme }) => theme.colors.primary};
+    border: 2px solid ${({ theme }) => theme.colors.secondary};
   }
 `;

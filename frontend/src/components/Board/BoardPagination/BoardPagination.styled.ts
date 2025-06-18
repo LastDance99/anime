@@ -9,23 +9,27 @@ export const PaginationWrapper = styled.div`
 
 export const PageButton = styled.button<{ selected: boolean }>`
   border: none;
-  background: ${({ selected }) => (selected ? "#FFB6C1" : "none")};
-  color: ${({ selected }) => (selected ? "#fff" : "#222")};
-  font-weight: 300;
-  font-family: 'Cafe24 Ssurround air', sans-serif;
+  background: ${({ selected, theme }) =>
+    selected ? theme.colors.bordermain : "none"};
+  color: ${({ selected, theme }) =>
+    selected ? theme.colors.background : theme.colors.text};
+  font-weight: ${({ theme }) => theme.Weights.light};
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
   border-radius: 50%;
   width: 32px;
   height: 32px;
-  font-size: 16px;
+  font-size: ${({ theme }) => theme.fontSizes.base};
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.12s, color 0.12s;
+
   &:hover {
-    background: #ffe2eb;
-    color: #e84d7a;
+    background: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.bordermain};
   }
+
   &:disabled {
     opacity: 0.45;
     pointer-events: none;

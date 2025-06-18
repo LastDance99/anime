@@ -126,7 +126,7 @@ const BoardPage: React.FC = () => {
                 <BoardTabs selected={selectedTab} onChange={setSelectedTab} />
                 <SortWrite>
                   <SortDropdown options={SORT_OPTIONS} value={sort} onChange={setSort} />
-                  <WriteButton to={`/write`} />
+                  <WriteButton to={`/board/write`} />
                 </SortWrite>
               </TabSortWrapper>
               <BoardList
@@ -149,7 +149,6 @@ const BoardPage: React.FC = () => {
 
           <SidebarSection>
             <BoardProfile user={mockUsers[0]} />
-            <ChatBot />
           </SidebarSection>
         </Wrapper>
       </Container>

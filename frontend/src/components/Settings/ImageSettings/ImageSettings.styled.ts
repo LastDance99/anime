@@ -1,15 +1,16 @@
 import styled, { css } from "styled-components";
 
 export const Section = styled.section`
-  font-family: 'Cafe24Ssurround', 'Quicksand', sans-serif;
-  border-bottom: 1px solid #FFB6C1;
+  font-family: ${({ theme }) => theme.fonts.cafe24};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.bordermain};
   padding-bottom: 40px;
 `;
 
 export const SubTitle = styled.h3`
-  font-size: 18px;
-  font-weight: bold;
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+  font-weight: ${({ theme }) => theme.Weights.bold};
   margin-bottom: 20px;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 export const ImageRow = styled.div`
@@ -26,8 +27,10 @@ export const ImageBox = styled.div`
 `;
 
 export const ImageLabel = styled.div`
-  font-weight: 600;
+  font-weight: ${({ theme }) => theme.Weights.medium};
   margin-bottom: 8px;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 export const StyledImage = styled.img<{ shape: 'circle' | 'rect' | 'square' }>`
@@ -50,15 +53,17 @@ export const ButtonGroup = styled.div`
 `;
 
 export const ActionButton = styled.button`
-  background-color: #f9c2d2;
+  background-color: ${({ theme }) => theme.colors.secondary};
   border: none;
   border-radius: 8px;
   padding: 6px 12px;
-  font-size: 14px;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   cursor: pointer;
-  font-family: 'Cafe24Ssurround', 'Quicksand', sans-serif;
+  font-family: ${({ theme }) => theme.fonts.cafe24};
+  color: ${({ theme }) => theme.colors.text};
+  transition: background-color 0.15s;
 
   &:hover {
-    background-color: #f7aac1;
+    background-color: ${({ theme }) => theme.colors.primary};
   }
 `;

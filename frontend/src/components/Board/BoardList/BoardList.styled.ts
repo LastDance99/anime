@@ -1,20 +1,18 @@
-// BoardList.styled.ts
-
 import styled from "styled-components";
 
 export const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;      // ⭐️ 핵심!
-  background: #fff;
+  table-layout: fixed; // ⭐️ 핵심!
+  background: ${({ theme }) => theme.colors.background};
 `;
 
 export const Thead = styled.thead`
-  border-top: 1px solid #FFB6C1;
-  border-bottom: 1px solid #FFB6C1;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: 'Cafe24 Ssurround', sans-serif;
+  border-top: 1px solid ${({ theme }) => theme.colors.bordermain};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.bordermain};
+  font-size: ${({ theme }) => theme.fontSizes.sm}; // 12px
+  font-weight: ${({ theme }) => theme.Weights.bold};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
   line-height: 40px;
 `;
 
@@ -24,47 +22,49 @@ export const TheadTr = styled.tr`
 
 export const Th = styled.th`
   text-align: center;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.background};
   padding: 0;
-  /* width는 style prop으로 개별 적용 */
 `;
 
-export const Tbody = styled.tbody`
-  /* 따로 스타일X: 기본 테이블 구조 */
-`;
+export const Tbody = styled.tbody``;
 
 export const TbodyTr = styled.tr`
   height: 58px;
   text-align: center;
   vertical-align: middle;
-  border-bottom: 1px solid #FFB6C1;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.bordermain};
 `;
 
 export const Td = styled.td`
   text-align: center;
   vertical-align: middle;
   padding: 0;
-  color: #222;
-  font-family: 'Cafe24 Ssurround air', sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  /* width는 style prop으로 개별 적용 */
+  color: ${({ theme }) => theme.colors.text};
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
+  font-weight: ${({ theme }) => theme.Weights.normal};
+  font-size: ${({ theme }) => theme.fontSizes.sm}; // 12px
 `;
 
-// 내부 요소는 flex 등 자유롭게 써도 됨 (td/셀 안에서만)
 export const Category = styled.span<{ $type: string }>`
   display: inline-block;
   width: 40px;
   height: 16px;
-  background: ${({ $type }) =>
-    $type === "게시글" ? "#CDE6F5" : $type === "갤러리" ? "#FAD1D7" : "#eee"};
+  background: ${({ $type, theme }) =>
+    $type === "게시글"
+      ? "#CDE6F5"
+      : $type === "갤러리"
+      ? "#FAD1D7"
+      : theme.colors.subcolor};
   margin-right: 10px;
   text-align: center;
+  font-size: ${({ theme }) => theme.fontSizes.xxs}; // 9px
+  line-height: 16px;
+  border-radius: 4px;
 `;
 
 export const Title = styled.span`
   display: inline-block;
-  max-width: 380px;      // 제목이 너무 길면 ... 처리
+  max-width: 380px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -73,7 +73,7 @@ export const Title = styled.span`
 
 export const Comments = styled.span`
   display: inline-block;
-  font-size: 10px;
+  font-size: ${({ theme }) => theme.fontSizes.xxs}; // 9px
   width: 20px;
   height: 20px;
   line-height: 20px;

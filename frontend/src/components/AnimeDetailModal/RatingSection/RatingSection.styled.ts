@@ -4,7 +4,7 @@ export const RatingSectionWrapper = styled.section`
   display: flex;
   width: 700px;
   height: 100px;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.background};
   border-radius: 0;
   margin: 10px auto 50px auto;
   align-items: flex-start;
@@ -21,16 +21,16 @@ export const RatingCol = styled.div`
 `;
 
 export const RatingTitle = styled.div`
-  font-size: 14px;
-  color: #222;
+  font-size: ${({ theme }) => theme.fontSizes.md}; // 14px
+  color: ${({ theme }) => theme.colors.text};
   margin-top: 6px;
   margin-bottom: 2px;
 `;
 
 export const RatingScore = styled.div`
-font-size: ${({ theme }) => theme.fontSizes.xl};
-font-famaily: ${({ theme }) => theme.fonts.cafe24Light};
-font-weight: ${({ theme }) => theme.Weights.bold};
+  font-size: ${({ theme }) => theme.fontSizes.xl}; // 20px
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
+  font-weight: ${({ theme }) => theme.Weights.bold};
 `;
 
 export const StarRow = styled.div`
@@ -55,7 +55,7 @@ export const ListAddIcon = styled.span`
 
 export const ListCount = styled.span`
   font-size: 2rem;
-  font-family: 'Quicksand', 'Cafe24 Ssurround', sans-serif;
-  color: #232020;
+  font-family: ${({ theme }) => `${theme.fonts.main}, ${theme.fonts.cafe24}`};
+  color: ${({ theme }) => theme.colors.text};
   letter-spacing: 2px;
 `;

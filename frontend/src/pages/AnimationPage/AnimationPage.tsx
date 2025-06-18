@@ -116,7 +116,6 @@ export default function AniMain() {
           </AnimeSectionBox>
           <SidebarSection>
             <AnimeProfile user={mockUsers[0]} />
-            <ChatBot />
           </SidebarSection>
         </Wrapper>
       </Container>

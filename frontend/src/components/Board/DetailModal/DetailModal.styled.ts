@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Overlay = styled.div`
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.4); // 어두운 반투명 배경
+  background-color: rgba(0, 0, 0, 0.4);
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -13,7 +13,7 @@ export const Overlay = styled.div`
 export const ModalBox = styled.div`
   width: 90%;
   height: 90%;
-  background-color: #fff;
+  background-color: ${({ theme }) => theme.colors.background};
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -26,17 +26,18 @@ export const Header = styled.div`
   justify-content: flex-end;
   align-items: center;
   padding: 0 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.subcolor};
 `;
 
 export const CloseButton = styled.button`
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: ${({ theme }) => theme.fontSizes.lg};
   cursor: pointer;
-  color: #999;
+  color: ${({ theme }) => theme.colors.subtext};
+
   &:hover {
-    color: #333;
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
 
@@ -50,7 +51,7 @@ export const Left = styled.div`
   flex: 3;
   padding: 24px;
   overflow-y: auto;
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid ${({ theme }) => theme.colors.subcolor};
 `;
 
 export const Right = styled.div`

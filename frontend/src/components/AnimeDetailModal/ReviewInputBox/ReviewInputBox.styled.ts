@@ -4,13 +4,13 @@ export const InputBox = styled.div`
   width: 600px;
   height: auto;
   position: relative;
-  border: 1.5px solid #F8A0BC;
-  background: #fff;
+  border: 1.5px solid ${({ theme }) => theme.colors.bordermain};
+  background: ${({ theme }) => theme.colors.background};
   border-radius: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 12px 10px 12px;
+  padding: 10px 12px;
 `;
 
 export const StyledTextarea = styled.textarea`
@@ -18,18 +18,18 @@ export const StyledTextarea = styled.textarea`
   height: 100%;
   border: none;
   resize: none;
-  font-size: 15px;
-  color: #555;
+  font-size: ${({ theme }) => theme.fontSizes.md}; // 14px
+  color: ${({ theme }) => theme.colors.text};
   background: transparent;
   outline: none;
   padding: 10px 58px 10px 12px;
   box-sizing: border-box;
-  font-family: inherit;
+  font-family: ${({ theme }) => theme.fonts.main};
 
   &::placeholder {
-    color: #d3b7c3;
-    font-size: 15px;
-    letter-spacing: 0.01em;
+    color: ${({ theme }) => theme.colors.secondary};
+    font-size: ${({ theme }) => theme.fontSizes.md};
+    letter-spacing: ${({ theme }) => theme.letterSpacings.wide};
   }
 `;
 
@@ -39,16 +39,18 @@ export const SubmitButton = styled.button`
   right: 14px;
   background: none;
   border: none;
-  color: #F8A0BC;
-  font-size: 15px;
-  font-weight: 700;
+  color: ${({ theme }) => theme.colors.bordermain};
+  font-size: ${({ theme }) => theme.fontSizes.md}; // 14px
+  font-weight: ${({ theme }) => theme.Weights.bold};
   cursor: pointer;
   padding: 0;
   opacity: 1;
   transition: color 0.15s, opacity 0.1s;
+
   &:hover:not(:disabled) {
-    color: #e05a8b;
+    color: ${({ theme }) => theme.colors.secondary};
   }
+
   &:disabled {
     opacity: 0.5;
     cursor: default;

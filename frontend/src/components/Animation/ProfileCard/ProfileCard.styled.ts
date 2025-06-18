@@ -4,8 +4,8 @@ import { Button } from "../../WriteButton/WriteButton.styled";
 export const Card = styled.div`
   width: 100%;
   height: 200px;
-  background: #fff;
-  border: 1px solid #FFB6C1;
+  background: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
   padding: 15px 28px;
   display: flex;
   flex-direction: column;
@@ -44,40 +44,40 @@ export const FontBox = styled.div`
 `;
 
 export const Name = styled.div`
-  font-size: 18px;
-  font-family: 'Cafe24 Ssurround', sans-serif;
+  font-size: ${({ theme }) => theme.fontSizes.lg}; // 18px
+  font-family: ${({ theme }) => theme.fonts.cafe24};
 `;
 
 export const Email = styled.div`
-  font-size: 12px;
-  color: #888;
-  font-family: 'Quicksand', sans-serif;
+  font-size: ${({ theme }) => theme.fontSizes.sm}; // 12px
+  color: ${({ theme }) => theme.colors.subtext};
+  font-family: ${({ theme }) => theme.fonts.main};
 `;
 
 export const Font = styled.div`
-  font-size: 12px;
-  color: #222;
-  font-family: 'Cafe24 Ssurround air', sans-serif;
-  font-weight: 300;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text};
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
+  font-weight: ${({ theme }) => theme.Weights.light};
 `;
 
 export const FontRow = styled.div`
   display: flex;
   justify-content: space-between;
   width: 100%;
-  font-size: 12px;
-  color: #222;
-  font-family: 'Cafe24 Ssurround air', sans-serif;
-  font-weight: 300;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text};
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
+  font-weight: ${({ theme }) => theme.Weights.light};
 `;
 
 export const LogoutButton = styled.button`
-  background: #FFD4DF;
+  background: ${({ theme }) => theme.colors.secondary};
   border: none;
   border-radius: 6px;
   padding: 6px 18px;
-  color: #c44e6d;
-  font-size: 12px;
+  color: ${({ theme }) => theme.colors.bordermain};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   cursor: pointer;
   position: absolute;
   right: -10px;
@@ -90,17 +90,17 @@ export const BottomBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px
+  gap: 20px;
 `;
 
 export const CustomButton = styled(Button)`
   width: 120px;
   height: 26px;
-  background: #FFD1DC;
-  border: 1px solid #FFB6C1;
+  background: ${({ theme }) => theme.colors.secondary};
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
   border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #222;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.Weights.medium};
+  color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
 `;

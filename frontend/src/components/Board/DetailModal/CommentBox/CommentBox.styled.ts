@@ -4,12 +4,12 @@ export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.background};
 `;
 
 export const TabList = styled.div`
   display: flex;
-  border-bottom: 1px solid #f4cbd4;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.secondary};
 `;
 
 export const Tab = styled.button<{ selected?: boolean }>`
@@ -17,9 +17,15 @@ export const Tab = styled.button<{ selected?: boolean }>`
   padding: 12px;
   background: none;
   border: none;
-  border-bottom: ${props => (props.selected ? '2px solid #e54b6e' : 'none')};
-  color: ${props => (props.selected ? '#e54b6e' : '#aaa')};
-  font-weight: ${props => (props.selected ? '600' : '400')};
+  border-bottom: ${({ selected, theme }) =>
+    selected ? `2px solid ${theme.colors.bordermain}` : "none"};
+  color: ${({ selected, theme }) =>
+    selected ? theme.colors.bordermain : theme.colors.subtext};
+  font-weight: ${({ selected, theme }) =>
+    selected ? theme.Weights.medium : theme.Weights.normal};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-family: ${({ theme }) => theme.fonts.main};
+  cursor: pointer;
 `;
 
 export const CommentList = styled.div.attrs({ tabIndex: -1 })`
@@ -35,7 +41,7 @@ export const CommentList = styled.div.attrs({ tabIndex: -1 })`
 
 export const CommentItem = styled.div`
   padding: 12px 0;
-  border-bottom: 1px solid #f4cbd4;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.secondary};
   display: flex;
   gap: 12px;
 `;
@@ -53,17 +59,19 @@ export const CommentContent = styled.div`
 `;
 
 export const Nickname = styled.div`
-  font-weight: bold;
+  font-weight: ${({ theme }) => theme.Weights.bold};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
 export const Text = styled.div`
   margin: 6px 0;
-  color: #444;
+  color: ${({ theme }) => theme.colors.text};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
 `;
 
 export const Meta = styled.div`
-  font-size: 0.8rem;
-  color: #aaa;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.subtext};
   display: flex;
   align-items: center;
   gap: 8px;
@@ -72,9 +80,9 @@ export const Meta = styled.div`
 export const ReplyBtn = styled.button`
   background: none;
   border: none;
-  color: #e2486e;
+  color: ${({ theme }) => theme.colors.bordermain};
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   padding: 0;
   margin: 0;
 `;
@@ -87,34 +95,36 @@ export const InputWrapper = styled.div`
 
 export const CommentInput = styled.input`
   flex: 1;
-  height: 40px; /* 높이 고정 */
+  height: 40px;
   padding: 0 12px;
-  border: 1px solid #ccc;
+  border: 1px solid ${({ theme }) => theme.colors.subtext};
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-family: ${({ theme }) => theme.fonts.main};
 `;
 
 export const SubmitBtn = styled.button`
-  height: 40px; /* 입력창과 동일 높이 */
+  height: 40px;
   padding: 0 16px;
-  background-color: #f76f6f;
-  color: white;
-  font-weight: 600;
+  background-color: ${({ theme }) => theme.colors.bordermain};
+  color: ${({ theme }) => theme.colors.background};
+  font-weight: ${({ theme }) => theme.Weights.medium};
   border: none;
   border-radius: 8px;
   cursor: pointer;
 
   &:hover {
-    background-color: #e14e4e;
+    background-color: ${({ theme }) => theme.colors.secondary};
   }
 `;
 
 export const LikeButton = styled.button<{ liked?: boolean }>`
   background: none;
   border: none;
-  color: ${props => (props.liked ? "#e2486e" : "#aaa")};
+  color: ${({ liked, theme }) =>
+    liked ? theme.colors.bordermain : theme.colors.subtext};
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   display: flex;
   align-items: center;
   gap: 6px;
@@ -123,7 +133,7 @@ export const LikeButton = styled.button<{ liked?: boolean }>`
   user-select: none;
 
   &:hover {
-    color: #e2486e;
+    color: ${({ theme }) => theme.colors.bordermain};
   }
 `;
 
@@ -137,9 +147,9 @@ export const ReplyInputWrapper = styled.div`
 export const ReplyInput = styled.input`
   flex: 1;
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid ${({ theme }) => theme.colors.subtext};
   padding: 6px 12px;
-  font-size: 0.9rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   margin-top: 4px;
 `;
 
@@ -147,20 +157,19 @@ export const ReplySubmitBtn = styled.button`
   padding: 6px 12px;
   border-radius: 8px;
   border: none;
-  background-color: #f76f6f;
-  color: white;
+  background-color: ${({ theme }) => theme.colors.bordermain};
+  color: ${({ theme }) => theme.colors.background};
   cursor: pointer;
-  font-weight: 600;
+  font-weight: ${({ theme }) => theme.Weights.medium};
   margin-top: 4px;
 
   &:hover {
-    background-color: #e14e4e;
+    background-color: ${({ theme }) => theme.colors.secondary};
   }
 `;
 
 export const TagMention = styled.span`
-  color: #e54b6e;
-  font-weight: 600;
+  color: ${({ theme }) => theme.colors.bordermain};
+  font-weight: ${({ theme }) => theme.Weights.medium};
   margin-right: 4px;
 `;
-

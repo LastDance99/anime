@@ -1,5 +1,6 @@
 import styled from "styled-components";
 
+// 썸네일 이미지
 export const Thumbnail = styled.img`
   width: 40px;
   height: 40px;
@@ -11,6 +12,7 @@ export const Thumbnail = styled.img`
     z-index 0.1s;
 `;
 
+// 제목 텍스트
 export const Title = styled.div`
   font-family: ${({ theme }) => theme.fonts.cafe24};
   font-weight: ${({ theme }) => theme.Weights.bold};
@@ -19,31 +21,34 @@ export const Title = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.md};
   transition: color 0.18s;
   word-break: keep-all;
-  white-space: nowrap;       // 줄바꿈 X
-  overflow: hidden;          // 넘치는 글자 숨김
-  text-overflow: ellipsis;   // 말줄임표(...)
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
+// 장르 텍스트
 export const Genre = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.subtext};
   min-width: 120px;
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   transition: color 0.18s;
-  white-space: nowrap;       // 줄바꿈 X
-  overflow: hidden;          // 넘치는 글자 숨김
-  text-overflow: ellipsis;   // 말줄임표(...)
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
+// 평점 텍스트
 export const Score = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-weight: ${({ theme }) => theme.Weights.bold};
-  color: #ff5e85;
+  color: #ff5e85; // 이건 강조 색이라 유지하거나 테마에 추가 가능
   min-width: 36px;
   font-family: ${({ theme }) => theme.fonts.main};
   transition: color 0.18s;
 `;
 
+// 카드 전체
 export const CardWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -51,9 +56,8 @@ export const CardWrapper = styled.div`
   width: 100%;
   gap: 4px;
   background: ${({ theme }) => theme.colors.secondary};
-  border-radius: 8px;;
+  border-radius: 8px;
   padding: 4px 20px;
-  // box-shadow: 0 2px 10px ${({ theme }) => theme.colors.primary};
   cursor: pointer;
   position: relative;
   transition:
@@ -65,7 +69,6 @@ export const CardWrapper = styled.div`
     transform: scale(1.015);
     background: ${({ theme }) => theme.colors.primary};
     box-shadow: 0 10px 34px 0 ${({ theme }) => theme.colors.primary}, 0 3px 16px rgba(0,0,0,0.10);
-
     z-index: 2;
   }
 
@@ -76,16 +79,19 @@ export const CardWrapper = styled.div`
   }
 
   &:hover ${Title} {
-    color: #b2276e;
+    color: #b2276e; // 포인트 컬러, 테마에 추가 고려
   }
+
   &:hover ${Genre} {
     color: #ff76a1;
   }
+
   &:hover ${Score} {
     color: #b2276e;
   }
 `;
 
+// 메뉴 버튼
 export const MenuBtn = styled.button`
   position: absolute;
   top: 14px;
@@ -97,11 +103,12 @@ export const MenuBtn = styled.button`
   padding: 0;
 `;
 
+// 드롭다운 박스
 export const MenuDropdown = styled.div`
   position: absolute;
   top: 0px;
   right: -140px;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.background};
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.14);
   min-width: 130px;
@@ -111,16 +118,18 @@ export const MenuDropdown = styled.div`
   overflow: hidden;
 `;
 
+// 드롭다운 항목
 export const MenuItem = styled.button`
   padding: 12px 18px;
   background: none;
   border: none;
-  color: #333;
-  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.text};
+  font-size: ${({ theme }) => theme.fontSizes.base};
   cursor: pointer;
   text-align: left;
   transition: background 0.15s;
+
   &:hover {
-    background: #ffe9f4;
+    background: ${({ theme }) => theme.colors.primary};
   }
 `;

@@ -37,7 +37,6 @@ export default function MyAniListPage() {
             onClose={() => setSelectedAnime(null)}
           />
         )}
-        <ChatBot />
       </MainLayout>    
     </PageWrapper>
   );

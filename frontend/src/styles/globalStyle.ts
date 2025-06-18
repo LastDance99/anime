@@ -162,6 +162,14 @@ const GlobalStyle = createGlobalStyle`
       font-display: swap;
   }
 
+  .ql-editor img.inserted-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 12px 0;
+    border-radius: 8px;
+  } 
+
 `;
 
 export default GlobalStyle;

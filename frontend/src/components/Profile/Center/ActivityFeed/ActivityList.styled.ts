@@ -9,26 +9,26 @@ export const SectionTitle = styled.div`
 `;
 
 export const LoadMoreButton = styled.button`
-  margin: 24px 0 0 0;
+  margin-top: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
   padding: 0;
   min-height: 36px;
 
   &:hover .toggle-line {
-    border-color: #fdafd8;
+    border-color: ${({ theme }) => theme.colors.bordermain};
   }
 `;
 
 export const ToggleLine = styled.span`
   flex: 1;
-  border-bottom: 1.5px solid #f99;
+  border-bottom: 1.5px solid ${({ theme }) => theme.colors.secondary};
   margin: 0 10px;
-  transition: border-color 0.15s;
   height: 0;
+  transition: border-color 0.15s;
 `;

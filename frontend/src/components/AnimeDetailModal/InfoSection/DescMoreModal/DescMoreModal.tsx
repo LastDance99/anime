@@ -49,16 +49,18 @@ const Overlay = styled.div`
 `;
 
 const Modal = styled.div`
-  background: #fff;
+  background: ${({ theme }) => theme.colors.background};
   padding: 38px 32px 32px 32px;
   border-radius: 8px;
   max-width: 480px;
-  box-shadow: 0 2px 24px rgba(0,0,0,0.13);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.13);
   position: relative;
 `;
 
 const FullDesc = styled.div`
-  font-size: 16px; color: #534a5a; white-space: pre-line;
+  font-size: ${({ theme }) => theme.fontSizes.base}; // 16px
+  color: #534a5a;
+  white-space: pre-line;
 `;
 
 const CloseBtn = styled.button`
@@ -68,6 +70,6 @@ const CloseBtn = styled.button`
   font-size: 1.5rem;
   background: none;
   border: none;
-  color: #888;
+  color: ${({ theme }) => theme.colors.subtext};
   cursor: pointer;
 `;

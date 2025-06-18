@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled from "styled-components";
 
 export const Button = styled.button`
   display: flex;
@@ -6,14 +6,15 @@ export const Button = styled.button`
   height: 30px;
   align-items: center;
   justify-content: center;
-  border: 1px solid #faaac6;
-  background: #ffe2eb;
-  color: #222;
-  font-family: 'Cafe24Ssurround air', sans-serif;
-  font-size: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
+  background: ${({ theme }) => theme.colors.subcolor};
+  color: ${({ theme }) => theme.colors.text};
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
   cursor: pointer;
   transition: background 0.2s;
+
   &:hover {
-    background: #FFB6C1;
+    background: ${({ theme }) => theme.colors.primary};
   }
 `;

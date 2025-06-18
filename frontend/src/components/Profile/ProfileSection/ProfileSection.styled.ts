@@ -1,11 +1,10 @@
-// components/ProfileSection/ProfileSection.styled.ts
 import styled from "styled-components";
 // import { Heart } from "lucide-react";
 
 export const ProfileSectionWrapper = styled.section`
   position: relative;
   width: 100%;
-  height: 320px;           /* 배경 이미지 높이 */
+  height: 320px;
 `;
 
 export const ProfileBackgroundImg = styled.img`
@@ -23,12 +22,12 @@ export const ShadowOverlay = styled.div`
   height: 55px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
   pointer-events: none;
-  `;
+`;
 
 export const ProfileFloatingCard = styled.div`
   position: absolute;
   left: 50%;
-  bottom: 0;    /* 아래로 띄워서 배경과 겹치게 */
+  bottom: 0;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -55,20 +54,14 @@ export const CharacterImg = styled.img`
   display: block;
 `;
 
-// 팔로우 기능 추후 추가 예정
 // export const HeartIconBox = styled.div`
-//   // position: absolute;
-//   // left: 190%;
-//   // bottom: -2px;
-//   // transform: translateX(-50%);
-//   // z-index: 2;
 //   margin-left: 6px;
 //   margin-bottom: -4px;
 // `;
 
 // export const HeartIcon = styled(Heart)`
 //   cursor: pointer;
-//   color: #ff6fbc;
+//   color: ${({ theme }) => theme.colors.bordermain};
 //   pointer-events: auto;
 //   transition: transform 0.15s, fill 0.2s;
 
@@ -86,7 +79,9 @@ export const UserName = styled.div`
   align-items: center;
   justify-content: center;
   margin-left: 10px;
-  font-size: 20px;
-  color: #fff;
+  font-size: ${({ theme }) => theme.fontSizes.xxl};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
+  font-weight: ${({ theme }) => theme.Weights.bold};
+  color: ${({ theme }) => theme.colors.background};
   white-space: nowrap;
 `;

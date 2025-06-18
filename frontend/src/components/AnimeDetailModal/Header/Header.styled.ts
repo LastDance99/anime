@@ -4,7 +4,7 @@ export const HeaderWrapper = styled.div`
   position: relative;
   width: 100%;
   height: 180px;
-  background: #f6e7ef;
+  background: ${({ theme }) => theme.colors.primary};
   overflow: hidden;
 `;
 
@@ -23,6 +23,6 @@ export const CloseBtn = styled.button`
   font-size: 1.5rem;
   background: none;
   border: none;
-  color: #888;
+  color: ${({ theme }) => theme.colors.subtext};
   cursor: pointer;
 `;

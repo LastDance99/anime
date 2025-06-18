@@ -10,29 +10,31 @@ export const FilterWrapper = styled.div`
 
 // 총 작품수 텍스트
 export const TotalText = styled.div`
-  font-size: 1.01rem;
-  font-weight: 600;
-  color: #222;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.Weights.medium};
+  color: ${({ theme }) => theme.colors.text};
+
   b {
-    font-weight: 700;
+    font-weight: ${({ theme }) => theme.Weights.bold};
     font-size: 1.04em;
   }
 `;
 
 // 오른쪽 정렬 드롭다운 버튼
 export const SortBox = styled.button`
-position: relative;
+  position: relative;
   display: flex;
   align-items: center;
   background: none;
   border: none;
-  font-size: 1rem;
-  color: #aaa;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  color: ${({ theme }) => theme.colors.subtext};
   cursor: pointer;
-  font-weight: 500;
+  font-weight: ${({ theme }) => theme.Weights.medium};
   transition: color 0.14s;
+
   &:hover {
-    color: #d75a85;
+    color: ${({ theme }) => theme.colors.bordermain};
   }
 `;
 
@@ -51,9 +53,9 @@ export const SortDropdown = styled.ul`
   position: absolute;
   right: 0;
   top: 28px;
-  background: #fff;
+  background: ${({ theme }) => theme.colors.background};
   border-radius: 8px;
-  box-shadow: 0 3px 18px rgba(0,0,0,0.09);
+  box-shadow: 0 3px 18px rgba(0, 0, 0, 0.09);
   padding: 5px 0;
   z-index: 10;
   min-width: 90px;
@@ -61,11 +63,12 @@ export const SortDropdown = styled.ul`
 
 export const SortOption = styled.li`
   padding: 7px 16px;
-  font-size: 1rem;
-  color: #222;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
+
   &:hover {
-    background: #fff0f5;
-    color: #d75a85;
+    background: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.bordermain};
   }
 `;

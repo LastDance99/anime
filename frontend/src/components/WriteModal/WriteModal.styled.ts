@@ -10,62 +10,70 @@ export const Form = styled.form`
 `;
 
 export const Label = styled.label`
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #444;
+  font-weight: ${({ theme }) => theme.Weights.medium};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.text};
   margin-bottom: 4px;
+  font-family: ${({ theme }) => theme.fonts.cafe24};
 `;
 
 export const Input = styled.input`
   padding: 12px 16px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
   border-radius: 8px;
   outline: none;
   transition: border-color 0.2s;
 
   &::placeholder {
-    color: #aaa;
+    color: ${({ theme }) => theme.colors.subtext};
   }
 
   &:focus {
-    border-color: #6c5ce7;
+    border-color: ${({ theme }) => theme.colors.primary};
   }
 `;
 
 export const Select = styled.select`
   padding: 10px 14px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
   border-radius: 8px;
-  background: #fff;
-  color: #333;
+  background: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.text};
   transition: border-color 0.2s;
 
   &:focus {
-    border-color: #6c5ce7;
+    border-color: ${({ theme }) => theme.colors.primary};
   }
 
   option {
-    background: white;
-    color: black;
+    background: ${({ theme }) => theme.colors.background};
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
 
 export const EditorWrapper = styled.div`
   .ql-toolbar {
     border-radius: 8px 8px 0 0;
-    border-color: #ccc;
+    border-color: ${({ theme }) => theme.colors.bordermain};
+    background: ${({ theme }) => theme.colors.subcolor};
   }
+
   .ql-container {
     border-radius: 0 0 8px 8px;
-    border-color: #ccc;
+    border-color: ${({ theme }) => theme.colors.bordermain};
+    background: ${({ theme }) => theme.colors.background};
   }
+
   .ql-editor {
     min-height: 200px;
-    max-height: 400px;
-    overflow-y: auto; 
-    font-size: 1rem;
+    height: 1200px;
+    overflow-y: auto;
+    font-size: ${({ theme }) => theme.fontSizes.md};
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
 
@@ -77,15 +85,16 @@ export const FileInputLabel = styled.label`
   display: inline-block;
   margin-top: 8px;
   padding: 10px 14px;
-  background: #eee;
-  color: #333;
+  background: ${({ theme }) => theme.colors.secondary};
+  color: ${({ theme }) => theme.colors.text};
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
   transition: background 0.2s;
 
   &:hover {
-    background: #ddd;
+    background: ${({ theme }) => theme.colors.subcolor};
   }
 `;
 
@@ -100,24 +109,25 @@ export const ImagePreviewBox = styled.div`
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid ${({ theme }) => theme.colors.bordermain};
   }
 `;
 
 export const Button = styled.button`
   align-self: flex-end;
   padding: 12px 24px;
-  background: #6c5ce7;
+  background: ${({ theme }) => theme.colors.secondary};
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-weight: ${({ theme }) => theme.Weights.bold};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
   transition: background 0.2s;
 
   &:hover {
-    background: #5a4ed1;
+    background: ${({ theme }) => theme.colors.bordermain};
   }
 `;
 
@@ -129,5 +139,18 @@ export const FileUploadRow = styled.div`
 
   input[type="file"] {
     flex: 1;
+  }
+`;
+
+export const GlobalQuillImageStyle = styled.div`
+  .ql-align-center {
+    text-align: center;
+  }
+
+  .ql-align-center img {
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
   }
 `;

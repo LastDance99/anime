@@ -1,13 +1,11 @@
 import styled from "styled-components";
 import { Settings } from "lucide-react";
 
-// 헤더 전체 래퍼
 export const HeaderWrapper = styled.header<{ $show?: boolean }>`
-  width: 100vw; // 전체 뷰포트 기준
+  width: 100vw;
   min-width: 360px;
   height: 60px;
-  // background: transparent;   // 투명
-  background: rgba(252, 238, 245, 0.3);
+  background: ${({ theme }) => theme.colors.primary}4D; // 투명도 추가
   display: flex;
   justify-content: center;
   align-items: center;
@@ -19,7 +17,6 @@ export const HeaderWrapper = styled.header<{ $show?: boolean }>`
   transform: ${({ $show }) => ($show === false ? "translateY(-100%)" : "translateY(0)")};
 `;
 
-// 내부 컨테이너 (가운데 영역)
 export const HeaderInner = styled.div`
   width: 1280px;
   height: 100px;
@@ -27,18 +24,16 @@ export const HeaderInner = styled.div`
   align-items: center;
 `;
 
-// 로고
 export const Logo = styled.img`
   height: 50px;
-  margin:0px 12px;
+  margin: 0 12px;
 `;
 
-// 네비게이션
 export const Nav = styled.nav`
   height: 100px;
   display: flex;
   align-items: center;
-  margin: 0 auto; // 오른쪽으로 밀기
+  margin: 0 auto;
 `;
 
 export const NavList = styled.ul`
@@ -48,10 +43,15 @@ export const NavList = styled.ul`
 `;
 
 export const NavItem = styled.li`
-  font-size: 14px;
-  font-family: 'Cafe24Ssurround', sans-serif;
-  color: #222;  // 흰색 텍스트
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
+  color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.bordermain};
+  }
 `;
 
 export const Iconbox = styled.div`
@@ -64,7 +64,7 @@ export const Iconbox = styled.div`
   margin-right: 10px;
 
   &:hover {
-    background: #fff;
+    background: ${({ theme }) => theme.colors.background};
   }
 `;
 
@@ -73,15 +73,16 @@ export const BottomBtn = styled.button`
   height: 30px;
   background: none;
   border: none;
-  font-size: 14px;
-  font-family: 'Cafe24SsurroundAir', sans-serif;
-  color: #222;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-family: ${({ theme }) => theme.fonts.cafe24Light};
+  color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
+
   &:hover {
-    background: #fff;
+    background: ${({ theme }) => theme.colors.background};
   }
 `;
 
 export const GearIcon = styled(Settings)`
-  color: #222;
+  color: ${({ theme }) => theme.colors.text};
 `;

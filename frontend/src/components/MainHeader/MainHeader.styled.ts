@@ -2,10 +2,10 @@ import styled from "styled-components";
 
 // 헤더 전체 래퍼
 export const HeaderWrapper = styled.header<{ $show?: boolean }>`
-  width: 100vw; // 전체 뷰포트 기준
+  width: 100vw;
   min-width: 360px;
   height: 60px;
-  background: #FCEEF5;
+  background: ${({ theme }) => theme.colors.primary};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,7 +17,7 @@ export const HeaderWrapper = styled.header<{ $show?: boolean }>`
   transform: ${({ $show }) => ($show === false ? "translateY(-100%)" : "translateY(0)")};
 `;
 
-// 내부 컨테이너 (가운데 영역)
+// 내부 컨테이너
 export const HeaderInner = styled.div`
   width: 100%;
   max-width: 1280px;
@@ -35,22 +35,28 @@ export const Logo = styled.img`
 
 // 네비게이션
 export const Nav = styled.nav`
-  height: 100px;
+  height: 100%;
   display: flex;
   align-items: center;
-  margin: 0 auto; // 오른쪽으로 밀기
+  margin: 0 auto;
 `;
 
 export const NavList = styled.ul`
   display: flex;
   gap: 40px;
   list-style: none;
+  padding: 0;
+  margin: 0;
 `;
 
 export const NavItem = styled.li`
-  font-size: 14px;
-  font-family: 'Cafe24Ssurround', sans-serif;
-  color: #222;  // 흰색 텍스트
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-family: ${({ theme }) => theme.fonts.cafe24};
+  color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
-`;
+  transition: color 0.2s;
 
+  &:hover {
+    color: ${({ theme }) => theme.colors.subtext};
+  }
+`;
