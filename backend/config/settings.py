@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 
 from pathlib import Path
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +30,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',      # 자기 자신 (로컬 개발용)
     'localhost',      # 자기 자신 도메인 방식
-    '192.168.0.9',   # ✅ 너의 내부 IP (프론트에서 접근할 주소!)
+    '192.168.0.9',   # ✅ 너의 내부 IP 집(프론트에서 접근할 주소!)
+    '192.168.0.7',   # ✅ 너의 내부 IP 학원(프론트에서 접근할 주소!)
 ]
 
 # Application definition
@@ -159,7 +161,18 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS 설정
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173",
+    "http://192.168.0.37:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = False  # 쿠키 인증 안 쓰면 False
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "Content-Type",
+    "Authorization",
+]
 
 
 # Django REST Framework 설정

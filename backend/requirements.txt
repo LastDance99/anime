@@ -13,7 +13,9 @@ drf-yasg==1.21.10
 inflection==0.5.1
 jmespath==1.0.1
 Markdown==3.8
+numpy==2.3.0
 packaging==25.0
+pandas==2.3.0
 pillow==11.2.1
 psycopg2==2.9.10
 psycopg2-binary==2.9.10

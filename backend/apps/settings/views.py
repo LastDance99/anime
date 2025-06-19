@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import (
     UserSettingsSerializer, 
+    PasswordChangeSerializer,
     UserAccountUpdateSerializer,
     UserLanguageUpdateSerializer,
     UserImageUpdateSerializer,
@@ -14,6 +15,15 @@ class UserSettingsView(APIView):
     def get(self, request):
         serializer = UserSettingsSerializer(request.user)
         return Response(serializer.data)
+    
+# 비밀번호 변경 API
+class PasswordChangeView(APIView):
+    def post(self, request):
+        serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "비밀번호가 성공적으로 변경되었습니다."})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # 사용자 닉네임 업데이트 API
 class UserAccountUpdateView(APIView):

@@ -67,6 +67,7 @@ class ProfileCommentSerializer(serializers.ModelSerializer):
         if not value or not value.strip():
             raise serializers.ValidationError("코멘트 내용이 비어있을 수 없습니다.")
         return sanitize_html(value)
+    
 # 유저 활동 시리얼라이저
 class UserActivitySerializer(serializers.ModelSerializer):
     
@@ -138,7 +139,7 @@ class UserActivitySerializer(serializers.ModelSerializer):
 class BoardPostSummarySerializer(serializers.ModelSerializer):
     author_nickname = serializers.CharField(source='author.nickname', read_only=True)
     board_type = serializers.CharField(read_only=True)
-    thumbnail = serializers.SerializerMethodField()
+    thumbnail = serializers.URLField(source='thumbnail_url', read_only=True)
     like_count = serializers.IntegerField(read_only=True)
     comment_count = serializers.IntegerField(read_only=True)
 
@@ -156,14 +157,10 @@ class BoardPostSummarySerializer(serializers.ModelSerializer):
             'created_at'
         ]
 
-    def get_thumbnail(self, obj):
-        image = obj.images.first()
-        return image.image_url if image else None
-
 # 내 갤러리 시리얼라이저
 class GallerySummarySerializer(serializers.ModelSerializer):
     author_nickname = serializers.CharField(source='author.nickname', read_only=True)
-    thumbnail = serializers.SerializerMethodField()
+    thumbnail = serializers.URLField(source='thumbnail_url', read_only=True)
     like_count = serializers.IntegerField(read_only=True)
     comment_count = serializers.IntegerField(read_only=True)
 
@@ -173,10 +170,6 @@ class GallerySummarySerializer(serializers.ModelSerializer):
             'id', 'title', 'author_nickname', 'thumbnail',
             'like_count', 'comment_count', 'views', 'created_at'
         ]
-
-    def get_thumbnail(self, obj):
-        image = obj.images.first()
-        return image.image_url if image else None
 
 # 내 애니리스트 시리얼라이저
 class MyAnimeListItemSerializer(serializers.ModelSerializer):

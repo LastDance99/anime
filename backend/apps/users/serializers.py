@@ -121,7 +121,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
 
-        reset_link = f"http://your-frontend-url/reset-password/{uid}/{token}/"
+        reset_link = f"http://localhost:5173/reset-password/{uid}/{token}/"
 
         send_mail(
             subject='[안타다] 비밀번호 재설정 링크입니다',
@@ -135,6 +135,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     uid = serializers.CharField()
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True)
+    new_password2 = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         try:
@@ -146,6 +147,23 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         token_generator = PasswordResetTokenGenerator()
         if not token_generator.check_token(user, attrs['token']):
             raise serializers.ValidationError("유효하지 않은 토큰입니다.")
+
+        new_password = attrs.get('new_password')
+        new_password2 = attrs.get('new_password2')
+
+        # 비밀번호 유효성 검사
+        if len(new_password) < 8:
+            raise serializers.ValidationError({"new_password": "비밀번호는 최소 8자리여야 합니다."})
+        if not re.search(r'[A-Za-z]', new_password) or not re.search(r'\d', new_password):
+            raise serializers.ValidationError({"new_password": "비밀번호는 영문과 숫자를 모두 포함해야 합니다."})
+
+        # 비밀번호 확인
+        if new_password != new_password2:
+            raise serializers.ValidationError({"new_password2": "비밀번호가 일치하지 않습니다."})
+
+        # 기존 비밀번호와 동일한지 확인
+        if user.check_password(new_password):
+            raise serializers.ValidationError({"new_password": "기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다."})
 
         attrs['user'] = user
         return attrs
