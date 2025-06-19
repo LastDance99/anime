@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { UploadButton } from "./ImageUploadButton.styled"; // ✅ import 추가
+import { UploadButton } from "./ImageUploadButton.styled";
 
 type Props = {
   onChange: (file: File) => void;
@@ -15,7 +15,11 @@ export default function ImageUploadButton({ onChange, label = "사진 변경" }:
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onChange(file);
+    if (file) {
+      onChange(file);
+      // 👉 같은 파일 다시 선택해도 이벤트 발생하도록 리셋
+      e.target.value = "";
+    }
   };
 
   return (

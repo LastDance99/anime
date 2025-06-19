@@ -32,3 +32,9 @@ export interface ProfileComment {
 export interface ProfileCardProps {
   user: User;
 }
+
+export type TempUser = Omit<User, 'profile_image' | 'background_image' | 'myroom_image'> & {
+  profile_image: string | File | null;
+  background_image: string | File | null;
+  myroom_image: string | File | null;
+};

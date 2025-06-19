@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
   Box,
@@ -18,88 +18,118 @@ import {
   LanguageSelected,
   LanguageDropdown,
   LanguageItem,
+  StyledLink,
 } from "./Login.styled";
-import { Eye, EyeOff, ChevronDown, ChevronUp} from "lucide-react";
+import { Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
+import { login } from "../../api/auth";
+import { getMyProfile } from "../../api/profile";
+import { useAuth } from "../../contexts/AuthContext";
 
 const languages = [
-    { code: "ko", label: "한국어" },
-    { code: "en", label: "English" },
-    { code: "ja", label: "日本語" },
-  ];
+  { code: "ko", label: "한국어" },
+  { code: "en", label: "English" },
+  { code: "ja", label: "日本語" },
+];
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as any)?.from?.pathname || "/";
+
   const [showPw, setShowPw] = useState(false);
   const [keepLogin, setKeepLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [open, setOpen] = useState(false);
   const [lang, setLang] = useState("ko");
-  
-  // 실제 언어 변경 로직은 i18n, 리로드 등 사용
+  const [error, setError] = useState("");
+
   const handleSelect = (code: string) => {
     setLang(code);
     setOpen(false);
-    // TODO: 여기에 실제 번역 함수 호출 (예: i18n.changeLanguage(code))
   };
 
   const selectedLabel = languages.find((l) => l.code === lang)?.label || "";
+
+  const { login: loginToContext } = useAuth();
+
+  const handleLogin = async () => {
+    setError("");
+    try {
+      const res = await login({ email, password: pw });
+      const token = res.access;
+
+      if (token) {
+        if (keepLogin) {
+          localStorage.setItem("accessToken", token); // ✅ 수정됨
+        } else {
+          sessionStorage.setItem("accessToken", token); // ✅ 수정됨
+        }
+      }
+
+      const userInfo = await getMyProfile();
+      loginToContext(userInfo); // ✅ context에 유저 저장
+      navigate(`/profile/${userInfo.id}`);
+    } catch (err: any) {
+      console.error("❌ 로그인 실패:", err);
+      const msg = err.response?.data?.detail || "로그인 실패";
+      setError(msg);
+    }
+  };
 
   return (
     <Container>
       <Box>
         <Link to="/">
-          <Logo src="/logos/mainlog.png" alt="AnTada 로고"/>
+          <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
         </Link>
         <SubBox>
           <LanguageContainer>
             <LanguageSelected onClick={() => setOpen((v) => !v)}>
-              {selectedLabel}{" "}
-              {open ? (
-                <ChevronUp size={14} style={{ marginLeft: "6px"}}/> 
-              ) : ( 
-                <ChevronDown size={14} style={{ marginLeft: "6px"}} />
-              )}
+              {selectedLabel}
+              {open ? <ChevronUp size={14} style={{ marginLeft: "6px" }} /> : <ChevronDown size={14} style={{ marginLeft: "6px" }} />}
             </LanguageSelected>
             {open && (
               <LanguageDropdown>
-                {languages.map((l) =>
-                  l.code !== lang ? (
-                    <LanguageItem key={l.code} onClick={() => handleSelect(l.code)}>
-                      {l.label}
-                    </LanguageItem>
-                  ) : null
+                {languages.map(
+                  (l) =>
+                    l.code !== lang && (
+                      <LanguageItem key={l.code} onClick={() => handleSelect(l.code)}>
+                        {l.label}
+                      </LanguageItem>
+                    )
                 )}
               </LanguageDropdown>
             )}
           </LanguageContainer>
+
           <InputWrapper>
             <Input
               type="email"
               placeholder="이메일"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               autoComplete="username"
             />
           </InputWrapper>
+
           <InputWrapper>
             <PasswordWrapper>
               <Input
                 type={showPw ? "text" : "password"}
                 placeholder="비밀번호"
                 value={pw}
-                onChange={e => setPw(e.target.value)}
+                onChange={(e) => setPw(e.target.value)}
                 autoComplete="current-password"
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               />
-              <IconButton onClick={() => setShowPw(v => !v)}>
-                {showPw ? (
-                  <EyeOff size={18} color="#555" />
-                ) : (
-                  <Eye size={18} color="#555" />
-                )}
+              <IconButton onClick={() => setShowPw((v) => !v)}>
+                {showPw ? <EyeOff size={18} color="#555" /> : <Eye size={18} color="#555" />}
               </IconButton>
             </PasswordWrapper>
           </InputWrapper>
-          <KeepLogin onClick={() => setKeepLogin(v => !v)}>
+
+          <KeepLogin onClick={() => setKeepLogin((v) => !v)}>
             {keepLogin ? (
               <CheckIcon size={16} color="#ffb6c1" />
             ) : (
@@ -107,12 +137,16 @@ const Login: React.FC = () => {
             )}
             로그인 상태 유지
           </KeepLogin>
-          <LoginButton>로그인</LoginButton>
+
+          <LoginButton onClick={handleLogin}>로그인</LoginButton>
+
+          {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
         </SubBox>
+
         <LinkArea>
-          <span>비밀번호 찾기</span>
+          <StyledLink to="/reset-password">비밀번호 찾기</StyledLink>
           <span>|</span>
-          <span>회원가입</span>
+          <StyledLink to="/signup">회원가입</StyledLink>
         </LinkArea>
       </Box>
     </Container>

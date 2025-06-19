@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../lib/axios';
 
 export const getUserSettings = async () => {
   const res = await axios.get('/api/settings/');

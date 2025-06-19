@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Section,
   Wrapper,
@@ -15,24 +15,16 @@ import BoardTabs from "../../components/Board/BoardTabs/BoardTabs";
 import BoardList from "../../components/Board/BoardList/BoardList";
 import BoardPagination from "../../components/Board/BoardPagination/BoardPagination";
 import BoardProfile from "../../components/Board/ProfileCard/ProfileCard";
-import ChatBot from "../../components/ChatBot/ChatBot";
 import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import WriteButton from "../../components/WriteButton/WriteButton";
-import { mockUsers } from "../../data/userList";
 import DetailModal from "../../components/Board/DetailModal";
 import { useNavigate } from "react-router-dom";
-
+import { getBoardPosts } from "../../api/board";
+import { getMyProfile } from "../../api/profile";
 import type { BoardItem } from "../../types/board";
-import { boardList as boardListData } from "../../data/boardList"; // rename to avoid naming conflict
+import type { User } from "../../types/user";
 
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/ko";
-dayjs.extend(relativeTime);
-dayjs.locale("ko");
-
-type TabType = "all" | "post" | "gallery" | "thirty" | "ten";
 const PAGE_SIZE = 50;
 
 const SORT_OPTIONS = [
@@ -41,66 +33,55 @@ const SORT_OPTIONS = [
   { label: "추천순", value: "likes" },
 ];
 
+type TabType = "all" | "post" | "gallery" | "thirty" | "ten";
+
 const BoardPage: React.FC = () => {
+  const [boardList, setBoardList] = useState<BoardItem[]>([]);
+  const [user, setUser] = useState<User | null>(null); // ✅ 훅은 여기
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("latest");
   const [selectedTab, setSelectedTab] = useState<TabType>("all");
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+  const [selectedType, setSelectedType] = useState<"post" | "gallery" | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
 
   const navigate = useNavigate();
 
-  const [boardList, setBoardList] = useState<BoardItem[]>(boardListData);
-  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
-  const [selectedType, setSelectedType] = useState<"post" | "gallery" | null>(null);
-
-  const filteredList = useMemo(() => {
-    let data = [...boardList];
-
-    if (selectedTab === "post") {
-      data = data.filter(item => item.board_type === "post");
-    } else if (selectedTab === "gallery") {
-      data = data.filter(item => item.board_type === "gallery");
-    } else if (selectedTab === "thirty") {
-      data = data.filter(item => (item.like_count ?? 0) >= 30);
-    } else if (selectedTab === "ten") {
-      data = data.filter(item => (item.like_count ?? 0) >= 10);
-    }
-
-    if (keyword.trim()) {
-      const kw = keyword.trim().toLowerCase();
-      data = data.filter(
-        item =>
-          item.title.toLowerCase().includes(kw) ||
-          item.content.toLowerCase().includes(kw) ||
-          item.author.nickname.toLowerCase().includes(kw)
-      );
-    }
-
-    switch (sort) {
-      case "latest":
-        data.sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf());
-        break;
-      case "oldest":
-        data.sort((a, b) => dayjs(a.created_at).valueOf() - dayjs(b.created_at).valueOf());
-        break;
-      case "likes":
-        data.sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0));
-        break;
-    }
-
-    return data;
-  }, [selectedTab, keyword, sort, boardList]);
-
-  const pagedList = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredList.slice(start, start + PAGE_SIZE);
-  }, [filteredList, page]);
-
-  const totalPage = Math.max(1, Math.ceil(filteredList.length / PAGE_SIZE));
-
+  // ✅ 로그인 유저 정보 가져오기
   useEffect(() => {
-    setPage(1);
-  }, [selectedTab, keyword, sort]);
+    async function fetchUser() {
+      try {
+        const data = await getMyProfile();
+        setUser(data);
+      } catch (err) {
+        console.error("유저 정보 불러오기 실패", err);
+      }
+    }
+    fetchUser();
+  }, []);
+
+  // 게시글 불러오기
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const data = await getBoardPosts({
+          page,
+          keyword,
+          sort,
+          type: selectedTab === "post" || selectedTab === "gallery" ? selectedTab : undefined,
+          minLikes: selectedTab === "thirty" ? 30 : selectedTab === "ten" ? 10 : undefined,
+        });
+        setBoardList(data.results ?? data);
+        setTotalCount(data.count ?? data.length);
+      } catch (err) {
+        console.error("게시글 불러오기 실패", err);
+      }
+    }
+    fetchPosts();
+  }, [page, keyword, sort, selectedTab]);
+
+  const totalPage = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const handleSearch = () => {
     setPage(1);
@@ -126,15 +107,17 @@ const BoardPage: React.FC = () => {
                 <BoardTabs selected={selectedTab} onChange={setSelectedTab} />
                 <SortWrite>
                   <SortDropdown options={SORT_OPTIONS} value={sort} onChange={setSort} />
-                  <WriteButton to={`/board/write`} />
+                  <WriteButton to={`/board/write?type=${selectedTab === "gallery" ? "gallery" : "post"}`} />
                 </SortWrite>
               </TabSortWrapper>
+
               <BoardList
-                list={pagedList}
+                list={boardList}
                 page={page}
                 pageSize={PAGE_SIZE}
                 onItemClick={handleItemClick}
               />
+
               <PageSearchWrapper>
                 <BoardPagination page={page} totalPage={totalPage} onChange={setPage} />
                 <SearchInput
@@ -148,7 +131,11 @@ const BoardPage: React.FC = () => {
           </BoardSectionBox>
 
           <SidebarSection>
-            <BoardProfile user={mockUsers[0]} />
+            {user ? (
+              <BoardProfile user={user} />
+            ) : (
+              <div>유저 정보를 불러오는 중...</div>
+            )}
           </SidebarSection>
         </Wrapper>
       </Container>

@@ -1,5 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { dummyComments } from "../../../../data/comment";
+import { useEffect, useRef, useState } from "react";
+import {
+  getBoardComments,
+  addBoardComment,
+  toggleCommentLike,
+  deleteComment,
+} from "../../../../api/board";
 import type { BoardComment } from "../../../../types/comment";
 import {
   Wrapper,
@@ -40,13 +45,13 @@ type SortType = "createdDesc" | "createdAsc" | "likeDesc";
 
 export default function CommentBox({ contentType, contentId }: Props) {
   const { currentUser } = useAuth();
-  const [comments, setComments] = useState<BoardComment[]>(dummyComments);
+  const [comments, setComments] = useState<BoardComment[]>([]);
   const [input, setInput] = useState("");
   const [replyState, setReplyState] = useState<{
     targetId: number | null;
     parentId: number | null;
     tagged_nickname?: string;
-  }>({ targetId: null, parentId: null });
+  }>({ targetId: null, parentId: null, tagged_nickname: undefined });
   const [replyInput, setReplyInput] = useState("");
   const [sort, setSort] = useState<SortType>("createdDesc");
 
@@ -54,105 +59,76 @@ export default function CommentBox({ contentType, contentId }: Props) {
   const replyInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (commentListRef.current) {
-      commentListRef.current.scrollTop = commentListRef.current.scrollHeight;
-    }
-  }, [comments, replyState.targetId]);
+    getBoardComments(contentId).then(setComments);
+  }, [contentId]);
 
-  useEffect(() => {
-    if (replyState.targetId !== null) {
-      replyInputRef.current?.focus();
-    }
-  }, [replyState.targetId]);
-
-  const handleLike = (id: number) => {
-    setComments(prev =>
-      prev.map(c =>
-        c.id === id
-          ? {
-              ...c,
-              liked: !c.liked,
-              like_count: c.like_count + (c.liked ? -1 : 1),
-            }
-          : c
+  const handleLike = async (id: number) => {
+    const res = await toggleCommentLike(id);
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, liked: res.liked, like_count: res.like_count } : c
       )
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!input.trim() || !currentUser) return;
 
-    const newComment: BoardComment = {
-      id: comments.length + 1,
-      post_id: contentId,
-      content: input,
-      is_deleted: false,
-      created_at: new Date().toISOString(),
-      author: currentUser,
-      like_count: 0,
-    };
-
-    setComments(prev => [...prev, newComment]);
+    const newComment = await addBoardComment(contentId, { content: input });
+    setComments((prev) => [...prev, newComment]);
     setInput("");
   };
 
   const handleReplyToggle = (target: BoardComment) => {
     const parentId = target.parent_id ?? target.id;
-    if (replyState.targetId === target.id) {
-      setReplyState({ targetId: null, parentId: null });
-      setReplyInput("");
-    } else {
-      setReplyState({
-        targetId: target.id,
-        parentId,
-        tagged_nickname: target.author.nickname,
-      });
-      setReplyInput("");
-    }
-  };
-
-  const handleReplySubmit = () => {
-    if (!replyInput.trim() || !currentUser || replyState.parentId == null) return;
-
-    const newReply: BoardComment = {
-      id: comments.length + 1,
-      post_id: contentId,
-      content: replyInput,
-      parent_id: replyState.parentId,
-      tagged_nickname: replyState.tagged_nickname,
-      is_deleted: false,
-      created_at: new Date().toISOString(),
-      author: currentUser,
-      like_count: 0,
-    };
-
-    setComments(prev => [...prev, newReply]);
-    setReplyState({ targetId: null, parentId: null });
+    setReplyState({
+      targetId: replyState.targetId === target.id ? null : target.id,
+      parentId: replyState.targetId === target.id ? null : parentId,
+      tagged_nickname: target.author.nickname,
+    });
     setReplyInput("");
   };
 
+  const handleReplySubmit = async () => {
+    if (!replyInput.trim() || !currentUser || replyState.parentId == null) return;
+
+    const newReply = await addBoardComment(contentId, {
+      content: replyInput,
+      parent_id: replyState.parentId,
+      tagged_nickname: replyState.tagged_nickname,
+    });
+    setComments((prev) => [...prev, newReply]);
+    setReplyState({ targetId: null, parentId: null, tagged_nickname: undefined });
+    setReplyInput("");
+  };
+
+  const handleDelete = async (commentId: number) => {
+    await deleteComment(contentId, commentId);
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId ? { ...c, is_deleted: true, content: "" } : c
+      )
+    );
+  };
+
   const getSortedTopLevelComments = () => {
-    const topLevel = comments.filter(c => !c.parent_id);
+    const topLevel = comments.filter((c) => !c.parent_id);
     switch (sort) {
       case "createdAsc":
         return [...topLevel].sort(
           (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
-      case "createdDesc":
-        return [...topLevel].sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
       case "likeDesc":
         return [...topLevel].sort((a, b) => b.like_count - a.like_count);
       default:
-        return topLevel;
+        return [...topLevel].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
     }
   };
 
   const getReplies = (parentId: number) =>
-    comments.filter(c => c.parent_id === parentId).sort(
-      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
+    comments.filter((c) => c.parent_id === parentId);
 
   const renderComment = (comment: BoardComment) => {
     const replies = getReplies(comment.id);
@@ -163,14 +139,23 @@ export default function CommentBox({ contentType, contentId }: Props) {
           <Profile src={comment.author.profile_image} />
           <CommentContent>
             <Nickname>{comment.author.nickname}</Nickname>
-            <Text>{comment.is_deleted ? "삭제된 댓글입니다." : comment.content}</Text>
+            <Text>
+              {comment.is_deleted ? "삭제된 댓글입니다." : comment.content}
+            </Text>
             <Meta>
               <span>{dayjs(comment.created_at).fromNow()}</span>
-              <ReplyBtn onClick={() => handleReplyToggle(comment)}>답글</ReplyBtn>
-              <LikeButton liked={comment.liked} onClick={() => handleLike(comment.id)}>
-                <ThumbsUp size={14} />
-                {comment.like_count}
-              </LikeButton>
+              {!comment.is_deleted && (
+                <>
+                  <ReplyBtn onClick={() => handleReplyToggle(comment)}>답글</ReplyBtn>
+                  <LikeButton liked={comment.liked} onClick={() => handleLike(comment.id)}>
+                    <ThumbsUp size={14} />
+                    {comment.like_count}
+                  </LikeButton>
+                  {currentUser?.id === comment.author.id && (
+                    <ReplyBtn onClick={() => handleDelete(comment.id)}>삭제</ReplyBtn>
+                  )}
+                </>
+              )}
             </Meta>
           </CommentContent>
         </CommentItem>
@@ -181,19 +166,14 @@ export default function CommentBox({ contentType, contentId }: Props) {
               ref={replyInputRef}
               placeholder={`@${replyState.tagged_nickname} 님에게 답글을 입력하세요`}
               value={replyInput}
-              onChange={e => setReplyInput(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleReplySubmit();
-                }
-              }}
+              onChange={(e) => setReplyInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleReplySubmit()}
             />
             <ReplySubmitBtn onClick={handleReplySubmit}>등록</ReplySubmitBtn>
           </ReplyInputWrapper>
         )}
 
-        {replies.map(reply => (
+        {replies.map((reply) => (
           <div key={reply.id}>
             <CommentItem style={{ marginLeft: 32 }}>
               <CornerDownRight size={16} style={{ marginRight: 8, color: "#B4B4B4" }} />
@@ -201,18 +181,23 @@ export default function CommentBox({ contentType, contentId }: Props) {
               <CommentContent>
                 <Nickname>{reply.author.nickname}</Nickname>
                 <Text>
-                  {reply.tagged_nickname && (
-                    <TagMention>@{reply.tagged_nickname} </TagMention>
-                  )}
+                  {reply.tagged_nickname && <TagMention>@{reply.tagged_nickname} </TagMention>}
                   {reply.is_deleted ? "삭제된 댓글입니다." : reply.content}
                 </Text>
                 <Meta>
-                  {dayjs(reply.created_at).fromNow()} ·
-                  <ReplyBtn onClick={() => handleReplyToggle(reply)}>답글</ReplyBtn>
-                  <LikeButton liked={reply.liked} onClick={() => handleLike(reply.id)}>
-                    <ThumbsUp size={14} />
-                    {reply.like_count}
-                  </LikeButton>
+                  <span>{dayjs(reply.created_at).fromNow()}</span>
+                  {!reply.is_deleted && (
+                    <>
+                      <ReplyBtn onClick={() => handleReplyToggle(reply)}>답글</ReplyBtn>
+                      <LikeButton liked={reply.liked} onClick={() => handleLike(reply.id)}>
+                        <ThumbsUp size={14} />
+                        {reply.like_count}
+                      </LikeButton>
+                      {currentUser?.id === reply.author.id && (
+                        <ReplyBtn onClick={() => handleDelete(reply.id)}>삭제</ReplyBtn>
+                      )}
+                    </>
+                  )}
                 </Meta>
               </CommentContent>
             </CommentItem>
@@ -223,13 +208,8 @@ export default function CommentBox({ contentType, contentId }: Props) {
                   ref={replyInputRef}
                   placeholder={`@${replyState.tagged_nickname} 님에게 답글을 입력하세요`}
                   value={replyInput}
-                  onChange={e => setReplyInput(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleReplySubmit();
-                    }
-                  }}
+                  onChange={(e) => setReplyInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleReplySubmit()}
                 />
                 <ReplySubmitBtn onClick={handleReplySubmit}>등록</ReplySubmitBtn>
               </ReplyInputWrapper>
@@ -240,8 +220,6 @@ export default function CommentBox({ contentType, contentId }: Props) {
     );
   };
 
-  const sortedTopLevelComments = getSortedTopLevelComments();
-
   return (
     <Wrapper>
       <TabList>
@@ -251,23 +229,20 @@ export default function CommentBox({ contentType, contentId }: Props) {
       </TabList>
 
       <CommentList ref={commentListRef}>
-        {sortedTopLevelComments.map(comment => renderComment(comment))}
+        {getSortedTopLevelComments().map((comment) => renderComment(comment))}
       </CommentList>
 
-      <InputWrapper>
-        <CommentInput
-          placeholder="댓글을 입력하세요"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-        />
-        <SubmitBtn onClick={handleSubmit}>등록</SubmitBtn>
-      </InputWrapper>
+      {currentUser && (
+        <InputWrapper>
+          <CommentInput
+            placeholder="댓글을 입력하세요"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          />
+          <SubmitBtn onClick={handleSubmit}>등록</SubmitBtn>
+        </InputWrapper>
+      )}
     </Wrapper>
   );
 }

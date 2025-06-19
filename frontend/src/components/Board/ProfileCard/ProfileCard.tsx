@@ -12,12 +12,12 @@ import {
   FontRow,
   CustomButton,
 } from "./ProfileCard.styled";
-import type { User } from "../../../types/user"; // 타입 임포트
+import type { User } from "../../../types/user";
+import { getFullImageUrl } from "../../../utils/getFullImageUrl"; // 반드시 추가!
 
 interface BoardProfileProps {
-  user: User;  // props로 유저 받음
+  user: User;
 }
-
 
 const BoardProfile: React.FC<BoardProfileProps> = ({ user }) => {
   return (
@@ -26,7 +26,16 @@ const BoardProfile: React.FC<BoardProfileProps> = ({ user }) => {
         <Avatar>
           {/* 프로필 이미지가 있으면 이미지, 없으면 첫 글자 */}
           {user.profile_image
-            ? <img src={user.profile_image} alt={user.nickname} style={{ width: 80, height: 80, borderRadius: "50%" }}/>
+            ? (
+                <img
+                  src={getFullImageUrl(user.profile_image)}
+                  alt={user.nickname}
+                  style={{ width: 80, height: 80, borderRadius: "50%" }}
+                  onError={e => {
+                    e.currentTarget.src = "/images/default-profile.png";
+                  }}
+                />
+              )
             : user.nickname?.charAt(0) || "?"}
         </Avatar>
         <FontBox>

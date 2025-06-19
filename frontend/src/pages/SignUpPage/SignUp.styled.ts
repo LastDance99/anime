@@ -12,7 +12,7 @@ export const Container = styled.div`
 
 export const MainBox = styled.div`
   width: 500px;
-  height: 510px;
+  height: 480px;
   border-radius: 14px;
   background: ${({ theme }) => theme.colors.background};
   display: flex;
@@ -31,7 +31,7 @@ export const Logo = styled.img`
 export const FormBox = styled.form`
   position: relative;  
   width: 500px;
-  height: 320px;
+  height: 480px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -305,14 +305,14 @@ export const GenderButton = styled.button<{
 // 회원가입 버튼
 export const SignUpButton = styled.button`
   width: 100%;
-  height: 40px;
+  line-height: 30px;
   background: ${({ theme }) => theme.colors.secondary};
   color: ${({ theme }) => theme.colors.text};
   border: 1px solid ${({ theme }) => theme.colors.bordermain};
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   font-weight: ${({ theme }) => theme.Weights.normal};
-  margin-top: 20px;
+  margin-top: 14px;
   cursor: pointer;
   transition: background 0.12s;
   &:disabled {

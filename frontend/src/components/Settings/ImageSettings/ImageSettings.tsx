@@ -10,29 +10,49 @@ import {
   ActionButton,
 } from "./ImageSettings.styled";
 import ImageUploadButton from "./ImageUploadButton";
-import type { User } from "../../../types/user";
+import type { TempUser } from "../../../types/user";
 
 type Props = {
-  user: User;
-  setUser: (user: User) => void;
+  user: TempUser;
+  setUser: (user: TempUser) => void;
+  setProfileFile: (file: File | null) => void;
+  setBgFile: (file: File | null) => void;
+  setRoomFile: (file: File | null) => void;
 };
 
-export default function ImageSettings({ user, setUser }: Props) {
-  const [profileImg, setProfileImg] = useState<string>(user.profile_image ?? "");
-  const [bgImg, setBgImg] = useState<string>(user.background_image ?? "");
-  const [roomImg, setRoomImg] = useState<string>(user.myroom_image ?? "");
+export default function ImageSettings({
+  user,
+  setUser,
+  setProfileFile,
+  setBgFile,
+  setRoomFile,
+}: Props) {
+  const [profileImg, setProfileImg] = useState<string>(
+    typeof user.profile_image === "string" ? user.profile_image : ""
+  );
+  const [bgImg, setBgImg] = useState<string>(
+    typeof user.background_image === "string" ? user.background_image : ""
+  );
+  const [roomImg, setRoomImg] = useState<string>(
+    typeof user.myroom_image === "string" ? user.myroom_image : ""
+  );
 
   const handleUpload = (
     type: "profile" | "background" | "myroom",
     setter: React.Dispatch<React.SetStateAction<string>>
   ) => (file: File) => {
     const url = URL.createObjectURL(file);
-    setter(url);
+    setter(url); // 미리보기용
+
+    if (type === "profile") setProfileFile(file);
+    if (type === "background") setBgFile(file);
+    if (type === "myroom") setRoomFile(file);
+
     setUser({
       ...user,
-      ...(type === "profile" && { profile_image: url }),
-      ...(type === "background" && { background_image: url }),
-      ...(type === "myroom" && { myroom_image: url }),
+      ...(type === "profile" && { profile_image: file }),
+      ...(type === "background" && { background_image: file }),
+      ...(type === "myroom" && { myroom_image: file }),
     });
   };
 
@@ -41,11 +61,15 @@ export default function ImageSettings({ user, setUser }: Props) {
     setter: React.Dispatch<React.SetStateAction<string>>
   ) => () => {
     setter("");
+    if (type === "profile") setProfileFile(null);
+    if (type === "background") setBgFile(null);
+    if (type === "myroom") setRoomFile(null);
+
     setUser({
       ...user,
-      ...(type === "profile" && { profile_image: "" }),
-      ...(type === "background" && { background_image: "" }),
-      ...(type === "myroom" && { myroom_image: "" }),
+      ...(type === "profile" && { profile_image: null }),
+      ...(type === "background" && { background_image: null }),
+      ...(type === "myroom" && { myroom_image: null }),
     });
   };
 

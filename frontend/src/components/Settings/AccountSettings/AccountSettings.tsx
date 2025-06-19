@@ -8,22 +8,28 @@ import {
   LangSelect,
 } from "./AccountSettings.styled";
 import ChangeButton from "../ChangeButton/ChangeButton";
-import type { User } from "../../../types/user";
+import type { TempUser } from "../../../types/user";
 import NicknameModal from "../NicknameModal";
 import PasswordModal from "../PasswordModal";
 
 type Props = {
-  user: User;
-  setUser: (user: User) => void;
+  user: TempUser;
+  setUser: (user: TempUser) => void;
   setSubModalOpen: (open: boolean) => void;
   onClose: () => void;
+  onChangeNickname: () => void;
 };
 
-export default function AccountSettings({ user, setUser, setSubModalOpen, onClose }: Props) {
+export default function AccountSettings({
+  user,
+  setUser,
+  setSubModalOpen,
+  onClose,
+  onChangeNickname,
+}: Props) {
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
   const [pwModalOpen, setPwModalOpen] = useState(false);
 
-  // 닉네임 모달 제어
   const openNicknameModal = () => {
     setNicknameModalOpen(true);
     setSubModalOpen(true);
@@ -34,7 +40,6 @@ export default function AccountSettings({ user, setUser, setSubModalOpen, onClos
     setSubModalOpen(false);
   };
 
-  // 비밀번호 모달 제어
   const openPwModal = () => {
     setPwModalOpen(true);
     setSubModalOpen(true);
@@ -47,7 +52,7 @@ export default function AccountSettings({ user, setUser, setSubModalOpen, onClos
 
   const handlePasswordSave = (newPassword: string) => {
     setUser({ ...user, password: newPassword });
-    closePwModal(); // 저장하면 모달 닫기 + ESC 다시 허용
+    closePwModal();
   };
 
   return (

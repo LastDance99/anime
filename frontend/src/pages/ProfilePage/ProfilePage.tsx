@@ -7,9 +7,16 @@ import AniListBox from "../../components/Profile/Center/AniListBox/AniListBox";
 import ActivityList from "../../components/Profile/Center/ActivityFeed/ActivityList";
 import StatsBox from "../../components/Profile/Center/StatsBox/StatsBox";
 import { useOutletContext } from "react-router-dom";
-import { Container, MainBox, ProfileLeftColumn, ProfileRightColumn, Sidebar } from "./ProfilePage.styled";
+import {
+  Container,
+  MainBox,
+  ProfileLeftColumn,
+  ProfileRightColumn,
+  Sidebar,
+} from "./ProfilePage.styled";
+
 import type { User, ProfileComment } from "../../types/user";
-import type { UserAnimeItem } from "../../types/anime"
+import type { UserAnimeItem } from "../../types/anime";
 
 type ProfileContext = {
   user: User;
@@ -25,8 +32,8 @@ export default function ProfilePage() {
     <Container>
       <MainBox>
         <ProfileLeftColumn>
-          <MyRoomBox myroom_image={user.myroom_image ?? ''} />
-          <Introduction about={user.about ?? ''} />
+          <MyRoomBox myroom_image={user.myroom_image ?? ""} />
+          <Introduction about={user.about ?? ""} />
           <CommentsBox comments={comments} />
           <AniListBox animeList={favoriteAnimeList} />
         </ProfileLeftColumn>
@@ -34,13 +41,11 @@ export default function ProfilePage() {
           <StatsBox
             totalAnime={56}
             avgScore={4.5}
-            // heartCount={136}
             attendance={103}
           />
           <ActivityList list={user.activity ?? []} />
         </ProfileRightColumn>
-        <Sidebar>
-        </Sidebar>
+        <Sidebar />
       </MainBox>
     </Container>
   );

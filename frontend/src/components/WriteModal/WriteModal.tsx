@@ -20,6 +20,8 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuidv4 } from "uuid";
 
+import { createBoardPost } from "../../api/board";
+
 type BoardType = "post" | "gallery";
 
 type Props = {
@@ -98,7 +100,7 @@ export default function WriteForm({
     onBoardTypeChange?.(boardType);
   }, [boardType, onBoardTypeChange]);
 
-  // ✅ 이미지 드롭 업로드 + 유튜브 자동 변환
+  // ✅ 이미지 드롭 & 유튜브 자동 변환
   useEffect(() => {
     const quill = quillRef.current?.getEditor();
     if (!quill) return;
@@ -143,7 +145,7 @@ export default function WriteForm({
     };
   }, []);
 
-  // ✅ 유튜브 버튼 아이콘 삽입
+  // ✅ 유튜브 버튼 텍스트 삽입
   useEffect(() => {
     const toolbar = document.querySelector(".ql-toolbar");
     const youtubeBtn = toolbar?.querySelector(".ql-youtube") as HTMLElement;
@@ -152,14 +154,32 @@ export default function WriteForm({
     }
   }, []);
 
-  const handleSubmit = () => {
+  // ✅ 게시글 작성 API 연결
+  const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) {
       alert("제목과 본문을 입력해주세요.");
       return;
     }
 
-    console.log({ boardType, title, content });
-    navigate("/board");
+    const payload = {
+      board_type: boardType,
+      title,
+      content,
+    };
+
+    try {
+      console.log("보내는 데이터:", payload); // ✅ 로그 추가
+      const res = await createBoardPost(payload);
+      console.log("응답 결과:", res); // ✅ 로그 추가
+      alert("게시글이 등록되었습니다!");
+      navigate("/board");
+    } catch (error: any) {
+      console.error("게시글 등록 실패:", error);
+      if (error.response) {
+        console.error("서버 응답:", error.response.data);
+      }
+      alert("게시글 등록에 실패했습니다.");
+    }
   };
 
   return (

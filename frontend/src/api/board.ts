@@ -1,12 +1,30 @@
-import axios from 'axios';
+import axios from '../lib/axios';
 
-export const getBoardPosts = async () => {
-  const res = await axios.get('/api/boards/');
+export const getBoardPosts = async (params?: {
+  page?: number;
+  keyword?: string;
+  sort?: string;
+  type?: string;
+  minLikes?: number;
+}) => {
+  const query = new URLSearchParams();
+
+  if (params?.page) query.append("page", params.page.toString());
+  if (params?.keyword) query.append("search", params.keyword);
+  if (params?.sort) query.append("sort", params.sort);
+  if (params?.type) query.append("type", params.type); // post/gallery
+  if (params?.minLikes) query.append("like_gte", String(params.minLikes));
+
+  const res = await axios.get(`/api/boards/?${query.toString()}`);
   return res.data;
 };
 
-export const createBoardPost = async (data: any) => {
-  const res = await axios.post('/api/boards/', data);
+export const createBoardPost = async (data: {
+  board_type: "post" | "gallery";
+  title: string;
+  content: string;
+}) => {
+  const res = await axios.post("/api/boards/", data);
   return res.data;
 };
 

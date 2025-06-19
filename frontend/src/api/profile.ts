@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../lib/axios';
 
 export const getMyProfile = async () => {
   const res = await axios.get('/api/profiles/me/overview/');
@@ -10,6 +10,12 @@ export const getUserProfile = async (userId: number) => {
   return res.data;
 };
 
+export const getUserProfileByNickname = async (nickname: string) => {
+  const encodedNickname = encodeURIComponent(nickname);
+  const res = await axios.get(`/api/profiles/${encodedNickname}/overview/`);
+  return res.data;
+};
+
 export const updateAbout = async (data: any) => {
   const res = await axios.put('/api/profiles/me/about/', data);
   return res.data;
@@ -17,7 +23,7 @@ export const updateAbout = async (data: any) => {
 
 export const getUserComments = async (userId: number) => {
   const res = await axios.get(`/api/profiles/${userId}/comments/`);
-  return res.data;
+  return res.data.results;
 };
 
 export const deleteUserComment = async (userId: number, pk: number) => {

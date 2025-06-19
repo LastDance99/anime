@@ -2,6 +2,30 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import SettingsPage from "../../pages/SettingsPage/SettingsPage";
 import type { User } from "../../types/user";
+import {
+  getUserSettings,
+  updateAccount,
+  updateLanguage,
+  deleteImage,
+} from "../../api/settings";
+import { checkNickname } from "../../api/auth";
+import axios from "../../lib/axios";
+import NicknameModal from "./NicknameModal";
+
+// TempUser 타입 정의
+type TempUser = Omit<User, 'profile_image' | 'background_image' | 'myroom_image'> & {
+  profile_image: string | File | null;
+  background_image: string | File | null;
+  myroom_image: string | File | null;
+};
+
+// 변환 함수
+const convertUserToTempUser = (user: User): TempUser => ({
+  ...user,
+  profile_image: user.profile_image ?? null,
+  background_image: user.background_image ?? null,
+  myroom_image: user.myroom_image ?? null,
+});
 
 type SettingsModalProps = {
   user: User;
@@ -9,32 +33,71 @@ type SettingsModalProps = {
   onClose: () => void;
 };
 
-export default function SettingsModal({
-  user,
-  setUser,
-  onClose,
-}: SettingsModalProps) {
+export default function SettingsModal({ user, setUser, onClose }: SettingsModalProps) {
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-  const [tempUser, setTempUser] = useState(user);
-  const [justSaved, setJustSaved] = useState(false); // ⭐
+  const [isNicknameModalOpen, setNicknameModalOpen] = useState(false);
+  const [tempUser, setTempUser] = useState<TempUser>(convertUserToTempUser(user));
+  const [justSaved, setJustSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [bgFile, setBgFile] = useState<File | null>(null);
+  const [roomFile, setRoomFile] = useState<File | null>(null);
 
   const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
 
-  // user가 변경될 때 tempUser도 동기화
   useEffect(() => {
-    setTempUser(user);
-  }, [user]);
+    (async () => {
+      try {
+        const data = await getUserSettings();
+        setTempUser(convertUserToTempUser(data));
+      } catch (err) {
+        console.error("설정 로드 실패", err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
-  // 저장 후, justSaved 플래그 세우기
-  const handleSave = () => {
+  const handleSave = async () => {
     const confirmed = window.confirm("설정을 저장하시겠습니까?");
     if (!confirmed) return;
-    setUser(tempUser);
-    setJustSaved(true); // ⭐ 저장됨 표시
-    onClose();
+
+    try {
+      if (user.nickname !== tempUser.nickname) {
+        await updateAccount({ nickname: tempUser.nickname });
+      }
+
+      if (user.language !== tempUser.language) {
+        await updateLanguage({ language: tempUser.language });
+      }
+
+      const formData = new FormData();
+      if (profileFile) formData.append("profile_image", profileFile);
+      if (bgFile) formData.append("background_image", bgFile);
+      if (roomFile) formData.append("myroom_image", roomFile);
+
+      if (formData.has("profile_image") || formData.has("background_image") || formData.has("myroom_image")) {
+        await axios.patch("/api/settings/image/", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
+      setUser(tempUser as User);
+      setJustSaved(true);
+      onClose();
+    } catch (err: any) {
+      console.error("설정 저장 실패:", err);
+      if (err.response) {
+        console.error("응답 오류:", err.response.data);
+        alert(err.response.data.detail || JSON.stringify(err.response.data));
+      } else if (err.request) {
+        alert("서버로부터 응답이 없습니다.");
+      } else {
+        alert("알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
-  // 닫기 시, justSaved면 무조건 닫음 (경고 스킵)
   const handleTryClose = () => {
     if (!justSaved && hasChanges) {
       const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
@@ -43,7 +106,18 @@ export default function SettingsModal({
     onClose();
   };
 
-  // justSaved는 닫힌 뒤 1회성으로만 쓰게 리셋
+  const handleNicknameChange = async (newNickname: string) => {
+    if (newNickname === user.nickname) return;
+    try {
+      await checkNickname(newNickname);
+      setTempUser((prev) => ({ ...prev, nickname: newNickname }));
+      setNicknameModalOpen(false);
+    } catch (err: any) {
+      const msg = err.response?.data?.nickname?.[0] || err.response?.data?.detail || "닉네임 확인 실패";
+      alert(msg);
+    }
+  };
+
   useEffect(() => {
     if (!isSubModalOpen && justSaved) {
       setJustSaved(false);
@@ -60,6 +134,8 @@ export default function SettingsModal({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [hasChanges, onClose, isSubModalOpen, justSaved]);
 
+  if (loading) return null;
+
   return (
     <Overlay onClick={handleTryClose}>
       <ModalBox onClick={(e) => e.stopPropagation()}>
@@ -69,10 +145,22 @@ export default function SettingsModal({
           tempUser={tempUser}
           setTempUser={setTempUser}
           setSubModalOpen={setIsSubModalOpen}
-          onSave={handleSave}      // ⭐ 콜백으로 저장
-          onClose={handleTryClose} // 닫기
+          onSave={handleSave}
+          onClose={handleTryClose}
+          onChangeNickname={() => setNicknameModalOpen(true)}
+          setProfileFile={setProfileFile}
+          setBgFile={setBgFile}
+          setRoomFile={setRoomFile}
         />
       </ModalBox>
+
+      {isNicknameModalOpen && (
+        <NicknameModal
+          currentNickname={tempUser.nickname}
+          onSave={handleNicknameChange}
+          onClose={() => setNicknameModalOpen(false)}
+        />
+      )}
     </Overlay>
   );
 }
@@ -97,10 +185,9 @@ const ModalBox = styled.div`
   padding: 32px;
   font-family: 'Cafe24Ssurround', 'Quicksand', sans-serif;
 
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
+    display: none;
   }
 `;

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { CheckCircle, Circle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Container = styled.div`
   width: 100vw;
@@ -207,4 +208,14 @@ export const ErrorText = styled.div`
   margin-top: 8px;
   font-weight: 500;
   min-height: 1.3em;  // (에러 안 보일 때도 영역 유지, 선택사항)
+`;
+
+export const StyledLink = styled(Link)`
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;

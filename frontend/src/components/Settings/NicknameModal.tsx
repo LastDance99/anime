@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { checkNickname } from "../../api/auth";
 
 type Props = {
   currentNickname: string;
@@ -9,6 +10,22 @@ type Props = {
 
 export default function NicknameModal({ currentNickname, onSave, onClose }: Props) {
   const [value, setValue] = useState(currentNickname);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async () => {
+    if (value === currentNickname) {
+      return onClose(); // 변경 없음
+    }
+
+    try {
+      await checkNickname(value); // ✅ 중복 검사
+      setError("");
+      onSave(value); // 성공 시 저장
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "이미 사용 중인 닉네임입니다.";
+      setError(msg);
+    }
+  };
 
   return (
     <Overlay>
@@ -16,12 +33,16 @@ export default function NicknameModal({ currentNickname, onSave, onClose }: Prop
         <Title>닉네임 변경</Title>
         <Input
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setError(""); // 입력 시 에러 초기화
+          }}
           maxLength={20}
         />
+        {error && <ErrorMsg>{error}</ErrorMsg>}
         <ButtonGroup>
           <Button onClick={onClose}>취소</Button>
-          <Button onClick={() => onSave(value)}>확인</Button>
+          <Button onClick={handleSubmit}>확인</Button>
         </ButtonGroup>
       </Modal>
     </Overlay>
@@ -56,7 +77,13 @@ const Input = styled.input`
   font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+`;
+
+const ErrorMsg = styled.p`
+  color: red;
+  font-size: 13px;
+  margin-bottom: 10px;
 `;
 
 const ButtonGroup = styled.div`

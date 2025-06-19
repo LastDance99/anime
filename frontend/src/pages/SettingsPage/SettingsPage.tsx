@@ -8,16 +8,20 @@ import {
   BottomBar,
   ActionButton,
 } from "./SettingsPage.styled";
-import type { User } from "../../types/user";
+import type { User, TempUser } from "../../types/user";
 
 type SettingsPageProps = {
   user: User;
   setUser: (user: User) => void;
-  tempUser: User;
-  setTempUser: (user: User) => void;
+  tempUser: TempUser;
+  setTempUser: (user: TempUser) => void;
   setSubModalOpen: (open: boolean) => void;
   onSave: () => void;
   onClose: () => void;
+  onChangeNickname: () => void;
+  setProfileFile: (file: File | null) => void;
+  setBgFile: (file: File | null) => void;
+  setRoomFile: (file: File | null) => void;
 };
 
 export default function SettingsPage({
@@ -28,6 +32,10 @@ export default function SettingsPage({
   setSubModalOpen,
   onSave,
   onClose,
+  onChangeNickname,
+  setProfileFile,
+  setBgFile,
+  setRoomFile,
 }: SettingsPageProps) {
   const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
 
@@ -47,9 +55,16 @@ export default function SettingsPage({
         setUser={setTempUser}
         setSubModalOpen={setSubModalOpen}
         onClose={handleTryClose}
+        onChangeNickname={onChangeNickname}
       />
       <Divider />
-      <ImageSettings user={tempUser} setUser={setTempUser} />
+      <ImageSettings
+        user={tempUser}
+        setUser={setTempUser}
+        setProfileFile={setProfileFile}
+        setBgFile={setBgFile}
+        setRoomFile={setRoomFile}
+      />
       <BottomBar>
         <ActionButton onClick={onSave}>저장</ActionButton>
         <ActionButton onClick={onClose}>닫기</ActionButton>

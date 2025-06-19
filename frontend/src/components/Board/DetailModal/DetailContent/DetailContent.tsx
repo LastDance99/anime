@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { boardList } from "../../../../data/boardList";
+import { getBoardPostDetail } from "../../../../api/board";
+import { toggleBoardPostLike } from "../../../../api/board";
 import type { BoardItem } from "../../../../types/board";
 import {
   Wrapper,
@@ -28,21 +29,33 @@ export default function DetailContent({ id }: { id: number }) {
   const [likeCount, setLikeCount] = useState(0);
 
   useEffect(() => {
-    const target = boardList.find((b) => b.id === id);
-    setItem(target ?? null);
-    setLiked(false);
-    setLikeCount(target?.like_count ?? 0);
+    async function fetchData() {
+      try {
+        const data = await getBoardPostDetail(id);
+        setItem(data);
+        setLiked(data.liked ?? false); // 서버 응답에 liked 필드가 있다면
+        setLikeCount(data.like_count ?? 0);
+      } catch (err) {
+        console.error("게시글 상세 조회 실패", err);
+        setItem(null);
+      }
+    }
+    fetchData();
   }, [id]);
 
   if (!item) return <div>게시글을 불러올 수 없습니다.</div>;
 
   const isGallery = item.board_type === "gallery";
 
-  const handleLike = () => {
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-    // TODO: API 연결 필요
-  };
+  const handleLike = async () => {
+  try {
+    const res = await toggleBoardPostLike(id);
+    setLiked(res.liked); // 서버가 true/false 반환한다고 가정
+    setLikeCount(res.like_count); // 서버가 최신 좋아요 수 반환한다고 가정
+  } catch (err) {
+    console.error("좋아요 처리 실패", err);
+  }
+};
 
   return (
     <Wrapper>

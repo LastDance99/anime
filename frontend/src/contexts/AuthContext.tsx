@@ -1,7 +1,8 @@
-import { createContext, useContext, useState, } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { User } from "../types/user";
-import { mockUsers } from "../data/userList"; // 추후 삭제 가능
+import { getMyProfile } from "../api/profile";
+import axios from "../lib/axios";
 
 type AuthContextType = {
   currentUser: User | null;
@@ -22,16 +23,42 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // 실제론 localStorage/token 활용하면 됨
-  const [currentUser, setCurrentUser] = useState<User | null>(mockUsers[0]); // 현재는 mockUsers[0] 로그인된 상태
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      getMyProfile()
+        .then((user) => {
+          setCurrentUser(user);
+        })
+        .catch((err) => {
+          console.warn("❌ 자동 로그인 실패", err);
+          localStorage.removeItem("accessToken");
+          setCurrentUser(null);
+        })
+        .finally(() => {
+          setLoading(false); // ✅ 이제 정확히 실행됨
+        });
+    } else {
+      setLoading(false); // 토큰 없을 때도 풀어줘야 함
+    }
+  }, []);
 
   const login = (user: User) => {
     setCurrentUser(user);
   };
 
   const logout = () => {
+    localStorage.removeItem("accessToken"); // ✅ 키 통일
     setCurrentUser(null);
   };
+
+  if (loading) return null; // ✅ 로그인 확인 중엔 아무것도 안 보여줌
 
   return (
     <AuthContext.Provider value={{ currentUser, login, logout }}>

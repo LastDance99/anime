@@ -7,6 +7,7 @@ type Props = {
   to?: string; // ← 새롭게 추가
   children?: ReactNode;
   style?: CSSProperties;
+  onClick?: () => void;
 };
 
 const WriteButton: React.FC<Props> = ({

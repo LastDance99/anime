@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../lib/axios';
 
 export const searchAnime = async (params: any) => {
   const res = await axios.get('/api/anime/search/', { params });

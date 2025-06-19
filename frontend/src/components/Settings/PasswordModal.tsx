@@ -1,37 +1,49 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { changePassword } from "../../api/auth";
 
 type Props = {
   currentPassword: string;
-  onClose: () => void;
   onSave: (newPassword: string) => void;
+  onClose: () => void;
 };
 
-export default function PasswordModal({ currentPassword, onClose, onSave }: Props) {
+export default function PasswordModal({ onClose }: Props) {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
-  const [valid, setValid] = useState<boolean | null>(null);
+  const [nextConfirm, setNextConfirm] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleBlur = () => {
-    if (current === "") {
-      setValid(null);
-    } else {
-      setValid(current === currentPassword);
-    }
-  };
-
-  const handleSave = () => {
-    if (!valid) {
-      alert("현재 비밀번호가 올바르지 않습니다.");
-      return;
-    }
-    if (!next.trim()) {
-      alert("새 비밀번호를 입력해주세요.");
+  const handleSave = async () => {
+    setError(null);
+    if (!current || !next || !nextConfirm) {
+      setError("모든 항목을 입력해주세요.");
       return;
     }
 
-    onSave(next);
-    onClose();
+    try {
+      await changePassword({
+        current_password: current,
+        new_password: next,
+        new_password2: nextConfirm,
+      });
+      setSuccess(true);
+      setTimeout(onClose, 1000);
+    } catch (err: any) {
+      const data = err.response?.data;
+      if (data?.current_password) {
+        setError(`현재 비밀번호 오류: ${data.current_password}`);
+      } else if (data?.new_password) {
+        setError(`새 비밀번호 오류: ${data.new_password}`);
+      } else if (data?.new_password2) {
+        setError(`비밀번호 확인 오류: ${data.new_password2}`);
+      } else if (data?.non_field_errors) {
+        setError(data.non_field_errors.join(" "));
+      } else {
+        setError("비밀번호 변경에 실패했습니다.");
+      }
+    }
   };
 
   return (
@@ -44,10 +56,7 @@ export default function PasswordModal({ currentPassword, onClose, onSave }: Prop
           type="password"
           value={current}
           onChange={(e) => setCurrent(e.target.value)}
-          onBlur={handleBlur}
         />
-        {valid === false && <Warning>현재 비밀번호가 일치하지 않습니다.</Warning>}
-        {valid === true && <Success>비밀번호 확인 완료 ✅</Success>}
 
         <Label>새 비밀번호</Label>
         <Input
@@ -55,6 +64,16 @@ export default function PasswordModal({ currentPassword, onClose, onSave }: Prop
           value={next}
           onChange={(e) => setNext(e.target.value)}
         />
+
+        <Label>새 비밀번호 확인</Label>
+        <Input
+          type="password"
+          value={nextConfirm}
+          onChange={(e) => setNextConfirm(e.target.value)}
+        />
+
+        {error && <Warning>{error}</Warning>}
+        {success && <Success>비밀번호가 변경되었습니다.</Success>}
 
         <ButtonGroup>
           <Button onClick={onClose}>취소</Button>
