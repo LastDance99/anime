@@ -5,6 +5,11 @@ export const searchAnime = async (params: any) => {
   return res.data;
 };
 
+export const getAnimeFilterMeta = async (lang = "ko") => {
+  const res = await axios.get('/api/anime/filters/', { params: { lang } });
+  return res.data;
+};
+
 export const getAnimeDetail = async (animeId: number) => {
   const res = await axios.get(`/api/anime/${animeId}/`);
   return res.data;

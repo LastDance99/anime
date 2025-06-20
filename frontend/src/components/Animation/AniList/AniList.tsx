@@ -11,8 +11,8 @@ interface AniListProps {
   sort: string;
   sortOptions: { label: string; value: string }[];
   onSortChange: (value: string) => void;
-  scrollRef?: React.RefObject<HTMLDivElement | null>;
-  loaderRef?: React.RefObject<HTMLDivElement | null>;
+  scrollRef?: React.RefObject<HTMLDivElement>;
+  loaderRef?: React.RefObject<HTMLDivElement>;
   onAnimeClick?: (anime: AnimeItem) => void;
 }
 

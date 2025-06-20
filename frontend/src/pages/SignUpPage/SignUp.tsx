@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Container, MainBox, FormBox, EmailRow, EmailInput, AtMark,
   NicknameInput, PasswordInputRow, PasswordInput, EyeIconButton,
   GenderRow, GenderButton, JobInput, SignUpButton, DropdownArrow, Logo,
   LanguageContainer, LanguageSelected, LanguageDropdown, LanguageItem,
-  DomainDropdownWrap, DomainDropdownButton, DomainDropdownList, DomainDropdownItem
+  DomainDropdownWrap, DomainDropdownButton, DomainDropdownList, DomainDropdownItem,
+  AbsoluteErrorBox, EmailAuthBox,
 } from "./SignUp.styled";
 import { Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -60,6 +61,11 @@ export default function SignUp() {
   const [emailMessage, setEmailMessage] = useState("");
   const [nicknameMessage, setNicknameMessage] = useState("");
 
+  const [pwError, setPwError] = useState("");
+  const [pwCheckError, setPwCheckError] = useState("");
+  const [emailTimer, setEmailTimer] = useState(0);
+  const emailTimerRef = useRef<number | null>(null);
+
   const domain = showJobInput ? job.trim() : emailDomain.trim();
   const fullEmail = `${emailId.trim()}@${domain}`.toLowerCase();
 
@@ -71,53 +77,79 @@ export default function SignUp() {
 
   const isActive = isValidEmail && isValidNickname && isValidPw && isSamePw && isValidGender && isEmailVerified;
 
+  // 이메일 인증 타이머
+  useEffect(() => {
+    if (emailSent && emailTimer > 0) {
+      emailTimerRef.current = window.setTimeout(() => setEmailTimer(t => t - 1), 1000);
+    }
+    if (emailTimer === 0 && emailSent) {
+      setEmailSent(false);
+      setIsEmailVerified(false);
+      setEmailMessage("인증 시간이 만료되었습니다. 다시 시도해주세요.");
+    }
+    return () => {
+      if (emailTimerRef.current !== null) {
+        clearTimeout(emailTimerRef.current);
+      }
+    };
+  }, [emailSent, emailTimer]);
+
+  // 비밀번호 유효성 체크
+  useEffect(() => {
+    if (!pw) setPwError("");
+    else if (!isValidPw) setPwError("8자 이상, 영문+숫자 포함");
+    else setPwError("");
+
+    if (!pwCheck) setPwCheckError("");
+    else if (pw !== pwCheck) setPwCheckError("비밀번호가 다릅니다.");
+    else setPwCheckError("");
+  }, [pw, pwCheck]);
+
+  // 이메일 인증 요청
   const handleEmailCheck = async () => {
-    console.log("📨 이메일 체크 요청:", fullEmail);
+    if (!isValidEmail) {
+      setEmailMessage("올바른 이메일을 입력하세요.");
+      return;
+    }
+    setEmailMessage("");
     try {
       const res = await checkEmail(fullEmail);
-      console.log("✅ 이메일 중복 체크 응답:", res);
-
       if (res.exists) {
         setEmailMessage("이미 가입된 이메일입니다.");
         setIsEmailVerified(false);
       } else {
-        console.log("📨 이메일 인증 요청 중...");
         const result = await requestEmailVerification({ email: fullEmail });
-        console.log("✅ 이메일 인증 요청 성공:", result);
         setEmailMessage("인증 메일을 보냈습니다.");
         setEmailSent(true);
+        setEmailTimer(300); // 5분
       }
     } catch (err) {
-      console.error("❌ 이메일 인증 요청 실패:", err);
       setEmailMessage("이메일 인증 요청 실패");
     }
   };
 
   const handleEmailVerify = async () => {
-    console.log("🔐 인증 확인 요청:", { email: fullEmail, code: verificationCode });
     try {
       const result = await confirmEmailVerification({ email: fullEmail, code: verificationCode });
-      console.log("✅ 인증 성공:", result);
       setIsEmailVerified(true);
       setEmailMessage("이메일 인증 완료");
+      setEmailTimer(0);
     } catch (err) {
-      console.error("❌ 인증 실패:", err);
+      setIsEmailVerified(false);
       setEmailMessage("인증 코드가 잘못되었습니다.");
     }
   };
 
   const handleNicknameCheck = async () => {
-    console.log("📝 닉네임 중복 확인:", nickname);
+    if (!isValidNickname) {
+      setNicknameMessage("2~16자 닉네임 입력");
+      return;
+    }
     try {
       const res = await checkNickname(nickname);
-      console.log("✅ 닉네임 응답:", res);
-      if (res.exists) {
-        setNicknameMessage("이미 사용 중인 닉네임입니다.");
-      } else {
-        setNicknameMessage("사용 가능한 닉네임입니다.");
-      }
+      if (res.exists) setNicknameMessage("이미 사용 중인 닉네임입니다.");
+      else setNicknameMessage("사용 가능한 닉네임입니다.");
     } catch (err) {
-      console.error("❌ 닉네임 중복 확인 실패:", err);
       setNicknameMessage("닉네임 확인 실패");
     }
   };
@@ -135,14 +167,10 @@ export default function SignUp() {
       language: lang,
     };
 
-    console.log("🚀 회원가입 데이터 전송:", data);
-
     try {
       const result = await signup(data);
-      console.log("✅ 회원가입 성공:", result);
       navigate("/login");
     } catch (err: any) {
-      console.error("❌ 회원가입 실패:", err);
       const resData = err.response?.data;
       if (resData && typeof resData === "object") {
         const firstKey = Object.keys(resData)[0];
@@ -153,13 +181,11 @@ export default function SignUp() {
     }
   };
 
+  // ----------- 렌더링 ----------
   return (
     <Container>
       <MainBox>
-        <Link to="/">
-          <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
-        </Link>
-
+        <Link to="/"><Logo src="/logos/mainlog.png" alt="AnTada 로고" /></Link>
         <FormBox onSubmit={handleSubmit}>
           {/* 언어 */}
           <LanguageContainer>
@@ -210,30 +236,43 @@ export default function SignUp() {
                 </DomainDropdownList>
               )}
             </DomainDropdownWrap>
+            {/* 이메일 오류 메시지 */}
+            {!!emailMessage && <AbsoluteErrorBox>{emailMessage}</AbsoluteErrorBox>}
           </EmailRow>
-          <button type="button" onClick={handleEmailCheck}>이메일 인증 요청</button>
-          {emailSent && (
-            <>
-              <input
-                type="text"
-                placeholder="인증코드 입력"
-                value={verificationCode}
-                onChange={e => setVerificationCode(e.target.value)}
-              />
-              <button type="button" onClick={handleEmailVerify}>인증 확인</button>
-            </>
-          )}
-          {emailMessage && <p>{emailMessage}</p>}
+
+          {/* 이메일 인증 박스 */}
+          <EmailAuthBox>
+            <button type="button" onClick={handleEmailCheck} disabled={emailSent && emailTimer > 0}>
+              {emailSent && emailTimer > 0 ? "인증 대기중" : "이메일 인증 요청"}
+            </button>
+            {emailSent && (
+              <>
+                <input
+                  type="text"
+                  placeholder="인증코드 입력"
+                  value={verificationCode}
+                  onChange={e => setVerificationCode(e.target.value)}
+                  style={{ width: "120px" }}
+                />
+                <button type="button" onClick={handleEmailVerify}>인증 확인</button>
+                <span style={{ color: "#ff4264", fontSize: "0.95em", minWidth: 50 }}>
+                  {`${Math.floor(emailTimer/60)}:${String(emailTimer%60).padStart(2,"0")}`}
+                </span>
+              </>
+            )}
+          </EmailAuthBox>
 
           {/* 닉네임 */}
-          <NicknameInput
-            type="text"
-            placeholder="닉네임"
-            value={nickname}
-            onChange={e => setNickname(e.target.value)}
-            onBlur={handleNicknameCheck}
-          />
-          {nicknameMessage && <p>{nicknameMessage}</p>}
+          <div style={{ width: "100%", position: "relative" }}>
+            <NicknameInput
+              type="text"
+              placeholder="닉네임"
+              value={nickname}
+              onChange={e => setNickname(e.target.value)}
+              onBlur={handleNicknameCheck}
+            />
+            {!!nicknameMessage && <AbsoluteErrorBox>{nicknameMessage}</AbsoluteErrorBox>}
+          </div>
 
           {/* 비밀번호 */}
           <PasswordInputRow>
@@ -246,8 +285,8 @@ export default function SignUp() {
             <EyeIconButton type="button" onClick={() => setShowPw(v => !v)}>
               {showPw ? <EyeOff /> : <Eye />}
             </EyeIconButton>
+            {!!pwError && <AbsoluteErrorBox>{pwError}</AbsoluteErrorBox>}
           </PasswordInputRow>
-
           <PasswordInputRow>
             <PasswordInput
               type={showPwCheck ? "text" : "password"}
@@ -258,6 +297,7 @@ export default function SignUp() {
             <EyeIconButton type="button" onClick={() => setShowPwCheck(v => !v)}>
               {showPwCheck ? <EyeOff /> : <Eye />}
             </EyeIconButton>
+            {!!pwCheckError && <AbsoluteErrorBox>{pwCheckError}</AbsoluteErrorBox>}
           </PasswordInputRow>
 
           {/* 성별 */}
@@ -270,7 +310,7 @@ export default function SignUp() {
           {/* 제출 */}
           <SignUpButton type="submit" disabled={!isActive}>회원가입</SignUpButton>
         </FormBox>
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <div style={{ color: "#d44", marginTop: 16 }}>{error}</div>}
       </MainBox>
     </Container>
   );

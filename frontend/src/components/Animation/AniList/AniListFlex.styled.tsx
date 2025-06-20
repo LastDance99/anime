@@ -7,7 +7,7 @@ export const StyledAniListFlex   = styled.main`
   align-items: flex-start;
   width: 100%;
   align-content: flex-start;
-  gap: 10px;
+  gap: 8px;
 
   overflow-y: auto;       // 세로 스크롤 활성화
 

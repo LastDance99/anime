@@ -3,7 +3,7 @@ import styled from "styled-components";
 // 카드 전체
 export const CardBox = styled.div`
   width: 120px;
-  height: 170px;
+  height: 150px;
   position: relative;
   background: ${({ theme }) => theme.colors.background};
   overflow: hidden;
@@ -34,8 +34,8 @@ export const ShadowBox = styled.div`
   background: linear-gradient(
     to top,
     rgba(30, 16, 26, 0.8) 0%,
-    rgba(30, 16, 26, 0.6) 35%,
-    rgba(30, 16, 26, 0.35) 70%,
+    rgba(30, 16, 26, 0.6) 40%,
+    rgba(30, 16, 26, 0.35) 80%,
     transparent 100%
   );
   z-index: 1;
@@ -46,17 +46,22 @@ export const ShadowBox = styled.div`
 export const AniTitle = styled.div`
   position: absolute;
   left: 0;
-  bottom: 4px;
+  right: 0;
+  bottom: 8px;
   z-index: 2;
-  font-size: ${({ theme }) => theme.fontSizes.sm}; // 12px
+  font-size: ${({ theme }) => theme.fontSizes.xs}; // 12px
   font-weight: ${({ theme }) => theme.Weights.medium};
   color: #fff;
-  text-align: center;
+  text-align: left;
   text-shadow: 0 1px 4px rgba(30, 0, 40, 0.24);
   padding: 0 8px;
-  overflow: hidden;
+  overflow: hidden; // 부모(카드)를 넘어서지는 않음
+  /* 아래 3줄로 여러 줄 허용 + 2줄로 제한 (더 많이 보고 싶으면 line-clamp 조정) */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;      // 2줄까지 허용 (필요하면 3으로)
+  -webkit-box-orient: vertical;
+  white-space: normal;
   text-overflow: ellipsis;
-  white-space: nowrap;
 `;
 
 // +버튼

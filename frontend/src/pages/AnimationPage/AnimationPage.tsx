@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import FilterSidebar from "../../components/Animation/AniTag/FilterSidebar";
 import AniList from "../../components/Animation/AniList/AniList";
-import ChatBot from "../../components/ChatBot/ChatBot";
 import AnimeProfile from "../../components/Animation/ProfileCard/ProfileCard";
 import AnimeDetailModal from "../../components/AnimeDetailModal/AnimeDetailModal";
 import { searchAnime, getAnimeDetail } from "../../api/anime";
 import { getMyProfile } from "../../api/profile";
+import { useGenreFilteredAnimeList } from "../../hooks/bolckAnime";
 import type { AnimeItem, AnimeFilter } from "../../types/anime";
 import type { User } from "../../types/user";
 import {
@@ -18,11 +18,33 @@ import {
   AnimeListBox,
 } from "./AnimationPage.styled";
 
+const LIMIT = 50;
+
 const SORT_OPTIONS = [
   { label: "인기순", value: "popular" },
   { label: "최신순", value: "latest" },
   { label: "평점순", value: "rating" },
 ];
+
+const buildAnimeParams = (filters: AnimeFilter, sort: string, offset: number, limit: number) => {
+  let yearParam = undefined;
+  if (filters.year === "2010년 이하") {
+    yearParam = undefined;
+  } else if (filters.year) {
+    yearParam = filters.year;
+  }
+
+  return {
+    ...(filters.genre && filters.genre.length > 0 ? { genres: filters.genre.join(",") } : {}),
+    ...(filters.season ? { season: filters.season } : {}),
+    ...(yearParam !== undefined ? { year: yearParam } : {}),
+    ...(filters.broadcast ? { status: filters.broadcast } : {}),
+    ...(filters.keyword ? { q: filters.keyword } : {}),
+    sort: sort === "popular" ? "popular" : (sort === "latest" ? "-start_year" : sort),
+    offset,
+    limit,
+  };
+};
 
 export default function AniMain() {
   const [filters, setFilters] = useState<AnimeFilter>({
@@ -34,8 +56,7 @@ export default function AniMain() {
   });
 
   const [sort, setSort] = useState("popular");
-  const [showCount, setShowCount] = useState(50);
-
+  const [offset, setOffset] = useState(0);
   const [animeList, setAnimeList] = useState<AnimeItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -48,12 +69,19 @@ export default function AniMain() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
-  // 로그인 유저 불러오기
+  // 필터링 훅 적용
+  const filteredAnimeList = useGenreFilteredAnimeList(animeList);
+
+  useEffect(() => {
+    console.log("[필터 변경] filters:", filters, "sort:", sort, "offset:", offset);
+  }, [filters, sort, offset]);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const data = await getMyProfile();
         setUser(data);
+        console.log("[유저 프로필]", data);
       } catch (e) {
         console.error("유저 정보 가져오기 실패", e);
       }
@@ -61,52 +89,54 @@ export default function AniMain() {
     fetchProfile();
   }, []);
 
-  // 애니 리스트 불러오기
   useEffect(() => {
     const fetchAnimeList = async () => {
       setLoading(true);
       try {
-        const params = {
-          genre: filters.genre,
-          season: filters.season,
-          year: filters.year,
-          broadcast: filters.broadcast,
-          keyword: filters.keyword,
-          sort,
-          limit: showCount,
-        };
+        const params = buildAnimeParams(filters, sort, offset, LIMIT);
+        console.log("[애니 검색 파라미터]", params);
         const data = await searchAnime(params);
-        console.log("🎯 애니 목록 API 응답:", data);
+        console.log("[애니 목록 API 응답]", data);
 
-        // 응답이 배열인지 확인하고 처리
+        let resultList: AnimeItem[] = [];
         if (Array.isArray(data)) {
-          setAnimeList(data);
+          resultList = data;
           setTotalCount(data.length);
         } else if (data.results) {
-          setAnimeList(data.results);
+          resultList = data.results;
           setTotalCount(data.count || data.results.length);
         } else {
-          console.warn("⚠️ 알 수 없는 응답 구조:", data);
-          setAnimeList([]);
+          resultList = [];
           setTotalCount(0);
         }
+        setAnimeList(prev =>
+          offset === 0 ? resultList : [...prev, ...resultList]
+        );
+        console.log("[최종 animeList]", offset === 0 ? resultList : [...animeList, ...resultList]);
       } catch (e) {
         console.error("애니 목록 가져오기 실패 ❌", e);
+        setAnimeList([]);
+        setTotalCount(0);
       } finally {
         setLoading(false);
       }
     };
     fetchAnimeList();
-  }, [filters, sort, showCount]);
+    // eslint-disable-next-line
+  }, [filters, sort, offset]);
 
-  // 무한스크롤
+  useEffect(() => {
+    setOffset(0);
+  }, [filters, sort]);
+
   useEffect(() => {
     if (!loaderRef.current || !scrollRef.current) return;
 
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
-          setShowCount(prev => prev + 50);
+          setOffset(prev => prev + LIMIT);
+          console.log("[무한스크롤] 다음 페이지 요청 (offset ↑)");
         }
       },
       {
@@ -119,13 +149,13 @@ export default function AniMain() {
     return () => observer.disconnect();
   }, [loaderRef.current, scrollRef.current]);
 
-  // 상세 보기
   useEffect(() => {
     const fetchDetail = async () => {
       if (selectedAnimeId === null) return;
       try {
         const data = await getAnimeDetail(selectedAnimeId);
         setSelectedAnime(data);
+        console.log("[애니 상세 정보]", data);
       } catch (e) {
         console.error("애니 상세 정보 불러오기 실패 ❌", e);
       }
@@ -139,10 +169,10 @@ export default function AniMain() {
         <Wrapper>
           <AnimeSectionBox>
             <AnimeHeader>애니메이션 목록</AnimeHeader>
-            <AnimeListBox>
+            <AnimeListBox ref={scrollRef}>
               <FilterSidebar filters={filters} setFilters={setFilters} />
               <AniList
-                list={animeList}
+                list={filteredAnimeList}
                 total={totalCount}
                 sort={SORT_OPTIONS.find(opt => opt.value === sort)?.label || "인기순"}
                 sortOptions={SORT_OPTIONS}
@@ -151,6 +181,7 @@ export default function AniMain() {
                 loaderRef={loaderRef}
                 onAnimeClick={anime => setSelectedAnimeId(anime.id)}
               />
+              <div ref={loaderRef} style={{ height: 1 }} />
               {selectedAnime && (
                 <AnimeDetailModal
                   anime={selectedAnime}

@@ -22,7 +22,6 @@ export default function DescMoreModal({ description, onClose }: DescMoreModalPro
 
   // 오버레이(밖) 클릭 시 닫기
   const handleOverlayClick = (e: React.MouseEvent) => {
-    // 모달 자체 클릭이면 무시, 오버레이 클릭일 때만 onClose
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -32,7 +31,8 @@ export default function DescMoreModal({ description, onClose }: DescMoreModalPro
     <Overlay onClick={handleOverlayClick}>
       <Modal ref={modalRef}>
         <CloseBtn onClick={onClose}>×</CloseBtn>
-        <FullDesc>{description}</FullDesc>
+        {/* ✨ 핵심 변경 부분! */}
+        <FullDesc dangerouslySetInnerHTML={{ __html: description }} />
       </Modal>
     </Overlay>
   );
@@ -58,7 +58,7 @@ const Modal = styled.div`
 `;
 
 const FullDesc = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.base}; // 16px
+  font-size: ${({ theme }) => theme.fontSizes.base};
   color: #534a5a;
   white-space: pre-line;
 `;

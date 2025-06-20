@@ -106,3 +106,11 @@ export const PosterImg = styled.img`
   box-shadow: 0 2px 8px rgba(120, 92, 119, 0.10);
   background: #fff;
 `;
+
+export const BannerImg = styled.img`
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 20px;
+`;

@@ -130,7 +130,8 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
   return (
     <Overlay onClick={onClose}>
       <Modal onClick={e => e.stopPropagation()}>
-        <Header image_url={anime.image_url} onClose={onClose} />
+        {/* ⭐️ 여기를 anime.banner_image로! */}
+        <Header image_url={anime.banner_image} onClose={onClose} />
         <Content>
           <InfoSection
             anime={anime}

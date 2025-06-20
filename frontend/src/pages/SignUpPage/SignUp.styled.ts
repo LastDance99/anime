@@ -263,6 +263,9 @@ export const EyeIconButton = styled.button`
   border: none;
   padding: 0;
   cursor: pointer;
+  svg {
+    color: #999;
+  }
 `;
 
 // 성별 토글 그룹
@@ -328,4 +331,30 @@ export const ErrorText = styled.div`
   margin-top: 10px;
   font-weight: 500;
   min-height: 1.3em;
+`;
+
+export const AbsoluteErrorBox = styled.div`
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: ${({ theme }) => theme.colors.background};
+  border: 1px solid #ffd1dc;
+  color: #ff4264;
+  font-size: 0.97rem;
+  padding: 6px 14px;
+  border-radius: 7px;
+  white-space: nowrap;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(255, 182, 193, 0.09);
+  pointer-events: none;
+`;
+
+// 이메일 인증용 입력+버튼 묶는 박스 (플렉스)
+export const EmailAuthBox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 6px 0;
+  position: relative;
 `;

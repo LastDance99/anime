@@ -45,7 +45,7 @@ instance.interceptors.response.use(
         if (!refreshToken) throw new Error("refreshToken 없음");
 
         const res = await axios.post(`${baseURL}/api/users/refresh/`, {
-          refresh: refreshToken,
+          refresh_token: refreshToken,
         });
 
         const newAccessToken = res.data.access;
