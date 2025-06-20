@@ -11,8 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 
+from dotenv import load_dotenv
 from pathlib import Path
 from corsheaders.defaults import default_headers
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,17 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&8$*-=i8uro%b8@!qrtyzqyq9w3rt=_!=#_wokivx0a0ff7*-9'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',      # 자기 자신 (로컬 개발용)
-    'localhost',      # 자기 자신 도메인 방식
-    '192.168.0.9',   # ✅ 너의 내부 IP 집(프론트에서 접근할 주소!)
-    '192.168.0.7',   # ✅ 너의 내부 IP 학원(프론트에서 접근할 주소!)
-]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Application definition
 
@@ -99,11 +97,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'anime_db',
-        'USER': 'postgres',
-        'PASSWORD': 'a2039305',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -161,11 +159,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS 설정
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", 
-    "http://127.0.0.1:5173",
-    "http://192.168.0.37:5173",
-]
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
 
 CORS_ALLOW_CREDENTIALS = False  # 쿠키 인증 안 쓰면 False
 
@@ -197,8 +191,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'simyuong68@gmail.com'  # 본인 Gmail 주소
-EMAIL_HOST_PASSWORD = 'lymi zpvz sttj kyhg'         # Gmail 앱 비밀번호
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') # 본인 Gmail 주소
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') # Gmail 앱 비밀번호
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 #Tip: 실제 코드에서는 EMAIL_HOST_PASSWORD에 절대로 평문을 두지 말고, 반드시 .env나 AWS/GCP Secret Manager 등에 보관
 
@@ -215,7 +209,22 @@ SIMPLE_JWT = {
 }
 
 # AWS S3 설정
-AWS_ACCESS_KEY_ID='AKIAZB7AEDKDR6SWG4VD'
-AWS_SECRET_ACCESS_KEY='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'
-AWS_S3_BUCKET_NAME='anime-project-image-bucket'
-AWS_REGION='ap-northeast-2' 
+
+INSTALLED_APPS += ['storages']
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_REGION', 'ap-northeast-2')
+AWS_S3_SIGNATURE_VERSION = 's3v4'             # 최신 리전 필수!
+
+AWS_S3_FILE_OVERWRITE = False                 # 같은 파일명 덮어쓰기 방지
+AWS_DEFAULT_ACL = None                        # 버킷 정책 우선
+AWS_QUERYSTRING_AUTH = False                  # public URL 사용시 권장
+
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+
+

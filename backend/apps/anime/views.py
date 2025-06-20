@@ -112,6 +112,45 @@ class AnimeSearchView(APIView):
             "count": total_count,
             "results": serializer.data
         })
+    
+# Anime 필터 메타데이터 조회 API
+class AnimeFilterMetaView(APIView):
+    def get(self, request):
+        lang = request.GET.get('lang', 'ko')
+        # genres (모든 애니의 genres_ko를 합쳐서 set)
+        genres = set()
+        seasons = set()
+        years = set()
+        formats = set()
+        sources = set()
+        statuses = set()
+
+        # 모든 애니메이션 쿼리
+        qs = Anime.objects.all()
+
+        for anime in qs:
+            # 장르 (JSONField, 리스트)
+            genres.update(getattr(anime, f'genres_{lang}', []) or [])
+            # 시즌
+            seasons.add(getattr(anime, f'season_{lang}', None))
+            # 연도
+            years.add(anime.start_year)
+            # 포맷, 소스, 상태
+            formats.add(anime.format)
+            sources.add(getattr(anime, f'source_{lang}', None))
+            statuses.add(getattr(anime, f'status_{lang}', None))
+
+        # None, 빈값 등 정리
+        def clean_set(s): return sorted([x for x in s if x and str(x).strip() != ''])
+
+        return Response({
+            "genres": clean_set(genres),
+            "seasons": clean_set(seasons),
+            "years": sorted([y for y in years if y]),
+            "formats": clean_set(formats),
+            "sources": clean_set(sources),
+            "statuses": clean_set(statuses),
+        })
 
 # Anime 상세 조회 API
 class AnimeDetailView(APIView):
@@ -232,7 +271,7 @@ class AnimeReviewUpdateDeleteView(APIView):
         return Response({"detail": "리뷰가 삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
     
 
-# Anime 평점 등록/수정/삭제 API
+# Anime 평점 등록/수정/삭제 API ####post메소드로 업데이트####
 class AnimeRatingView(APIView):
 
     def post(self, request, anime_id):
@@ -246,7 +285,11 @@ class AnimeRatingView(APIView):
         except:
             return Response({"detail": "평점은 1~5 사이의 정수여야 합니다."}, status=400)
 
-        review, created = AnimeReview.objects.get_or_create(anime=anime, user=request.user)
+        review, created = AnimeReview.objects.get_or_create(
+            anime=anime, 
+            user=request.user, 
+            defaults={'rating': rating, 'content': ''},
+            )
 
         review.rating = rating
         if created:

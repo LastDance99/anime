@@ -7,11 +7,14 @@ from .views import (
     AnimeReviewLikeView,
     AnimeRatingView,
     AnimeListToggleView,
+    AnimeFilterMetaView,
 )
 
 urlpatterns = [
     # 애니메이션 통합 검색
     path("search/", AnimeSearchView.as_view(), name="anime-search"),
+    # 애니메이션 필터 메타 정보 조회
+    path("filters/", AnimeFilterMetaView.as_view()),
     # 애니 상세 정보
     path("<int:anime_id>/", AnimeDetailView.as_view(), name="anime-detail"),
     # 리뷰 목록 조회 & 작성 (GET, POST)

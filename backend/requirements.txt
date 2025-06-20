@@ -7,13 +7,16 @@ Django==5.2
 django-cors-headers==4.7.0
 django-environ==0.12.0
 django-filter==25.1
+django-storages==1.14.6
 djangorestframework==3.16.0
 djangorestframework_simplejwt==5.5.0
 drf-yasg==1.21.10
+et_xmlfile==2.0.0
 inflection==0.5.1
 jmespath==1.0.1
 Markdown==3.8
 numpy==2.3.0
+openpyxl==3.1.5
 packaging==25.0
 pandas==2.3.0
 pillow==11.2.1
@@ -21,6 +24,7 @@ psycopg2==2.9.10
 psycopg2-binary==2.9.10
 PyJWT==2.9.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.1.0
 pytz==2025.2
 PyYAML==6.0.2
 s3transfer==0.13.0

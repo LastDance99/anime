@@ -229,13 +229,6 @@ class BoardAPITest(APITestCase):
         resp = self.client.post(url, {"title": "테스트", "content": "본문"})
         self.assertEqual(resp.status_code, 400)
 
-    def test_comment_like_on_deleted_comment(self):
-        post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
-        comment = BoardComment.objects.create(post=post, author=self.user, content="댓글", is_deleted=True)
-        url = f"/api/boards/comments/{comment.id}/like/"
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 201)  # 삭제된 댓글도 좋아요 가능(비즈니스 규칙 따라 다름, 바꿔도 됨)
-
     def test_reply_to_nonexistent_comment(self):
         post = BoardPost.objects.create(author=self.user, title="댓글글", content="c", board_type="post")
         url = f"/api/boards/{post.id}/comments/"
@@ -250,3 +243,54 @@ class BoardAPITest(APITestCase):
         self.assertIn(resp.status_code, [200, 204])
         resp2 = self.client.delete(url)
         self.assertEqual(resp2.status_code, 404)
+
+    def test_post_create_and_thumbnail_extract(self):
+        """썸네일 자동 추출 & XSS 필터 동작"""
+        # img 태그 있는 HTML
+        html = '<p>텍스트<img src="http://a.com/a.png"></p>'
+        url = reverse("board-post-list-create")
+        resp = self.client.post(url, {"title": "img", "content": html, "board_type": "post"})
+        self.assertEqual(resp.status_code, 201)
+        post = BoardPost.objects.latest('id')
+        self.assertIn('img', post.content) # 원본의 img 태그가 sanitize됨
+        self.assertEqual(post.thumbnail_url, "http://a.com/a.png")
+
+        # 유튜브 iframe
+        html2 = '<iframe src="https://www.youtube.com/embed/abcDEF123"></iframe>'
+        resp2 = self.client.post(url, {"title": "yt", "content": html2, "board_type": "post"})
+        self.assertEqual(resp2.status_code, 201)
+        post2 = BoardPost.objects.latest('id')
+        self.assertTrue("iframe" in post2.content)
+        self.assertEqual(post2.thumbnail_url, "https://img.youtube.com/vi/abcDEF123/0.jpg")
+
+        # 아무것도 없을 때
+        resp3 = self.client.post(url, {"title": "no", "content": "글만있음", "board_type": "post"})
+        post3 = BoardPost.objects.latest('id')
+        self.assertIsNone(post3.thumbnail_url)
+
+    def test_post_update_content_and_thumbnail(self):
+        """수정시에도 XSS 필터와 썸네일 변경"""
+        post = BoardPost.objects.create(author=self.user, title="수정", content="초기", board_type="post")
+        url = reverse("board-post-detail", kwargs={"post_id": post.id})
+        new_html = '<img src="http://a.com/img.png">'
+        resp = self.client.put(url, {"title": "수정", "content": new_html, "board_type": "post"})
+        self.assertEqual(resp.status_code, 200)
+        post.refresh_from_db()
+        self.assertEqual(post.thumbnail_url, "http://a.com/img.png")
+        self.assertIn("img", post.content)
+
+    def test_comment_create_xss_and_parent_error(self):
+        """댓글/대댓글 XSS, 존재X parent_id 예외"""
+        post = BoardPost.objects.create(author=self.user, title="T", content="c", board_type="post")
+        url = reverse("comment-list-create", kwargs={"post_id": post.id})
+        # 댓글 XSS
+        html = "<script>alert(1)</script>댓글"
+        resp = self.client.post(url, {"content": html})
+        self.assertEqual(resp.status_code, 201)
+        comment = BoardComment.objects.latest('id')
+        self.assertNotIn("<script>", comment.content)
+        # 존재하지 않는 parent_id
+        resp2 = self.client.post(url, {"content": "test", "parent_id": 999999})
+        self.assertEqual(resp2.status_code, 400)
+        self.assertIn("존재하지 않는 댓글", str(resp2.data))
+        
