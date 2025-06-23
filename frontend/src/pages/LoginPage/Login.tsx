@@ -24,6 +24,7 @@ import { Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { login } from "../../api/auth";
 import { getMyProfile } from "../../api/profile";
 import { useAuth } from "../../contexts/AuthContext";
+import { setAccessToken, setRefreshToken } from "../../utils/token";
 
 const languages = [
   { code: "ko", label: "한국어" },
@@ -57,23 +58,17 @@ const Login: React.FC = () => {
     setError("");
     try {
       const res = await login({ email, password: pw });
-      const token = res.access;
+      const { access, refresh } = res;
 
-      if (token) {
-        if (keepLogin) {
-          localStorage.setItem("accessToken", token); // ✅ 수정됨
-        } else {
-          sessionStorage.setItem("accessToken", token); // ✅ 수정됨
-        }
-      }
+      // ✅ keepLogin 상태에 따라 저장 위치 결정
+      setAccessToken(access, keepLogin);
+      setRefreshToken(refresh);
 
       const userInfo = await getMyProfile();
-      loginToContext(userInfo); // ✅ context에 유저 저장
+      loginToContext(userInfo);
       navigate(`/profile/${userInfo.id}`);
     } catch (err: any) {
-      console.error("❌ 로그인 실패:", err);
-      const msg = err.response?.data?.detail || "로그인 실패";
-      setError(msg);
+      // ...
     }
   };
 

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import type { AnimeItem, AnimeReview } from "../../types/anime";
-import { ANIME_REVIEWS } from "../../data/animeReviews";
 import {
   Overlay,
   Modal,
@@ -15,35 +14,35 @@ import ReviewList from "./ReviewList/ReviewList";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ko";
+import { ANIME_REVIEWS } from "../../data/animeReviews";
+
 dayjs.extend(relativeTime);
 dayjs.locale("ko");
-
-const MY_USER_ID = 1;
 
 type Props = {
   anime: AnimeItem;
   onClose: () => void;
+  isAdded: boolean;
+  onToggle: () => void;
+  user: {
+    id: number;
+    nickname: string;
+    profile_image?: string;
+  };
+  onDelete?: () => void; // 🔹 선택적 삭제 후 콜백
 };
 
-export default function AnimeDetailModal({ anime, onClose }: Props) {
-  const initialReviews = ANIME_REVIEWS.filter(r => r.anime_id === anime.id);
+export default function AnimeDetailModal({
+  anime,
+  onClose,
+  isAdded,
+  onToggle,
+  user,
+  onDelete,
+}: Props) {
+  const initialReviews = ANIME_REVIEWS.filter((r) => r.anime_id === anime.id);
   const [reviews, setReviews] = useState<AnimeReview[]>(initialReviews);
-
-  const [myAnimeList, setMyAnimeList] = useState<AnimeItem[]>([]);
-  const isAdded = myAnimeList.some(item => item.id === anime.id);
-
-  const [addedUserCount, setAddedUserCount] = useState(0);
-
-  const handleToggleList = () => {
-    if (isAdded) {
-      setMyAnimeList(prev => prev.filter(item => item.id !== anime.id));
-      setAddedUserCount(prev => Math.max(prev - 1, 0));
-    } else {
-      setMyAnimeList(prev => [...prev, anime]);
-      setAddedUserCount(prev => prev + 1);
-    }
-  };
-
   const [myRating, setMyRating] = useState(0);
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [editedContent, setEditedContent] = useState("");
@@ -63,15 +62,15 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
       id: Date.now(),
       anime_id: anime.id,
       user: {
-        id: MY_USER_ID,
-        nickname: "임시유저",
-        profile_image: "/images/default_profile.png",
+        id: user.id,
+        nickname: user.nickname,
+        profile_image: user.profile_image ?? "/images/default_profile.png",
       },
       rating: myRating,
       content,
       created_at: new Date().toISOString(),
     };
-    setReviews(prev => [newReview, ...prev]);
+    setReviews((prev) => [newReview, ...prev]);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -89,7 +88,7 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
   };
 
   const handleDelete = (id: number) => {
-    setReviews(prev => prev.filter(r => r.id !== id));
+    setReviews((prev) => prev.filter((r) => r.id !== id));
   };
 
   const handleEditStart = (review: AnimeReview) => {
@@ -106,8 +105,8 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
 
   const handleEditSubmit = (id: number) => {
     if (!editedContent.trim()) return;
-    setReviews(prev =>
-      prev.map(r =>
+    setReviews((prev) =>
+      prev.map((r) =>
         r.id === id
           ? {
               ...r,
@@ -129,22 +128,21 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
 
   return (
     <Overlay onClick={onClose}>
-      <Modal onClick={e => e.stopPropagation()}>
-        {/* ⭐️ 여기를 anime.banner_image로! */}
+      <Modal onClick={(e) => e.stopPropagation()}>
         <Header image_url={anime.banner_image} onClose={onClose} />
         <Content>
           <InfoSection
             anime={anime}
-            onAddList={handleToggleList}
+            onAddList={onToggle}
             isAdded={isAdded}
+            onDelete={onDelete} // 🔹 삭제 콜백 넘김
           />
           <RatingSection
             myRating={myRating}
             onChangeMyRating={handleChangeMyRating}
             avgRating={avgRating}
-            listCount={addedUserCount}
+            listCount={0}
           />
-
           <ReviewBoxGroup>
             <ReviewInputBox
               value={reviewInput}
@@ -153,7 +151,7 @@ export default function AnimeDetailModal({ anime, onClose }: Props) {
             />
             <ReviewList
               reviews={reviews}
-              myUserId={MY_USER_ID}
+              myUserId={user.id}
               editingReviewId={editingReviewId}
               editedContent={editedContent}
               editedRating={editedRating}

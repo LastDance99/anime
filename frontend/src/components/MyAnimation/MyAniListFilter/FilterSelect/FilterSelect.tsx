@@ -6,7 +6,7 @@ import { useTheme } from "styled-components";
 type OptionType = { value: string; label: string };
 
 type Props = {
-  value: string;
+  value?: string;
   onChange: (v: string) => void;
   options: OptionType[];
   label?: string;

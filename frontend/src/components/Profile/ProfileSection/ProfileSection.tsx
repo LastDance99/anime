@@ -11,9 +11,10 @@ import {
 } from "./ProfileSection.styled";
 
 import type { ProfileCardProps } from "../../../types/user";
-import { getFullImageUrl } from "../../../utils/getFullImageUrl"; // 경로 맞게 조정
+import { getFullImageUrl } from "../../../utils/getFullImageUrl";
 
 const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
+  // 경로 찍어서 꼭 확인!
   console.log("ProfileSection user", user);
 
   return (

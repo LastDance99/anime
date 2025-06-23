@@ -14,6 +14,9 @@ interface AniListProps {
   scrollRef?: React.RefObject<HTMLDivElement>;
   loaderRef?: React.RefObject<HTMLDivElement>;
   onAnimeClick?: (anime: AnimeItem) => void;
+  loading?: boolean;
+  userAnimeIds: number[];
+  onToggleAnimeList: (animeId: number) => void;
 }
 
 export default function AniList({
@@ -25,8 +28,16 @@ export default function AniList({
   scrollRef,
   loaderRef,
   onAnimeClick,
+  loading,
+  userAnimeIds,
+  onToggleAnimeList,
 }: AniListProps) {
-  if (!list || list.length === 0) {
+  const processedList = list.map(anime => ({
+    ...anime,
+    isAdded: userAnimeIds.includes(anime.id),
+  }));
+
+  if (!loading && (!list || list.length === 0)) {
     return <AniListWrapper>애니메이션 목록이 없습니다.</AniListWrapper>;
   }
 
@@ -39,11 +50,13 @@ export default function AniList({
         onSortChange={onSortChange}
       />
       <AniListFlex ref={scrollRef}>
-        {list.map(anime => (
+        {processedList.map(anime => (
           <AniListCard
             key={anime.id}
             anime={anime}
+            isAdded={anime.isAdded ?? false}
             onClick={onAnimeClick ? () => onAnimeClick(anime) : undefined}
+            onToggle={() => onToggleAnimeList(anime.id)}
           />
         ))}
         <div ref={loaderRef} style={{ height: 30, background: "yellow" }} />

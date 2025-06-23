@@ -2,18 +2,24 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { User } from "../types/user";
 import { getMyProfile } from "../api/profile";
-import axios from "../lib/axios";
+import {
+  getAccessToken,
+  removeAccessToken,
+  removeRefreshToken,
+} from "../utils/token"; // helper로 분리해뒀다면 import
 
 type AuthContextType = {
   currentUser: User | null;
   login: (user: User) => void;
   logout: () => void;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   login: () => {},
   logout: () => {},
+  loading: true,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -27,25 +33,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-
+    const token = getAccessToken(); // localStorage or sessionStorage 둘 다 체크
     if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
+      // getMyProfile에서 자동으로 커스텀 axios 사용 & 인터셉터 적용
       getMyProfile()
         .then((user) => {
           setCurrentUser(user);
         })
         .catch((err) => {
-          console.warn("❌ 자동 로그인 실패", err);
-          localStorage.removeItem("accessToken");
+          // accessToken/refreshToken이 모두 만료 or 비정상일 때
+          removeAccessToken();
+          removeRefreshToken();
           setCurrentUser(null);
         })
         .finally(() => {
-          setLoading(false); // ✅ 이제 정확히 실행됨
+          setLoading(false);
         });
     } else {
-      setLoading(false); // 토큰 없을 때도 풀어줘야 함
+      setLoading(false);
     }
   }, []);
 
@@ -54,14 +59,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("accessToken"); // ✅ 키 통일
+    removeAccessToken();
+    removeRefreshToken();
     setCurrentUser(null);
+    // 필요시 window.location.href = "/login";
   };
 
-  if (loading) return null; // ✅ 로그인 확인 중엔 아무것도 안 보여줌
+  if (loading) return null; // 또는 <LoadingSpinner />
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

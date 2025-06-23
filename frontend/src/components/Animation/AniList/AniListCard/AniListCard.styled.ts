@@ -74,7 +74,7 @@ export const AddButton = styled.button`
   height: 16px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.45);
   color: ${({ theme }) => theme.colors.bordermain};
   font-size: 1.22rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);

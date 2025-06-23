@@ -1,5 +1,7 @@
 import axios from '../lib/axios';
 
+type ContentType = "post" | "gallery" | "anime";
+
 export const getMyProfile = async () => {
   const res = await axios.get('/api/profiles/me/overview/');
   return res.data;
@@ -56,7 +58,39 @@ export const toggleFavoriteAnime = async (animeId: number) => {
   return res.data;
 };
 
-export const getUserContent = async (userId: number) => {
-  const res = await axios.get(`/api/profiles/${userId}/content/`);
+
+interface GetUserContentParams {
+  userId: number;
+  type: "post" | "gallery" | "anime";
+  page?: number;
+  q?: string;
+  order?: string;
+  // 애니메이션 전용 필터
+  year?: string;
+  genres?: string;
+  season?: string;
+  format?: string;
+  source?: string;
+  status?: string;
+}
+
+export const getUserContent = async (params: GetUserContentParams) => {
+  const {
+    userId, type, page, q, order,
+    year, genres, season, format, source
+  } = params;
+
+  const query = new URLSearchParams();
+  query.append("type", type);
+  if (page) query.append("page", String(page));
+  if (q) query.append("q", q);
+  if (order) query.append("order", order);
+  if (year) query.append("year", year);
+  if (genres) query.append("genres", genres);
+  if (season) query.append("season", season);
+  if (format) query.append("format", format);
+  if (source) query.append("source", source);
+
+  const res = await axios.get(`/api/profiles/${userId}/content/?${query.toString()}`);
   return res.data;
 };

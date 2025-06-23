@@ -1,13 +1,11 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import GalleryGrid from "../../components/MyGallery/GalleryGrid";
 import BoardPagination from "../../components/Board/BoardPagination/BoardPagination";
 import SearchInput from "../../components/SearchInput/SearchInput";
-import ChatBot from "../../components/ChatBot/ChatBot";
-import SortDropdown from "../../components/SortDropdown/SortDropdown";
-import { boardList } from "../../data/boardList";
 import DetailModal from "../../components/Board/DetailModal";
-import type { BoardItem } from "../../types/board";
+import SortDropdown from "../../components/SortDropdown/SortDropdown";
+import { getUserContent } from "../../api/profile";
 import {
   Section,
   Container,
@@ -23,7 +21,7 @@ const PAGE_SIZE = 40;
 const SORT_OPTIONS = [
   { label: "최신순", value: "latest" },
   { label: "오래된순", value: "oldest" },
-  { label: "추천순", value: "likes" },
+  { label: "추천순", value: "like" },
 ];
 
 type ProfileContext = {
@@ -38,53 +36,24 @@ const MyGalleryPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("latest");
-  
+  const [list, setList] = useState([]);
+  const [totalPage, setTotalPage] = useState(1);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
-  const myGalleryPosts = useMemo(() => {
-    return boardList.filter(
-      item =>
-        item.author.id === user.id &&
-        item.board_type === "gallery"
-    );
-  }, [user.id]);
-
-  const filteredList = useMemo(() => {
-    let list = [...myGalleryPosts];
-
-    const kw = keyword.trim().toLowerCase();
-    if (kw) {
-      list = list.filter(item =>
-        item.title.toLowerCase().includes(kw) ||
-        item.content.toLowerCase().includes(kw)
-      );
-    }
-
-    switch (sort) {
-      case "latest":
-        list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      case "oldest":
-        list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
-      case "likes":
-        list.sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0));
-        break;
-    }
-
-    return list;
-  }, [keyword, sort, myGalleryPosts]);
-
-  const pagedList = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredList.slice(start, start + PAGE_SIZE);
-  }, [filteredList, page]);
-
-  const totalPage = Math.max(1, Math.ceil(filteredList.length / PAGE_SIZE));
-
   useEffect(() => {
-    setPage(1);
-  }, [keyword, sort]);
+    const fetch = async () => {
+      const res = await getUserContent({
+        userId: user.id,
+        type: "gallery",
+        q: keyword,
+        order: sort,
+        page,
+      });
+      setList(res.results);
+      setTotalPage(Math.max(1, Math.ceil(res.count / PAGE_SIZE)));
+    };
+    fetch();
+  }, [user.id, page, keyword, sort]);
 
   return (
     <Section>
@@ -97,7 +66,7 @@ const MyGalleryPage: React.FC = () => {
             </div>
           </Header>
 
-          <GalleryGrid list={pagedList} onItemClick={(id) => setSelectedPostId(id)} />
+          <GalleryGrid list={list} onItemClick={(id) => setSelectedPostId(id)} />
 
           {selectedPostId !== null && (
             <DetailModal

@@ -66,7 +66,7 @@ export default function ProfileLayout() {
     <>
       <ProfileHeader show={showHeader} user={user} setUser={setUser} />
       <ProfileSection user={user} />
-      <NavTabBar />
+      <NavTabBar user={user} />
       <Outlet context={{ user, comments, userAnimeList }} />
     </>
   );

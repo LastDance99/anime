@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   InfoSectionWrapper,
   InfoLeft,
@@ -12,18 +12,31 @@ import {
   PosterImg,
 } from "./InfoSection.styled";
 import DescMoreModal from "./DescMoreModal/DescMoreModal";
+import type { AnimeItem } from "../../../types/anime";
 
 interface Props {
-  anime: any;
+  anime: AnimeItem;
   onAddList?: () => void;
   isAdded?: boolean;
+  onDelete?: () => void; // ✅ 삭제용 콜백 (optional)
 }
 
-export default function InfoSection({ anime, onAddList, isAdded }: Props) {
+export default function InfoSection({
+  anime,
+  onAddList,
+  isAdded = false,
+  onDelete,
+}: Props) {
   const [showMore, setShowMore] = useState(false);
+  const [added, setAdded] = useState(isAdded);
+
+  useEffect(() => {
+    setAdded(isAdded);
+  }, [isAdded]);
 
   const title = anime.title || "-";
-  const genres = anime.genres || [];
+  const genres: string[] = Array.isArray(anime.genres) ? anime.genres : [];
+
   const year = anime.start_date ? anime.start_date.slice(0, 4) : "-";
   const posterUrl = anime.cover_image_xl || "";
   const original = anime.source || "-";
@@ -32,18 +45,28 @@ export default function InfoSection({ anime, onAddList, isAdded }: Props) {
   const avgRating = anime.average_rating ?? "-";
   const description = anime.description || "";
 
-  const animationStudios =
-    Array.isArray(anime.studios)
-      ? anime.studios
-          .filter((s: any) => s.node?.isAnimationStudio)
-          .map((s: any) => s.node.name)
-          .join(", ")
-      : "-";
+  const animationStudios = Array.isArray(anime.studios)
+    ? anime.studios
+        .filter((s: any) => s.node?.isAnimationStudio)
+        .map((s: any) => s.node.name)
+        .join(", ")
+    : "-";
 
   const MAX_LEN = 80;
   const plainDesc = description.replace(/<[^>]+>/g, "");
   const showEllipsis = plainDesc.length > MAX_LEN;
   const displayedDesc = plainDesc.slice(0, MAX_LEN) + (showEllipsis ? "..." : "");
+
+  const handleToggleList = () => {
+    setAdded((prev) => !prev);
+    onAddList?.();
+  };
+
+  const handleDelete = () => {
+    if (window.confirm("정말 삭제하시겠습니까?")) {
+      onDelete?.();
+    }
+  };
 
   return (
     <InfoSectionWrapper>
@@ -61,10 +84,7 @@ export default function InfoSection({ anime, onAddList, isAdded }: Props) {
           <span>/ {animationStudios}</span>
         </MetaRow>
         <Desc>
-          {/* "더보기"를 눌러도 InfoSection 줄거리는 80자 미리보기만! */}
-          <span
-            dangerouslySetInnerHTML={{ __html: displayedDesc }}
-          />
+          <span dangerouslySetInnerHTML={{ __html: displayedDesc }} />
           {showEllipsis && (
             <MoreButton onClick={() => setShowMore(true)}>더보기</MoreButton>
           )}
@@ -75,9 +95,13 @@ export default function InfoSection({ anime, onAddList, isAdded }: Props) {
             onClose={() => setShowMore(false)}
           />
         )}
-        <AddButton onClick={onAddList}>
-          {isAdded ? "리스트에서 제거" : "리스트에 추가"}
-        </AddButton>
+        {onDelete ? (
+          <AddButton onClick={handleDelete}>리스트에서 삭제</AddButton>
+        ) : (
+          <AddButton onClick={handleToggleList}>
+            {added ? "리스트에서 제거" : "리스트에 추가"}
+          </AddButton>
+        )}
       </InfoLeft>
       <InfoRight>
         {posterUrl && <PosterImg src={posterUrl} alt={title} />}

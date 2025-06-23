@@ -7,6 +7,7 @@ import {
   updateAccount,
   updateLanguage,
   deleteImage,
+  updateImage,
 } from "../../api/settings";
 import { checkNickname } from "../../api/auth";
 import axios from "../../lib/axios";
@@ -77,9 +78,7 @@ export default function SettingsModal({ user, setUser, onClose }: SettingsModalP
       if (roomFile) formData.append("myroom_image", roomFile);
 
       if (formData.has("profile_image") || formData.has("background_image") || formData.has("myroom_image")) {
-        await axios.patch("/api/settings/image/", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await updateImage(formData);
       }
 
       setUser(tempUser as User);

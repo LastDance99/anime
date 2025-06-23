@@ -9,13 +9,21 @@ import type { Activity } from "../../../../types/activity";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ko";
-import { SectionTitle, LoadMoreButton, ToggleLine } from "./ActivityList.styled";
+import {
+  SectionTitle,
+  LoadMoreButton,
+  ToggleLine,
+} from "./ActivityList.styled";
 
 dayjs.extend(relativeTime);
 dayjs.locale("ko");
 
-
 export default function ActivityList({ list }: { list: Activity[] }) {
+  // 리스트가 배열이 아닐 경우 early return
+  if (!Array.isArray(list)) {
+    return <div>활동 정보가 올바르지 않습니다.</div>;
+  }
+
   // 20개씩 보여줄 개수 상태
   const [visibleCount, setVisibleCount] = useState(20);
 
@@ -30,24 +38,40 @@ export default function ActivityList({ list }: { list: Activity[] }) {
   return (
     <div>
       <SectionTitle>내 활동</SectionTitle>
-      {visibleList.map(item => {
-        switch(item.type) {
-          case "list_add":   return <ActivityListAddCard {...item} key={item.id} />;
-          case "list_del":   return <ActivityListDelCard {...item} key={item.id} />;
-          case "post":       return <ActivityPostCard {...item} key={item.id} />;
-          case "comment":    return <ActivityCommentCard {...item} key={item.id} />;
-          case "review_add": return <ActivityReviewAddCard {...item} key={item.id} />;
-          case "review_del": return <ActivityReviewDelCard {...item} key={item.id} />;
-          default:           return null;
-        }
-      })}
-      {/* 더보기 버튼은 조건일 때만 노출 */}
+      {visibleList.length === 0 ? (
+        <div>아직 활동 내역이 없습니다.</div>
+      ) : (
+        visibleList.map((item) => {
+          switch (item.type) {
+            case "list_add":
+              return <ActivityListAddCard {...item} key={item.id} />;
+            case "list_del":
+              return <ActivityListDelCard {...item} key={item.id} />;
+            case "post":
+              return <ActivityPostCard {...item} key={item.id} />;
+            case "comment":
+              return <ActivityCommentCard {...item} key={item.id} />;
+            case "review_add":
+              return <ActivityReviewAddCard {...item} key={item.id} />;
+            case "review_del":
+              return <ActivityReviewDelCard {...item} key={item.id} />;
+            default:
+              return null;
+          }
+        })
+      )}
       {showLoadMore && (
         <LoadMoreButton onClick={handleLoadMore} aria-label="더보기">
           <ToggleLine className="toggle-line" />
-          {/* 아래 화살표 */}
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <polyline points="5,8 10,13 15,8" stroke="#d75a85" strokeWidth="2.1" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            <polyline
+              points="5,8 10,13 15,8"
+              stroke="#d75a85"
+              strokeWidth="2.1"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <ToggleLine className="toggle-line" />
         </LoadMoreButton>

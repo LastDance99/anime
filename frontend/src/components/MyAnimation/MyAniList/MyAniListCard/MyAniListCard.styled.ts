@@ -17,7 +17,8 @@ export const Title = styled.div`
   font-family: ${({ theme }) => theme.fonts.cafe24};
   font-weight: ${({ theme }) => theme.Weights.bold};
   color: ${({ theme }) => theme.colors.text};
-  min-width: 360px;
+  width: 100%;
+  max-width: 450px;
   font-size: ${({ theme }) => theme.fontSizes.md};
   transition: color 0.18s;
   word-break: keep-all;

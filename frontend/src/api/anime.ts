@@ -45,7 +45,14 @@ export const rateAnime = async (animeId: number, data: any) => {
   return res.data;
 };
 
+// POST - 리스트에 추가
 export const toggleAnimeList = async (animeId: number) => {
   const res = await axios.post(`/api/anime/${animeId}/animelist/`);
+  return res.data;
+};
+
+// DELETE - 리스트에서 제거
+export const removeAnimeFromList = async (animeId: number) => {
+  const res = await axios.delete(`/api/anime/${animeId}/animelist/`);
   return res.data;
 };

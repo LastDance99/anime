@@ -3,7 +3,7 @@ import styled from "styled-components";
 // 리스트 전체 감싸는 박스
 export const ListWrapper = styled.div`
   width: 100%;
-  max-width: 740px;
+  max-width: 1100px;
   border-radius: 14px;
   background: transparent;
   display: flex;
@@ -14,7 +14,7 @@ export const ListWrapper = styled.div`
 // 카드들을 감싸는 컨테이너
 export const AniListContainer = styled.div`
   width: 100%;
-  max-width: 740px;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -34,7 +34,7 @@ export const ListCountText = styled.div`
 // 헤더 라인
 export const ListHeader = styled.div`
   width: 100%;
-  max-width: 740px;
+  max-width: 900px;
   padding: 10px 20px;
   display: flex;
   justify-content: space-between;
