@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   RatingSectionWrapper,
   RatingCol,
@@ -7,39 +7,42 @@ import {
   StarRow,
   ListAddRow,
   ListAddIcon,
-  ListCount
+  ListCount,
 } from "./RatingSection.styled";
-import { Star as StarFull, StarHalf, Plus } from "lucide-react";
+import { Star as StarFull, Plus } from "lucide-react";
 
 interface RatingSectionProps {
   myRating: number;
   avgRating: number;
   listCount: number;
   onChangeMyRating?: (score: number) => void;
+  
 }
 
-// 별 렌더링 함수 (클릭, hover 지원)
+// 별점 렌더 (수정)
 function renderStars(
   score: number,
   onClick?: (val: number) => void,
   onHover?: (val: number) => void,
   onLeave?: () => void,
-  hoverScore?: number | null
+  hoverScore: number | null = null // undefined 안 씀
 ) {
   return Array.from({ length: 5 }).map((_, i) => {
-    const leftVal = i + 1;
-    const rightVal = i + 1;
-    const icon =
-      score >= leftVal ? (
-        <StarFull fill="#F8A0BC" stroke="none" width={32} height={32} strokeWidth={1.6} />
-      ) : (
-        <StarFull fill="#fff" stroke="#F8A0BC" width={32} height={32} strokeWidth={0.2} />
-      );
-    // 애니메이션 스타일
-    const isActive = hoverScore !== undefined && hoverScore !== null && hoverScore >= rightVal;
+    const val = i + 1;
+    const isFilled = score >= val;
+    const icon = (
+      <StarFull
+        fill={isFilled ? "#F8A0BC" : "#fff"}
+        stroke={isFilled ? "none" : "#F8A0BC"}
+        width={32}
+        height={32}
+        strokeWidth={isFilled ? 1.6 : 0.2}
+      />
+    );
+    const isActive = hoverScore !== null && hoverScore >= val;
     return (
       <span
-        key={i}
+        key={val}
         style={{
           cursor: onClick ? "pointer" : "default",
           display: "inline-block",
@@ -49,34 +52,11 @@ function renderStars(
           filter: isActive ? "drop-shadow(0 0 6px #f8a0bc55)" : "none",
           zIndex: isActive ? 2 : 1,
         }}
+        onClick={onClick ? () => onClick(val) : undefined}
+        onMouseMove={onHover ? () => onHover(val) : undefined}
+        onMouseLeave={onLeave}
       >
-        {onClick ? (
-          <>
-            {/* 왼쪽(반 별) hover/click */}
-            <span
-              style={{
-                position: "absolute",
-                left: 0, top: 0, width: "50%", height: "100%", zIndex: 10,
-              }}
-              onClick={() => onClick(leftVal)}
-              onMouseMove={() => onHover?.(leftVal)}
-              onMouseLeave={onLeave}
-            />
-            {/* 오른쪽(꽉 별) hover/click */}
-            <span
-              style={{
-                position: "absolute",
-                right: 0, top: 0, width: "50%", height: "100%", zIndex: 10,
-              }}
-              onClick={() => onClick(rightVal)}
-              onMouseMove={() => onHover?.(rightVal)}
-              onMouseLeave={onLeave}
-            />
-            {icon}
-          </>
-        ) : (
-          icon
-        )}
+        {icon}
       </span>
     );
   });
@@ -88,17 +68,18 @@ export default function RatingSection({
   listCount,
   onChangeMyRating,
 }: RatingSectionProps) {
-  // ⭐️ hover 별점 임시 상태
   const [hoverScore, setHoverScore] = useState<number | null>(null);
+
+  // **myRating이 바뀔 때 hoverScore 초기화** (리뷰 동기화 대응)
+  useEffect(() => {
+    setHoverScore(null);
+  }, [myRating]);
 
   return (
     <RatingSectionWrapper>
-      {/* 내 평점 (클릭/hover 지원) */}
       <RatingCol>
         <RatingTitle>내 평점</RatingTitle>
-        <RatingScore>
-          {(hoverScore ?? myRating).toFixed(1)}
-        </RatingScore>
+        <RatingScore>{Number(hoverScore ?? myRating ?? 0).toFixed(1)}</RatingScore>
         <StarRow style={{ userSelect: "none" }}>
           {renderStars(
             hoverScore ?? myRating,
@@ -109,17 +90,16 @@ export default function RatingSection({
           )}
         </StarRow>
       </RatingCol>
-      {/* 평균 평점 (static) */}
       <RatingCol>
         <RatingTitle>평균 평점</RatingTitle>
-        <RatingScore>{avgRating.toFixed(1)}</RatingScore>
-        <StarRow>
-          {renderStars(avgRating)}
-        </StarRow>
+        <RatingScore>{Number(avgRating ?? 0).toFixed(1)}</RatingScore>
+        <StarRow>{renderStars(avgRating)}</StarRow>
       </RatingCol>
-      {/* 리스트 추가 수 */}
       <RatingCol>
-        <RatingTitle>리스트에<br />추가된 수</RatingTitle>
+        <RatingTitle>
+          리스트에<br />
+          추가된 수
+        </RatingTitle>
         <ListAddRow>
           <ListAddIcon>
             <Plus size={20} strokeWidth={3} color="#F8A0BC" />

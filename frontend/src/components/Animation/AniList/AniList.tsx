@@ -16,7 +16,7 @@ interface AniListProps {
   onAnimeClick?: (anime: AnimeItem) => void;
   loading?: boolean;
   userAnimeIds: number[];
-  onToggleAnimeList: (animeId: number) => void;
+  onToggleAnimeList: (anime: AnimeItem) => void; // ✅ anime 전체 받도록 변경
 }
 
 export default function AniList({
@@ -56,7 +56,7 @@ export default function AniList({
             anime={anime}
             isAdded={anime.isAdded ?? false}
             onClick={onAnimeClick ? () => onAnimeClick(anime) : undefined}
-            onToggle={() => onToggleAnimeList(anime.id)}
+            onToggle={() => onToggleAnimeList(anime)} // ✅ anime 전체 넘김
           />
         ))}
         <div ref={loaderRef} style={{ height: 30, background: "yellow" }} />

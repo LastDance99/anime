@@ -15,14 +15,10 @@ import {
 } from "./ProfilePage.styled";
 
 import type { User, ProfileComment } from "../../types/user";
-import type { UserAnimeItem} from "../../types/anime";
+import type { UserAnimeItem } from "../../types/anime";
 import type { Activity } from "../../types/activity";
 
-import {
-  getAnimeListStats,
-  getAttendanceStats,
-  getUserActivity,
-} from "../../api/profile";
+import { getMyProfile } from "../../api/profile";
 
 type ProfileContext = {
   user: User;
@@ -32,33 +28,29 @@ type ProfileContext = {
 
 export default function ProfilePage() {
   const { user, comments, userAnimeList } = useOutletContext<ProfileContext>();
-  const favoriteAnimeList = userAnimeList.filter(item => item.is_favorite);
+  const favoriteAnimeList = userAnimeList.filter((item) => item.is_favorite);
 
   const [totalAnime, setTotalAnime] = useState(0);
-  const [avgScore, setAvgScore] = useState(0);
+  const [avgScore, setAvgScore] = useState<number | null>(null);
   const [attendance, setAttendance] = useState(0);
   const [activityList, setActivityList] = useState<Activity[]>([]);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchProfile = async () => {
       try {
-        const [animeStats, attendanceStats, activity] = await Promise.all([
-          getAnimeListStats(user.id),
-          getAttendanceStats(user.id),
-          getUserActivity(user.id),
-        ]);
+        const profile = await getMyProfile();
 
-        setTotalAnime(animeStats.total);
-        setAvgScore(animeStats.avg_score);
-        setAttendance(attendanceStats.attendance);
-        setActivityList(activity);
+        setTotalAnime(profile.total_animes);
+        setAvgScore(profile.avg_rating);
+        setAttendance(profile.total_attendance);
+        setActivityList(profile.activity || []);
       } catch (err) {
-        console.error("통계 데이터를 불러오는 중 오류 발생:", err);
+        console.error("프로필 데이터를 불러오는 중 오류 발생:", err);
       }
     };
 
-    fetchStats();
-  }, [user.id]);
+    fetchProfile();
+  }, []);
 
   return (
     <Container>
@@ -72,7 +64,7 @@ export default function ProfilePage() {
         <ProfileRightColumn>
           <StatsBox
             totalAnime={totalAnime}
-            avgScore={avgScore}
+            avgScore={avgScore ?? 0}
             attendance={attendance}
           />
           <ActivityList list={activityList} />

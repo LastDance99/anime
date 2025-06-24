@@ -13,15 +13,17 @@ type Props = {
   list: UserAnimeItem[];
   onAnimeClick?: (anime: UserAnimeItem) => void;
   myAnimeList?: AnimeItem[];
-  onDelete?: (anime: UserAnimeItem) => void; // ✅ 부모에게 전달할 삭제 핸들러
-  onToggleFavorite?: (anime: UserAnimeItem) => void; // 필요 시 즐겨찾기도 위임 가능
+  onAdd?: (anime: UserAnimeItem) => void;
+  onRemove?: (anime: UserAnimeItem) => void;
+  onToggleFavorite?: (anime: UserAnimeItem) => void;
 };
 
 export default function MyAniList({
   list,
   onAnimeClick,
   myAnimeList,
-  onDelete,
+  onAdd,
+  onRemove,
   onToggleFavorite,
 }: Props) {
   if (!list.length) return <div>등록된 애니가 없습니다.</div>;
@@ -44,6 +46,7 @@ export default function MyAniList({
           const imageUrl =
             item.cover_image_xl ||
             item.cover_image_l ||
+            item.cover_image_m ||
             item.imgUrl ||
             item.image_url ||
             "/images/no_poster.png";
@@ -53,6 +56,8 @@ export default function MyAniList({
             Array.isArray(item.genres) ? item.genres :
             [];
 
+          const isAdded = myAnimeList?.some((a) => a.id === item.id) ?? false;
+
           return (
             <MyAniListCard
               key={item.id}
@@ -61,9 +66,10 @@ export default function MyAniList({
               genres={genres}
               rating={item.rating}
               myRating={item.my_rating}
-              isFavorite={myAnimeList?.some(a => a.id === item.id) ?? false}
+              isAdded={isAdded}
+              onAdd={() => onAdd?.(item)}
+              onRemove={() => onRemove?.(item)}
               onToggleFavorite={() => onToggleFavorite?.(item)}
-              onDelete={() => onDelete?.(item)} // ✅ 부모에게 위임
               onClick={() => onAnimeClick?.(item)}
             />
           );

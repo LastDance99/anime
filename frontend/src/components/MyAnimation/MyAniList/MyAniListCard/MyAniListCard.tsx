@@ -17,9 +17,10 @@ type MyAniListCardProps = {
   genres?: string[];
   myRating?: number;
   rating?: number;
-  isFavorite: boolean;
+  isAdded: boolean; // ✅ 내 리스트에 있는지 여부
   onToggleFavorite?: () => void;
-  onDelete?: () => void;
+  onAdd?: () => void;
+  onRemove?: () => void;
   onClick?: () => void;
 };
 
@@ -27,17 +28,17 @@ export default function MyAniListCard({
   imgUrl,
   title,
   genres,
-  rating,
   myRating,
-  isFavorite,
+  isAdded,
   onToggleFavorite,
-  onDelete,
+  onAdd,
+  onRemove,
   onClick,
 }: MyAniListCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // 메뉴 바깥 클릭시 닫힘
+  // 메뉴 바깥 클릭 시 닫기
   React.useEffect(() => {
     if (!menuOpen) return;
     const handleClick = (e: MouseEvent) => {
@@ -64,19 +65,19 @@ export default function MyAniListCard({
 
       <MenuBtn
         onClick={(e) => {
-          e.stopPropagation(); // 카드 클릭 방지!
+          e.stopPropagation();
           setMenuOpen((v) => !v);
         }}
         aria-label="더보기"
       >
         <MoreVertical size={22} />
       </MenuBtn>
+
       {menuOpen && (
         <MenuDropdown ref={menuRef} onClick={(e) => e.stopPropagation()}>
-          <MenuItem onClick={onDelete}>리스트에서 삭제</MenuItem>
-          <MenuItem onClick={onToggleFavorite}>
-            {isFavorite ? "최애의 애니 취소" : "최애의 애니 등록"}
-          </MenuItem>
+          {!isAdded && onAdd && <MenuItem onClick={onAdd}>리스트에 추가</MenuItem>}
+          {isAdded && onRemove && <MenuItem onClick={onRemove}>리스트에서 삭제</MenuItem>}
+          <MenuItem onClick={onToggleFavorite}>즐겨찾기 토글</MenuItem>
         </MenuDropdown>
       )}
     </CardWrapper>

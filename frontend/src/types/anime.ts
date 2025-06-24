@@ -1,10 +1,12 @@
 export interface AnimeItem {
   id: number;
   title: string;
+  anime_id: number;
 
   // 메인 포스터(커버) 이미지 (API마다 다를 수 있음, 순서대로 fallback)
   cover_image_xl?: string;
   cover_image_l?: string;
+  cover_image_m?: string;
   image_url?: string;      // 기존 방식 호환 (가능하면 위에 걸 우선)
   imgUrl?: string;         // 기타 케이스도 호환
 
@@ -47,6 +49,10 @@ export interface AnimeItem {
 
   // 상세조회용 필드(예시)
   start_date?: string;     // 2024-05-18 등
+
+  // 리스트에 추가되었는지 여부를 나타내는 필드 추가
+  isAdded?: boolean;
+
 }
 
 export interface AnimeFilter {
@@ -74,4 +80,7 @@ export interface AnimeReview {
   rating: number;
   content: string;
   created_at: string;
+
+  like_count: number;
+  liked_by_user: boolean;
 }

@@ -17,7 +17,7 @@ export const RoomTitle = styled.div`
 
 export const RoomImage = styled.img`
   width: 410px;
-  height: 320px;
+  height: 270px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid ${({ theme }) => theme.colors.secondary};

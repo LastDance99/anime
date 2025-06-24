@@ -16,7 +16,7 @@ const baseURL =
 
 const instance = axios.create({
   baseURL,
-  headers: { "Content-Type": "application/json" },
+  // headers: { "Content-Type": "application/json" },
 });
 
 // ✅ 요청마다 accessToken 부착

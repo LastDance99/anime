@@ -22,21 +22,9 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Star as StarFull, StarHalf, ThumbsUp } from "lucide-react";
-dayjs.extend(relativeTime);
+import { likeAnimeReview } from "../../../api/anime";
 
-type Props = {
-  reviews: AnimeReview[];
-  myUserId: number;
-  editingReviewId: number | null;
-  editedContent: string;
-  editedRating: number;
-  onEditStart: (review: AnimeReview) => void;
-  onEditCancel: () => void;
-  onEditSubmit: (reviewId: number) => void;
-  setEditedContent: (val: string) => void;
-  setEditedRating: (value: number) => void;
-  onDelete: (reviewId: number) => void;
-};
+dayjs.extend(relativeTime);
 
 const SORT_OPTIONS = [
   { label: "최신순", value: "latest" },
@@ -58,14 +46,36 @@ function renderStars(score: number) {
   });
 }
 
-function initializeLikes(reviews: AnimeReview[], myUserId: number) {
-  return reviews.reduce((acc, review) => {
-    acc[review.id] = { count: 0, liked: false };
-    return acc;
-  }, {} as Record<number, { count: number; liked: boolean }>);
+function getLikesFromReviews(reviews: AnimeReview[]) {
+  const obj: Record<number, { count: number; liked: boolean }> = {};
+  reviews.forEach((review) => {
+    if (review && typeof review.id === "number") {
+      obj[review.id] = {
+        count: review.like_count ?? 0,
+        liked: review.liked_by_user ?? false,
+      };
+    }
+  });
+  return obj;
 }
 
+type Props = {
+  animeId: number;
+  reviews: AnimeReview[];
+  myUserId: number;
+  editingReviewId: number | null;
+  editedContent: string;
+  editedRating: number;
+  onEditStart: (review: AnimeReview) => void;
+  onEditCancel: () => void;
+  onEditSubmit: (reviewId: number) => void;
+  setEditedContent: (val: string) => void;
+  setEditedRating: (value: number) => void;
+  onDelete: (reviewId: number) => void;
+};
+
 export default function ReviewList({
+  animeId,
   reviews,
   myUserId,
   editingReviewId,
@@ -78,13 +88,14 @@ export default function ReviewList({
   setEditedRating,
   onDelete,
 }: Props) {
-  const [likes, setLikes] = useState<Record<number, { count: number; liked: boolean }>>(
-    () => initializeLikes(reviews, myUserId)
-  );
-
   const [sortType, setSortType] = useState<"latest" | "oldest" | "like">("latest");
-
   const [animatedRating, setAnimatedRating] = useState(editedRating);
+  const [likes, setLikes] = useState(() => getLikesFromReviews(reviews));
+
+  // reviews가 바뀔 때마다 likes 최신화
+  useEffect(() => {
+    setLikes(getLikesFromReviews(reviews));
+  }, [reviews]);
 
   useEffect(() => {
     let frame: number;
@@ -105,31 +116,38 @@ export default function ReviewList({
     return () => cancelAnimationFrame(frame);
   }, [editedRating]);
 
-  const handleToggleLike = (reviewId: number) => {
-    setLikes(prev => {
-      const prevData = prev[reviewId] || { count: 0, liked: false };
-      return {
+  const handleToggleLike = async (reviewId: number) => {
+    try {
+      const updated = await likeAnimeReview(animeId, reviewId);
+      setLikes((prev) => ({
         ...prev,
         [reviewId]: {
-          count: prevData.liked ? prevData.count - 1 : prevData.count + 1,
-          liked: !prevData.liked,
+          count: updated.like_count,
+          liked: updated.liked_by_user,
         },
-      };
-    });
+      }));
+    } catch (err) {
+      console.error(`[handleToggleLike] 실패:`, err);
+    }
   };
 
   const sortedReviews = useMemo(() => {
-    let arr = [...reviews];
-    if (sortType === "latest") arr.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    else if (sortType === "oldest") arr.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    else if (sortType === "like") arr.sort((a, b) => (likes[b.id]?.count || 0) - (likes[a.id]?.count || 0));
-    return arr;
+    const filtered = reviews.filter((r): r is AnimeReview => !!r && typeof r.id === "number");
+    if (sortType === "latest")
+      return [...filtered].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    if (sortType === "oldest")
+      return [...filtered].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    if (sortType === "like")
+      return [...filtered].sort((a, b) => (likes[b.id]?.count || 0) - (likes[a.id]?.count || 0));
+    return filtered;
   }, [reviews, sortType, likes]);
 
   return (
     <>
       <ReviewTopBar>
-        <ReviewCount>리뷰 <b>({reviews.length === 0 ? "---" : reviews.length})</b></ReviewCount>
+        <ReviewCount>
+          리뷰 <b>({reviews.length === 0 ? "---" : reviews.length})</b>
+        </ReviewCount>
         <SortSelectBox>
           <SortSelect value={sortType} onChange={e => setSortType(e.target.value as any)}>
             {SORT_OPTIONS.map(opt => (
@@ -138,20 +156,22 @@ export default function ReviewList({
           </SortSelect>
         </SortSelectBox>
       </ReviewTopBar>
-      {reviews.length === 0 ? (
+
+      {sortedReviews.length === 0 ? (
         <List style={{ padding: "32px 0", color: "#aaa" }}>아직 등록된 리뷰가 없습니다.</List>
       ) : (
         <List>
           {sortedReviews.map((r) => {
             const isEditing = editingReviewId === r.id;
-            const isMyReview = r.user.id === myUserId;
+            const isMyReview = r.user?.id === myUserId;
             const { count, liked } = likes[r.id] || { count: 0, liked: false };
+
             return (
               <Item key={r.id}>
                 <ReviewRow>
-                  {r.user.profile_image && <ReviewerImg src={r.user.profile_image} alt="유저" />}
+                  {r.user?.profile_image && <ReviewerImg src={r.user.profile_image} alt="유저" />}
                   <ReviewerInfo>
-                    <ReviewerName>{r.user.nickname}</ReviewerName>
+                    <ReviewerName>{r.user?.nickname || "알 수 없음"}</ReviewerName>
                     <RatingStars>{renderStars(r.rating)}</RatingStars>
                     <ReviewTime>{dayjs(r.created_at).fromNow()}</ReviewTime>
                     {isMyReview && !isEditing && (
@@ -162,6 +182,7 @@ export default function ReviewList({
                     )}
                   </ReviewerInfo>
                 </ReviewRow>
+
                 {isEditing ? (
                   <>
                     <textarea
@@ -182,7 +203,6 @@ export default function ReviewList({
                               onClick={() => setEditedRating(i)}
                               style={{
                                 cursor: "pointer",
-                                display: "inline-block",
                                 transform: isActive ? "scale(1.15)" : "scale(1)",
                                 filter: isActive ? "drop-shadow(0 0 6px #f8a0bc55)" : "none",
                                 transition: "transform 0.18s ease, filter 0.18s",
@@ -207,6 +227,7 @@ export default function ReviewList({
                 ) : (
                   <Content>{r.content}</Content>
                 )}
+
                 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginTop: 4 }}>
                   <LikeBtn onClick={() => handleToggleLike(r.id)}>
                     <ThumbsUp
@@ -215,7 +236,9 @@ export default function ReviewList({
                       fill={liked ? "#F8A0BC" : "none"}
                       style={{ verticalAlign: "middle", transition: "color 0.18s, fill 0.18s" }}
                     />
-                    <LikeCount style={{ color: liked ? "#ed7cb8" : "#bbb" }}>{count === 0 ? "0" : count}</LikeCount>
+                    <LikeCount style={{ color: liked ? "#ed7cb8" : "#bbb" }}>
+                      {count === 0 ? "0" : count}
+                    </LikeCount>
                   </LikeBtn>
                 </div>
               </Item>

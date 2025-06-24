@@ -20,7 +20,12 @@ export const getAnimeReviews = async (animeId: number) => {
   return res.data;
 };
 
-export const addAnimeReview = async (animeId: number, data: any) => {
+interface AnimeReviewPayload {
+  content: string;
+  rating: number;
+}
+
+export const addAnimeReview = async (animeId: number, data: AnimeReviewPayload) => {
   const res = await axios.post(`/api/anime/${animeId}/review/`, data);
   return res.data;
 };
@@ -37,7 +42,11 @@ export const deleteAnimeReview = async (animeId: number, reviewId: number) => {
 
 export const likeAnimeReview = async (animeId: number, reviewId: number) => {
   const res = await axios.post(`/api/anime/${animeId}/review/${reviewId}/like/`);
-  return res.data;
+  return res.data as {
+    id: number;
+    like_count: number;
+    liked_by_user: boolean;
+  };
 };
 
 export const rateAnime = async (animeId: number, data: any) => {
@@ -46,13 +55,20 @@ export const rateAnime = async (animeId: number, data: any) => {
 };
 
 // POST - 리스트에 추가
-export const toggleAnimeList = async (animeId: number) => {
-  const res = await axios.post(`/api/anime/${animeId}/animelist/`);
+export const addAnimeList = async (animeId: number) => {
+  const res = await axios.post(`/api/anime/${animeId}/animelist/`, {
+    anime_id: animeId, // 또는 필요한 필드
+  });
   return res.data;
 };
 
 // DELETE - 리스트에서 제거
 export const removeAnimeFromList = async (animeId: number) => {
   const res = await axios.delete(`/api/anime/${animeId}/animelist/`);
+  return res.data;
+};
+
+export const animeProfileInfo = async () => {
+  const res = await axios.get('/api/anime/animecount/');
   return res.data;
 };

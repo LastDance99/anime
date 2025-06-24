@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import { IntroductionBox, ProfileButton, IntroTextArea, IntroParagraph } from "./Introduction.styled";
+import { updateAbout } from "../../../../api/profile";
 
 export default function Introduction({ about }: { about: string }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(about);
 
-  const handleSave = () => {
-    setEditing(false);
-    // TODO: API 저장
-    console.log("저장된 intro:", value);
+  const handleSave = async () => {
+    try {
+      await updateAbout({ about: value }); // ✅ API 호출
+      setEditing(false);
+    } catch (err) {
+      console.error("소개글 저장 실패:", err);
+      alert("소개글 저장에 실패했어요.");
+    }
   };
 
   return (

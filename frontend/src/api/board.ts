@@ -67,3 +67,8 @@ export const deleteComment = async (postId: number, commentId: number) => {
   const res = await axios.delete(`/api/boards/${postId}/comments/${commentId}/`);
   return res.data;
 };
+
+export const boardsProfileInfo = async () => {
+  const res = await axios.get('/api/boards/postcount/');
+  return res.data;
+};

@@ -77,6 +77,17 @@ export default function SettingsModal({ user, setUser, onClose }: SettingsModalP
       if (bgFile) formData.append("background_image", bgFile);
       if (roomFile) formData.append("myroom_image", roomFile);
 
+      // ✅ 디버깅: FormData 내용 출력
+      for (let [key, value] of formData.entries()) {
+        console.log(`[FormData] ${key}:`, value);
+        console.log(` - is File:`, value instanceof File);
+        if (value instanceof File) {
+          console.log(` - name: ${value.name}`);
+          console.log(` - type: ${value.type}`);
+          console.log(` - size: ${value.size}`);
+        }
+      }
+
       if (formData.has("profile_image") || formData.has("background_image") || formData.has("myroom_image")) {
         await updateImage(formData);
       }

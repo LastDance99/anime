@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   InfoSectionWrapper,
   InfoLeft,
@@ -18,7 +18,7 @@ interface Props {
   anime: AnimeItem;
   onAddList?: () => void;
   isAdded?: boolean;
-  onDelete?: () => void; // ✅ 삭제용 콜백 (optional)
+  onDelete?: () => void;
 }
 
 export default function InfoSection({
@@ -28,11 +28,6 @@ export default function InfoSection({
   onDelete,
 }: Props) {
   const [showMore, setShowMore] = useState(false);
-  const [added, setAdded] = useState(isAdded);
-
-  useEffect(() => {
-    setAdded(isAdded);
-  }, [isAdded]);
 
   const title = anime.title || "-";
   const genres: string[] = Array.isArray(anime.genres) ? anime.genres : [];
@@ -58,7 +53,6 @@ export default function InfoSection({
   const displayedDesc = plainDesc.slice(0, MAX_LEN) + (showEllipsis ? "..." : "");
 
   const handleToggleList = () => {
-    setAdded((prev) => !prev);
     onAddList?.();
   };
 
@@ -99,7 +93,7 @@ export default function InfoSection({
           <AddButton onClick={handleDelete}>리스트에서 삭제</AddButton>
         ) : (
           <AddButton onClick={handleToggleList}>
-            {added ? "리스트에서 제거" : "리스트에 추가"}
+            {isAdded ? "리스트에서 제거" : "리스트에 추가"}
           </AddButton>
         )}
       </InfoLeft>

@@ -10,9 +10,12 @@ import {
 import { Plus, Minus } from "lucide-react";
 import type { AnimeItem } from "../../../../types/anime";
 
+// AnimeItem에 isAdded를 포함한 확장 타입 정의
+type AnimeItemWithAdded = AnimeItem & { isAdded?: boolean };
+
 interface Props {
-  anime: AnimeItem;
-  onClick?: (anime: AnimeItem) => void;
+  anime: AnimeItemWithAdded;
+  onClick?: (anime: AnimeItemWithAdded) => void;
   isAdded?: boolean;
   onToggle?: () => void;
 }

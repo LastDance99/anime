@@ -19,7 +19,7 @@ export const getUserProfileByNickname = async (nickname: string) => {
 };
 
 export const updateAbout = async (data: any) => {
-  const res = await axios.put('/api/profiles/me/about/', data);
+  const res = await axios.patch('/api/profiles/me/about/', data);
   return res.data;
 };
 
@@ -43,7 +43,12 @@ export const getAnimeListStats = async (userId: number) => {
   return res.data;
 };
 
-export const getAttendanceStats = async (userId: number) => {
+interface AttendanceStats {
+  total_attendance: number;
+  last_attendance: string | null; // 출석 안한 경우 null일 수도 있으니
+}
+
+export const getAttendanceStats = async (userId: number): Promise<AttendanceStats> => {
   const res = await axios.get(`/api/profiles/${userId}/attendance-stats/`);
   return res.data;
 };
@@ -77,19 +82,21 @@ interface GetUserContentParams {
 export const getUserContent = async (params: GetUserContentParams) => {
   const {
     userId, type, page, q, order,
-    year, genres, season, format, source
+    year, genres, season, format, source,
+    status, 
   } = params;
 
   const query = new URLSearchParams();
   query.append("type", type);
   if (page) query.append("page", String(page));
   if (q) query.append("q", q);
-  if (order) query.append("order", order);
+  if (order) query.append("ordering", order);
   if (year) query.append("year", year);
   if (genres) query.append("genres", genres);
   if (season) query.append("season", season);
   if (format) query.append("format", format);
   if (source) query.append("source", source);
+  if (status) query.append("status", status);
 
   const res = await axios.get(`/api/profiles/${userId}/content/?${query.toString()}`);
   return res.data;

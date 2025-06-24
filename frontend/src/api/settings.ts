@@ -16,9 +16,7 @@ export const updateLanguage = async (data: any) => {
 };
 
 export const updateImage = async (formData: FormData) => {
-  const res = await axios.patch('/api/settings/image/', formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const res = await axios.patch('/api/settings/image/', formData);
   return res.data;
 };
 
