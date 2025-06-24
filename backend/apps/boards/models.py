@@ -19,6 +19,9 @@ class BoardPost(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"[{self.get_board_type_display()}] {self.title} / {self.author} ({self.id})"
+
 # 게시글에 좋아요 모델 정의
 class PostLike(models.Model):
     post = models.ForeignKey(BoardPost, on_delete=models.CASCADE, related_name='likes')
@@ -27,6 +30,9 @@ class PostLike(models.Model):
 
     class Meta:
         unique_together = ('post', 'user')  # 동일 유저 중복 좋아요 방지
+    
+    def __str__(self):
+        return f"{self.user} → '{self.post.title}' ({self.post.id})"
 
 # 게시글에 댓글 모델 정의
 class BoardComment(models.Model):
@@ -38,6 +44,11 @@ class BoardComment(models.Model):
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        if self.parent:
+            return f"대댓글 by {self.author} on '{self.post.title}' (id:{self.id})"
+        return f"댓글 by {self.author} on '{self.post.title}' (id:{self.id})"
+
 # 댓글에 좋아요 모델 정의
 class CommentLike(models.Model):
     comment = models.ForeignKey(BoardComment, on_delete=models.CASCADE, related_name='likes')
@@ -46,3 +57,6 @@ class CommentLike(models.Model):
 
     class Meta:
         unique_together = ('comment', 'user') # 동일 유저 중복 좋아요 방지
+
+    def __str__(self):
+        return f"{self.user} → 댓글(id:{self.comment.id})"

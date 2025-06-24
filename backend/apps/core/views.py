@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+# S3 프리사인 URL 생성 API
 class GeneratePresignedURLView(APIView):
     def post(self, request):
         file_name = request.data.get("file_name")

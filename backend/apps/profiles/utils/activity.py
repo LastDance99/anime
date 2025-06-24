@@ -1,5 +1,6 @@
 from apps.profiles.models import UserActivity
 
+# 사용자 활동 기록 생성 함수
 def create_user_activity(
     user,
     type,

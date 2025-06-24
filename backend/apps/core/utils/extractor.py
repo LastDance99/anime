@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 
+# HTML 콘텐츠에서 이미지 또는 유튜브 썸네일을 추출하는 함수
 def extract_thumbnail_from_html(html: str) -> str | None:
     """HTML 콘텐츠에서 이미지 또는 유튜브 썸네일을 추출합니다."""
     soup = BeautifulSoup(html, "html.parser")

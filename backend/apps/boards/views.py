@@ -12,6 +12,7 @@ from rest_framework.exceptions import PermissionDenied
 from apps.core.utils.extractor import extract_thumbnail_from_html 
 from apps.core.utils.sanitizer import sanitize_html
 from apps.profiles.utils.activity import create_user_activity
+from apps.profiles.models import Attendance
 from .serializers import (
     BoardPostDetailSerializer, 
     BoardPostCreateSerializer, 
@@ -77,7 +78,7 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'post_id'
 
-    # ✅ 조회 시 조회수 증가
+    # 조회 시 조회수 증가
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.views += 1
@@ -85,7 +86,7 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, context={"request": request})
         return Response(serializer.data)
 
-    # ✅ 수정 권한: 작성자 본인만
+    # 수정 권한: 작성자 본인만
     def perform_update(self, serializer):
         post = self.get_object()
         if post.author != self.request.user:
@@ -97,7 +98,7 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         serializer.save(content=sanitized_content, thumbnail_url=thumbnail_url)
 
-    # ✅ 삭제 권한: 작성자 본인만
+    # 삭제 권한: 작성자 본인만
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
             raise PermissionDenied("게시글 삭제 권한이 없습니다.")
@@ -227,4 +228,18 @@ class BoardCommentDeleteView(generics.DestroyAPIView):
             return Response({"message": "댓글 내용이 삭제 처리되었습니다."}, status=200)
 
         return super().delete(request, *args, **kwargs)
+    
+# 게시판 미니 프로필 뷰
+class BoardMiniProfileView(APIView):
+
+    def get(self, request):
+        user = request.user
+        post_count = BoardPost.objects.filter(author=user).count()
+        comment_count = BoardComment.objects.filter(author=user).count()
+        attendance_count = Attendance.objects.filter(user=user).count()
+        return Response({
+            "post_count": post_count,
+            "comment_count": comment_count,
+            "attendance_count": attendance_count
+        })
     

@@ -11,15 +11,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 
-from dotenv import load_dotenv
+
 from pathlib import Path
+from dotenv import load_dotenv
 from corsheaders.defaults import default_headers
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -42,22 +42,45 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'rest_framework', # Django REST Framework
-    'rest_framework_simplejwt', # JWT 인증을 위한 Simple JWT
-    'rest_framework_simplejwt.token_blacklist', # JWT 토큰 블랙리스트 기능
-    'corsheaders', # 프론트와 API가 다른 포트나 도메인일 경우 CORS(보안) 문제 해결
-    'drf_yasg', # API 문서 자동 생성 (Swagger/OpenAPI)
+    'rest_framework',
+    
+    # JWT 인증을 위한 Simple JWT
+    'rest_framework_simplejwt', 
+    
+    # JWT 토큰 블랙리스트 기능
+    'rest_framework_simplejwt.token_blacklist', 
+    
+    # 프론트와 API가 다른 포트나 도메인일 경우 CORS(보안) 문제 해결
+    'corsheaders', 
+    
+    # API 문서 자동 생성 (Swagger/OpenAPI)
+    'drf_yasg', 
+    
+    # ----------앱 목록------------
 
-    # 앱 목록
-    'apps.users', # 사용자 인증 및 관리 앱
-    'apps.profiles', # 사용자 프로필 앱
-    'apps.boards', # 게시판 기능 앱
-    'apps.anime', # 애니 기능 앱
-    'apps.core', # 공통 기능 앱
-    'apps.settings', # 사용자 설정 앱
+    # 사용자 인증 및 관리 앱
+    'apps.users', 
+
+    # 사용자 프로필 앱
+    'apps.profiles', 
+
+    # 게시판 기능 앱
+    'apps.boards', 
+
+    # 애니 기능 앱
+    'apps.anime', 
+
+    # 공통 기능 앱
+    'apps.core', 
+
+    # 사용자 설정 앱
+    'apps.settings', 
+
+    # 장고 스토리지 앱
+    'storages'
 ]
 
-# ✅ 커스텀 유저 모델 설정
+# 커스텀 유저 모델 설정
 AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
@@ -143,25 +166,16 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    ]
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# Media 파일 설정
-MEDIA_URL = '/media/' 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # CORS 설정
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
 
-CORS_ALLOW_CREDENTIALS = False  # 쿠키 인증 안 쓰면 False
+# 쿠키 인증 안 쓰면 False
+CORS_ALLOW_CREDENTIALS = False  
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "Content-Type",
@@ -182,7 +196,9 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 50,  # ✅ 페이지당 50개
+
+    # 페이지당 50개
+    'PAGE_SIZE': 50,  
     
 }
 
@@ -191,10 +207,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') # 본인 Gmail 주소
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') # Gmail 앱 비밀번호
+
+# 본인 Gmail 주소
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') 
+
+# Gmail 앱 비밀번호
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-#Tip: 실제 코드에서는 EMAIL_HOST_PASSWORD에 절대로 평문을 두지 말고, 반드시 .env나 AWS/GCP Secret Manager 등에 보관
 
 from datetime import timedelta
 #JWT Token 설정
@@ -208,23 +227,36 @@ SIMPLE_JWT = {
     'SIGNING_KEY': SECRET_KEY,
 }
 
-# AWS S3 설정
-
-INSTALLED_APPS += ['storages']
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
+# # AWS S3 설정
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.environ.get('AWS_REGION', 'ap-northeast-2')
-AWS_S3_SIGNATURE_VERSION = 's3v4'             # 최신 리전 필수!
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "access_key": AWS_ACCESS_KEY_ID,
+            "secret_key": AWS_SECRET_ACCESS_KEY,
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "region_name": AWS_S3_REGION_NAME,
+            "default_acl": None,
+            "querystring_auth": False,
+            "file_overwrite": False,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "access_key": AWS_ACCESS_KEY_ID,
+            "secret_key": AWS_SECRET_ACCESS_KEY,
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "region_name": AWS_S3_REGION_NAME,
+        },
+    },
+}
 
-AWS_S3_FILE_OVERWRITE = False                 # 같은 파일명 덮어쓰기 방지
-AWS_DEFAULT_ACL = None                        # 버킷 정책 우선
-AWS_QUERYSTRING_AUTH = False                  # public URL 사용시 권장
-
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 

@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from .serializers import (
     UserSettingsSerializer, 
@@ -47,12 +48,27 @@ class UserLanguageUpdateView(APIView):
     
 # 사용자 이미지 업데이트 API
 class UserImageUpdateView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
 
     def patch(self, request):
-        serializer = UserImageUpdateSerializer(request.user, data=request.data, partial=True)
+        print("request.FILES:", request.FILES)  # 디버그
+        serializer = UserImageUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True  # 일부만 업데이트 가능
+        )
         if serializer.is_valid():
-            serializer.save()
-            return Response({"detail": "이미지가 성공적으로 업로드되었습니다."})
+            try:
+                instance = serializer.save()
+                print("업로드 결과:", instance.profile_image, instance.background_image, instance.myroom_image)
+                return Response(
+                    {"detail": "이미지가 성공적으로 업로드되었습니다."},
+                    status=status.HTTP_200_OK
+                )
+            except Exception as e:
+                print("이미지 저장 오류:", e)
+                return Response({"detail": f"이미지 저장 중 에러: {str(e)}"}, status=500)
+        print("유효성 검사 에러:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # 사용자 이미지 삭제 API
@@ -68,7 +84,7 @@ class UserImageDeleteView(APIView):
         # 실제 필드 제거
         current_image = getattr(user, target)
         if current_image:
-            current_image.delete(save=False)  # 실제 파일 삭제
+            current_image.delete(save=False)  
             setattr(user, target, None)
             user.save()
 

@@ -6,13 +6,14 @@ from .serializers import AnimeSimpleSerializer, AnimeDetailSerializer, AnimeRevi
 from operator import itemgetter
 from rest_framework.generics import get_object_or_404
 from rest_framework import status
+from apps.profiles.models import Attendance
 from apps.profiles.utils.activity import create_user_activity
 from apps.profiles.utils.localization import get_localized_title
 
 # Anime 통합검색 API
 class AnimeSearchView(APIView):
     def get(self, request):
-        # ✅ 언어 설정: 로그인 > Accept-Language > 기본 'ko'
+        # 언어 설정: 로그인 > Accept-Language > 기본 'ko'
         if request.user.is_authenticated:
             lang = getattr(request.user, 'language', 'ko')
         else:
@@ -24,7 +25,7 @@ class AnimeSearchView(APIView):
             else:
                 lang = "ko"
 
-        # ✅ 검색/필터 파라미터
+        # 검색/필터 파라미터
         query = request.GET.get("q", "")
         genres = request.GET.get("genres")
         year = request.GET.get("year")
@@ -36,13 +37,13 @@ class AnimeSearchView(APIView):
         offset = int(request.GET.get("offset", 0))
         limit = int(request.GET.get("limit", 50))
 
-        # ✅ 기본 쿼리셋 + 평점 정보
+        # 기본 쿼리셋 + 평점 정보
         animes = Anime.objects.annotate(
             avg_rating=Avg('animereview__rating'),
             review_count=Count('animereview')
         )
 
-        # ✅ 언어별 검색 필드 동적 처리
+        # 언어별 검색 필드 동적 처리
         if query:
             search_field_map = {
                 "ko": "title_ko",
@@ -52,7 +53,7 @@ class AnimeSearchView(APIView):
             search_field = search_field_map.get(lang, "title_ko")
             animes = animes.filter(Q(**{f"{search_field}__icontains": query}))
 
-        # ✅ 필터링
+        # 필터링
         if genres:
             genre_field = f"genres_{lang}"
             for genre in genres.split(','):
@@ -68,7 +69,7 @@ class AnimeSearchView(APIView):
         if source:
             animes = animes.filter(**{f"source_{lang}": source})
 
-        # ✅ 인기순: 가중 평점 계산
+        # 인기순: 가중 평점 계산
         if ordering == "popular":
             C = AnimeReview.objects.aggregate(avg=Avg('rating'))['avg'] or 0
             m = 10 # 최소 평점 수 기준
@@ -94,7 +95,7 @@ class AnimeSearchView(APIView):
                 "results": results
             })
 
-        # ✅ 정렬 (최신순 / 오래된순)
+        # 정렬 (최신순 / 오래된순)
         if ordering == "-start_year":
             animes = animes.order_by('-start_year', '-start_month', '-start_day')
         elif ordering == "start_year":
@@ -102,11 +103,11 @@ class AnimeSearchView(APIView):
         else:
             animes = animes.order_by(ordering)
 
-        # ✅ 무한스크롤 처리
+        # 무한스크롤 처리
         total_count = animes.count()
         animes = animes[offset:offset + limit]
 
-        # ✅ 응답
+        # 응답
         serializer = AnimeSimpleSerializer(animes, many=True, context={"lang": lang})
         return Response({
             "count": total_count,
@@ -178,7 +179,6 @@ class AnimeDetailView(APIView):
 
 # Anime 리뷰 목록 조회/리뷰 작성 API
 class AnimeReviewListCreateView(APIView):
-
     def get(self, request, anime_id):
         sort = request.GET.get("sort", "latest")
         qs = AnimeReview.objects.filter(anime_id=anime_id).annotate(
@@ -202,7 +202,7 @@ class AnimeReviewListCreateView(APIView):
         anime = get_object_or_404(Anime, id=anime_id)
         serializer = AnimeReviewCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user, anime=anime)
+            review = serializer.save(user=request.user, anime=anime)
 
             lang = getattr(request.user, "language", "ko")
             create_user_activity(
@@ -213,7 +213,10 @@ class AnimeReviewListCreateView(APIView):
                 target_image=anime.cover_image_m
             )
 
-            return Response({"detail": "리뷰가 등록되었습니다."}, status=201)
+            # 리뷰 작성 직후, 유저정보까지 포함된 리뷰 데이터 반환!
+            review_data = AnimeReviewSerializer(review, context={"request": request}).data
+
+            return Response(review_data, status=201)
         return Response(serializer.errors, status=400)
 
 
@@ -223,12 +226,21 @@ class AnimeReviewLikeView(APIView):
     def post(self, request, anime_id, review_id):
         review = get_object_or_404(AnimeReview, id=review_id, anime_id=anime_id)
 
-        # 중복 방지
+        # 중복 체크
         if ReviewLike.objects.filter(user=request.user, review=review).exists():
             return Response({"detail": "이미 좋아요를 눌렀습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # 좋아요 추가
         ReviewLike.objects.create(user=request.user, review=review)
-        return Response({"detail": "좋아요 등록 완료!"}, status=status.HTTP_201_CREATED)
+
+        # 확장된 응답
+        like_count = ReviewLike.objects.filter(review=review).count()
+
+        return Response({
+            "id": review.id,
+            "like_count": like_count,
+            "liked_by_user": True,
+        }, status=status.HTTP_201_CREATED)
 
 
 # Anime 리뷰 수정/삭제 API
@@ -355,3 +367,16 @@ class AnimeListToggleView(APIView):
         animelist.delete()
         return Response({"detail": "애니 리스트에서 제거되었습니다."}, status=204)
     
+# Anime 미니 프로필 API
+class AnimeMiniProfileView(APIView):
+
+    def get(self, request):
+        user = request.user
+        animelist_count = AnimeList.objects.filter(user=user).count()
+        review_count = AnimeReview.objects.filter(user=user).count()
+        attendance_count = Attendance.objects.filter(user=user).count()
+        return Response({
+            "animelist_count": animelist_count,
+            "review_count": review_count,
+            "attendance_count": attendance_count
+        })

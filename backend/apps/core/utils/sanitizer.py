@@ -1,5 +1,6 @@
 import bleach
 
+# HTML 콘텐츠를 XSS 공격으로부터 보호하기 위한 sanitizer 설정
 ALLOWED_TAGS = [
     'p', 'br', 'strong', 'em', 'ul', 'ol', 'li',
     'a', 'img', 'iframe', 'blockquote', 'h1', 'h2', 'h3'

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from apps.core.utils.sanitizer import sanitize_html
+from apps.users.models import User
 from .models import Anime, AnimeReview, AnimeList, ReviewLike
 from django.db.models import Avg
 
@@ -97,17 +98,20 @@ class AnimeDetailSerializer(serializers.ModelSerializer):
 
 
 # 애니메이션 리뷰 목록 조회 시 사용할 Serializer
+class SimpleUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "nickname", "profile_image")
+
 class AnimeReviewSerializer(serializers.ModelSerializer):
-    user_nickname = serializers.CharField(source="user.nickname")
-    user_profile_image = serializers.CharField(source="user.profile_image")
+    user = SimpleUserSerializer(read_only=True)
     like_count = serializers.SerializerMethodField()
-    user_rating = serializers.IntegerField(source="rating")
     is_liked_by_me = serializers.SerializerMethodField()
 
     class Meta:
         model = AnimeReview
         fields = [
-            "id", "user_nickname", "user_profile_image", "user_rating",
+            "id", "user", "rating",
             "content", "created_at", "like_count", "is_liked_by_me"
         ]
 
