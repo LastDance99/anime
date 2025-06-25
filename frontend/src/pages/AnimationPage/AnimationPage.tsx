@@ -64,7 +64,7 @@ export default function AniMain() {
   const fetchUserAnimeList = async (userId: number) => {
     try {
       const data = await getUserContent({ userId, type: "anime" });
-      setUserAnimeIds(data.results.map((item: AnimeItem) => item.id));
+      setUserAnimeIds(data.results.map((item: any) => Number(item.anime_id)));
     } catch (e) {
       console.error("유저 애니 리스트 가져오기 실패", e);
     }
@@ -79,6 +79,11 @@ export default function AniMain() {
         await removeAnimeFromList(animeId);
       } else {
         await addAnimeList(animeId);
+      }
+
+      // ✅ 변경: 서버 최신 상태로 동기화
+      if (user) {
+        await fetchUserAnimeList(user.id);
       }
 
       setUserAnimeIds(prev =>
@@ -132,13 +137,17 @@ export default function AniMain() {
   useEffect(() => {
     if (!loaderRef.current || !scrollRef.current) return;
     const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !isFetching && offset !== 0) {
+      if (
+        entries[0].isIntersecting &&
+        !isFetching &&
+        animeList.length < totalCount
+      ) {
         setOffset(prev => prev + LIMIT);
       }
     }, { root: scrollRef.current, threshold: 1 });
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
-  }, [loaderRef.current, scrollRef.current, isFetching, offset]);
+  }, [isFetching, animeList.length, totalCount]);
 
   useEffect(() => {
     if (selectedAnimeId === null) return;

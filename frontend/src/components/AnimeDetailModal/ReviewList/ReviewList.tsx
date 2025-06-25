@@ -133,14 +133,23 @@ export default function ReviewList({
 
   const sortedReviews = useMemo(() => {
     const filtered = reviews.filter((r): r is AnimeReview => !!r && typeof r.id === "number");
+
+    // 내 리뷰와 나머지 분리
+    const myReview = filtered.find(r => r.user?.id === myUserId);
+    const others = filtered.filter(r => r.user?.id !== myUserId);
+
+    // 기존 정렬 로직 (최신순, 오래된순, 따봉순 등)
+    let sorted = [...others];
     if (sortType === "latest")
-      return [...filtered].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     if (sortType === "oldest")
-      return [...filtered].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     if (sortType === "like")
-      return [...filtered].sort((a, b) => (likes[b.id]?.count || 0) - (likes[a.id]?.count || 0));
-    return filtered;
-  }, [reviews, sortType, likes]);
+      sorted.sort((a, b) => (likes[b.id]?.count || 0) - (likes[a.id]?.count || 0));
+
+    // 내 리뷰가 있으면 맨 앞에 붙여서 반환
+    return myReview ? [myReview, ...sorted] : sorted;
+  }, [reviews, sortType, likes, myUserId]);
 
   return (
     <>

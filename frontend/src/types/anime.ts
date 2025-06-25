@@ -53,6 +53,8 @@ export interface AnimeItem {
   // 리스트에 추가되었는지 여부를 나타내는 필드 추가
   isAdded?: boolean;
 
+  // 리스트에 추가된 수
+  total_animelist_users?: number;
 }
 
 export interface AnimeFilter {

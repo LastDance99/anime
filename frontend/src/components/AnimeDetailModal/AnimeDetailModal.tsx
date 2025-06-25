@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import type { AnimeItem, AnimeReview } from "../../types/anime";
 import {
   Overlay,
@@ -20,14 +20,13 @@ import {
   addAnimeReview,
   updateAnimeReview,
   deleteAnimeReview,
-  rateAnime,
 } from "../../api/anime";
 
 dayjs.extend(relativeTime);
 dayjs.locale("ko");
 
 type Props = {
-  anime: AnimeItem & { isAdded?: boolean };
+  anime: AnimeItem & { isAdded?: boolean; added_count?: number }; // added_count 추가
   onClose: () => void;
   isAdded: boolean;
   onToggle: () => void;
@@ -65,46 +64,39 @@ export default function AnimeDetailModal({
     [reviews]
   );
 
-  // 내 리뷰 찾기 디버그 함수
+  // 내 리뷰 찾기
   function findMyReview(reviews: AnimeReview[]) {
     for (const r of reviews) {
-      const reviewUserId = Number(r.user?.id);
-      // 디버깅 로그
-      console.log("[DEBUG] reviewUserId:", reviewUserId, "myUserId:", myUserId, "user=", r.user);
-      if (reviewUserId === myUserId) return r;
+      if (Number(r.user?.id) === myUserId) return r;
     }
     return null;
   }
 
-  // 리뷰 fetch, 내 리뷰 판별
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const data = await getAnimeReviews(anime.id);
-        setReviews(data.results);
-
-        // 내 리뷰 찾기 디버깅
-        const myReview = findMyReview(data.results);
-        if (myReview) {
-          console.log("[DEBUG] 내 리뷰 발견! 평점:", myReview.rating, "닉네임:", myReview.user?.nickname);
-          setMyRating(myReview.rating);
-          setHasMyReview(true);
-        } else {
-          console.log("[DEBUG] 내 리뷰 없음, 평점 0으로 초기화");
-          setMyRating(0);
-          setHasMyReview(false);
-        }
-      } catch (err) {
-        console.error("리뷰 불러오기 실패:", err);
-        setReviews([]);
+  // **fetchReviews 함수로 따로 빼서 재사용**
+  const fetchReviews = useCallback(async () => {
+    try {
+      const data = await getAnimeReviews(anime.id);
+      setReviews(data.results);
+      const myReview = findMyReview(data.results);
+      if (myReview) {
+        setMyRating(myReview.rating);
+        setHasMyReview(true);
+      } else {
         setMyRating(0);
         setHasMyReview(false);
       }
-    };
-    fetchReviews();
+    } catch (err) {
+      setReviews([]);
+      setMyRating(0);
+      setHasMyReview(false);
+    }
   }, [anime.id, myUserId]);
 
-  // 리뷰 등록 (리뷰 user 필드 보정 및 로그)
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  // 리뷰 등록
   const handleAddReview = async (content: string) => {
     const rating = parseInt(String(myRating), 10);
 
@@ -122,24 +114,10 @@ export default function AnimeDetailModal({
     }
 
     try {
-      const newReview = await addAnimeReview(anime.id, {
-        content,
-        rating,
-      });
-
-      // user 필드 없으면 직접 내 user 정보로 보정!
-      if (!newReview.user) {
-        console.warn("[DEBUG] newReview.user가 undefined! 직접 user 할당", user);
-        newReview.user = { ...user, id: myUserId };
-      }
-      // user id 타입이 이상하면 강제 변환
-      newReview.user.id = Number(newReview.user.id);
-
-      setReviews((prev) => [newReview, ...prev]);
-      setHasMyReview(true);
-      setMyRating(newReview.rating);
+      await addAnimeReview(anime.id, { content, rating });
       setReviewInput("");
-      console.log("[DEBUG] 리뷰 등록 후, 내 평점:", newReview.rating, "닉네임:", newReview.user.nickname);
+      // 성공시 서버 동기화 (최신 데이터 fetch)
+      fetchReviews();
     } catch (err: any) {
       const message = err.response?.data || err.message || "알 수 없는 오류";
       alert("리뷰 작성 실패:\n" + JSON.stringify(message, null, 2));
@@ -163,18 +141,12 @@ export default function AnimeDetailModal({
     setReviewInput(e.target.value);
   };
 
-  // 리뷰 삭제 (성공시만 상태 변경)
+  // 리뷰 삭제
   const handleDelete = async (id: number) => {
     try {
       await deleteAnimeReview(anime.id, id);
-      setReviews((prev) => prev.filter((r) => r.id !== id));
-      // 내 리뷰 삭제시 상태 초기화
-      const deleted = reviews.find((r) => r.id === id);
-      if (Number(deleted?.user?.id) === myUserId) {
-        setHasMyReview(false);
-        setMyRating(0);
-      }
-      console.log("[DEBUG] 리뷰 삭제, id:", id, "내 id:", myUserId);
+      // 성공시 서버 동기화
+      fetchReviews();
     } catch (err) {
       console.error("리뷰 삭제 실패:", err);
     }
@@ -199,30 +171,22 @@ export default function AnimeDetailModal({
       return;
     }
     try {
-      const updated = await updateAnimeReview(anime.id, id, {
+      await updateAnimeReview(anime.id, id, {
         content: editedContent.trim(),
         rating: editedRating,
       });
-      // user 정보 보정
-      if (!updated.user) updated.user = { ...user, id: myUserId };
-      updated.user.id = Number(updated.user.id);
-
-      setReviews((prev) => prev.map((r) => (r.id === id ? updated : r)));
       setEditingReviewId(null);
       setEditedContent("");
       setEditedRating(0);
-      // 내 리뷰 수정시 평점 반영
-      if (Number(updated.user?.id) === myUserId) setMyRating(updated.rating);
-
-      console.log("[DEBUG] 리뷰 수정 완료, 내 평점:", updated.rating);
+      // 내 리뷰 수정시 서버 동기화
+      fetchReviews();
     } catch (err) {
       console.error("리뷰 수정 실패:", err);
     }
   };
 
-  // 별점 변경은 내 리뷰 없는 상태(작성 전)에만 허용, 별점만 등록하고 싶으면 여기서 따로 처리
+  // 별점 변경은 내 리뷰 없는 상태(작성 전)에만 허용
   const handleChangeMyRating = (rating: number) => {
-    // 별점만 등록, 리뷰 없는 상태면 임시로 상태만 변경(입력 UX 개선용)
     if (!hasMyReview) setMyRating(rating);
   };
 
@@ -241,7 +205,8 @@ export default function AnimeDetailModal({
             myRating={myRating}
             onChangeMyRating={handleChangeMyRating}
             avgRating={avgRating}
-            listCount={reviews.length}
+            // **진짜 '내 리스트 추가된 수' 필드 사용!**
+            listCount={anime.total_animelist_users ?? 0}
           />
           <ReviewBoxGroup>
             {!hasMyReview && (

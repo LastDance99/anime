@@ -29,6 +29,12 @@ type BoardListProps = {
 };
 
 const BoardList: React.FC<BoardListProps> = ({ list, page, pageSize, onItemClick }) => {
+
+  const BOARD_TYPE_KR: Record<string, string> = {
+    post: "게시글",
+    gallery: "갤러리",
+  };
+
   return (
     <Table>
       <Thead>
@@ -51,9 +57,9 @@ const BoardList: React.FC<BoardListProps> = ({ list, page, pageSize, onItemClick
           >
             <Td style={{ width: columnWidths[0] }}>{item.id}</Td>
             <Td style={{ width: columnWidths[1] }}>
-              {item.images && item.images.length > 0 ? (
+              {item.thumbnail ? (
                 <img
-                  src={item.images[0]}
+                  src={item.thumbnail}
                   alt={`${item.title} 썸네일`}
                   width={46}
                   height={46}
@@ -80,24 +86,15 @@ const BoardList: React.FC<BoardListProps> = ({ list, page, pageSize, onItemClick
             </Td>
             <Td style={{ width: columnWidths[2], textAlign: "left" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
-                <Category $type={item.category}>{item.category}</Category>
+                <Category $type={item.board_type}>
+                  {BOARD_TYPE_KR[item.board_type] || item.board_type}
+                </Category>
                 <Title>{item.title}</Title>
                 <Comments>({item.comment_count})</Comments>
               </div>
             </Td>
-            <Td style={{ width: columnWidths[3], textAlign: "left" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                {item.author.profile_image && (
-                  <img
-                    src={item.author.profile_image}
-                    alt={`${item.author.nickname} 프로필`}
-                    width={24}
-                    height={24}
-                    style={{ borderRadius: "50%" }}
-                  />
-                )}
-                <span>{item.author.nickname}</span>
-              </div>
+            <Td style={{ width: columnWidths[3], textAlign: "center" }}>
+              <span>{item.author_nickname}</span>
             </Td>
             <Td style={{ width: columnWidths[4] }}>
               {item.created_at ? dayjs(item.created_at).fromNow() : "-"}

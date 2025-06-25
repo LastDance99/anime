@@ -134,7 +134,7 @@ export const HtmlContent = styled.div`
 
   iframe {
     max-width: 100%;
-    height: auto;
+    height: 340px;
     display: block;
     margin: 24px auto;
     border-radius: 12px;

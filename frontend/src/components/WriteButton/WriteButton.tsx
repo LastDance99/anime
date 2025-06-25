@@ -14,9 +14,10 @@ const WriteButton: React.FC<Props> = ({
   to = "/board/write?type=post", // 기본값
   children = "글쓰기",
   style,
+  onClick,
 }) => {
   return (
-    <Link to={to}>
+    <Link to={to} onClick={onClick}>
       <Button style={style}>{children}</Button>
     </Link>
   );

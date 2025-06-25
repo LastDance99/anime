@@ -52,6 +52,10 @@ const BoardProfile: React.FC<Props> = ({ user }) => {
     }
   };
 
+  const handleClick = () => {
+    navigate("/board/write?type=post");
+  };
+
   return (
     <Card>
       <TopBox>
@@ -89,7 +93,7 @@ const BoardProfile: React.FC<Props> = ({ user }) => {
             {boardData.comment_count}개
           </FontRow>
         </FontBox>
-        <CustomButton>글쓰기</CustomButton>
+        <CustomButton onClick={handleClick}>글쓰기</CustomButton>
       </BottomBox>
     </Card>
   );

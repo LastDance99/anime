@@ -34,7 +34,7 @@ export default function DetailModal({ type, id, onClose }: Props) {
         <Content>
           <Left>
             {type === 'post' || type === 'gallery' ? (
-              <DetailContent id={id} />
+              <DetailContent key={id} id={id} />
             ) : null}
           </Left>
           <Right>

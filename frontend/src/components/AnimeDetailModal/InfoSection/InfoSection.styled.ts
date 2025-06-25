@@ -36,8 +36,6 @@ export const Title = styled.div`
   font-weight: ${({ theme }) => theme.Weights.bold};
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: 8px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 `;
 
 export const MetaRow = styled.div`
@@ -100,17 +98,9 @@ export const InfoRight = styled.div`
 `;
 
 export const PosterImg = styled.img`
-  width: 110px;
-  height: 154px;
+  width: 150px;
+  height: 200px;
   object-fit: cover;
   box-shadow: 0 2px 8px rgba(120, 92, 119, 0.10);
   background: #fff;
-`;
-
-export const BannerImg = styled.img`
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 20px;
 `;

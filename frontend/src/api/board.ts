@@ -43,24 +43,39 @@ export const deleteBoardPost = async (postId: number) => {
   return res.data;
 };
 
-export const toggleBoardPostLike = async (postId: number) => {
+export const addBoardPostLike = async (postId: number) => {
   const res = await axios.post(`/api/boards/${postId}/like/`);
   return res.data;
 };
 
-export const getBoardComments = async (postId: number) => {
-  const res = await axios.get(`/api/boards/${postId}/comments/`);
+export const removeBoardPostLike = async (postId: number) => {
+  const res = await axios.delete(`/api/boards/${postId}/like/`);
   return res.data;
 };
 
-export const addBoardComment = async (postId: number, data: any) => {
+export const getBoardComments = async (postId: number, sort: 'latest' | 'like' | 'created' = 'latest') => {
+  const res = await axios.get(`/api/boards/${postId}/comments/?sort=${sort}`);
+  return res.data;
+};
+
+export const addBoardComment = async (
+  postId: number,
+  data: { content: string; parent_id?: number; tagged_nickname?: string }
+) => {
   const res = await axios.post(`/api/boards/${postId}/comments/`, data);
   return res.data;
 };
 
 export const toggleCommentLike = async (commentId: number) => {
-  const res = await axios.post(`/api/boards/comments/${commentId}/like/`);
-  return res.data;
+  try {
+    const res = await axios.post(`/api/boards/comments/${commentId}/like/`);
+    return { liked: true }; // 성공시
+  } catch (err: any) {
+    if (err.response?.status === 400) {
+      return { liked: false }; // 이미 눌렀음
+    }
+    throw err;
+  }
 };
 
 export const deleteComment = async (postId: number, commentId: number) => {

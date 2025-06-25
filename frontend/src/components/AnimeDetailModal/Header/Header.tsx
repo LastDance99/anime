@@ -6,7 +6,7 @@ type Props = {
   onClose: () => void;
 };
 
-const DEFAULT_BANNER = "/images/no_banner.png";
+const DEFAULT_BANNER = ""; // 완전 빈 이미지 (또는 /images/transparent.png 처럼 투명 PNG)
 
 export default function Header({ image_url, onClose }: Props) {
   const valid =
@@ -15,22 +15,32 @@ export default function Header({ image_url, onClose }: Props) {
     image_url.trim() !== "" &&
     image_url !== "nan";
 
+  const [showImage, setShowImage] = useState(valid); // 이미지 유효 여부
   const [imgSrc, setImgSrc] = useState(valid ? image_url : DEFAULT_BANNER);
 
   const handleImgError = () => {
-    if (imgSrc !== DEFAULT_BANNER) {
-      setImgSrc(DEFAULT_BANNER);
-    }
+    // 에러 나면 이미지 자체를 안 보여줌!
+    setShowImage(false);
   };
 
   return (
     <HeaderWrapper>
-      <BannerImage
-        src={imgSrc}
-        alt={valid ? "애니 배너" : "배너 없음"}
-        onError={handleImgError}
-        draggable={false}
-      />
+      {showImage ? (
+        <BannerImage
+          src={imgSrc}
+          alt=""
+          onError={handleImgError}
+          draggable={false}
+        />
+      ) : (
+        // 이미지 없을 때 배경만 깔끔하게
+        <div style={{
+          width: "100%",
+          height: "100%",
+          background: "#FCEEF5", // 필요에 따라 색상 지정
+          borderRadius: "inherit",
+        }} />
+      )}
       <CloseBtn
         onClick={onClose}
         aria-label="닫기"

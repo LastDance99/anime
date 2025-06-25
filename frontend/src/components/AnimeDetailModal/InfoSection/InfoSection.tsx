@@ -14,6 +14,20 @@ import {
 import DescMoreModal from "./DescMoreModal/DescMoreModal";
 import type { AnimeItem } from "../../../types/anime";
 
+// ✅ 1번 방법: 값이 nan, NaN, undefined, null, 빈문자열이면 fallback 사용
+function valid(value: any, fallback = "데이터가 없습니다") {
+  if (
+    value === undefined ||
+    value === null ||
+    value === "nan" ||
+    value === "NaN" ||
+    (typeof value === "string" && value.trim() === "")
+  ) {
+    return fallback;
+  }
+  return value;
+}
+
 interface Props {
   anime: AnimeItem;
   onAddList?: () => void;
@@ -29,23 +43,24 @@ export default function InfoSection({
 }: Props) {
   const [showMore, setShowMore] = useState(false);
 
-  const title = anime.title || "-";
+  // ✅ 아래 모든 변수 선언에 valid 함수 적용!
+  const title = valid(anime.title, "제목 없음");
   const genres: string[] = Array.isArray(anime.genres) ? anime.genres : [];
-
-  const year = anime.start_date ? anime.start_date.slice(0, 4) : "-";
-  const posterUrl = anime.cover_image_xl || "";
-  const original = anime.source || "-";
-  const episodes = anime.episodes ?? "-";
-  const format = anime.format || "-";
-  const avgRating = anime.average_rating ?? "-";
-  const description = anime.description || "";
+  const year = valid(anime.start_date ? anime.start_date.slice(0, 4) : null, "연도 정보 없음");
+  const posterUrl = valid(anime.cover_image_xl, ""); // 이미지는 fallback 이미지를 직접 넣어도 됨
+  const original = valid(anime.source, "--");
+  const episodes = valid(anime.episodes, "--");
+  const format = valid(anime.format, "--");
+  const avgRating = valid(anime.average_rating, "--");
+  const description = valid(anime.description, "설명 없음");
 
   const animationStudios = Array.isArray(anime.studios)
     ? anime.studios
         .filter((s: any) => s.node?.isAnimationStudio)
-        .map((s: any) => s.node.name)
-        .join(", ")
-    : "-";
+        .map((s: any) => valid(s.node.name, ""))
+        .filter((name: string) => name !== "")
+        .join(", ") || "제작사 정보 없음"
+    : "제작사 정보 없음";
 
   const MAX_LEN = 80;
   const plainDesc = description.replace(/<[^>]+>/g, "");
@@ -71,7 +86,7 @@ export default function InfoSection({
         <Title>{title}</Title>
         <MetaRow>
           <span>원작: {original}</span>
-          <span>/ {genres.join(", ")}</span>
+          <span>/ {genres.length > 0 ? genres.join(", ") : "장르 정보 없음"}</span>
           <span>/ 유형: {format}</span>
           <span>/ {year}</span>
           <span>/ {episodes}화</span>

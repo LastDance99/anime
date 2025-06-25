@@ -48,8 +48,8 @@ export const CharacterImgBox = styled.div`
 `;
 
 export const CharacterImg = styled.img`
-  width: 145px;
-  height: 160px;
+  width: 180px;
+  height: 180px;
   object-fit: cover;
   display: block;
 `;

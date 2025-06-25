@@ -13,60 +13,45 @@ import {
   GlobalQuillImageStyle,
 } from "./WriteModal.styled";
 
-import {
-  S3Client,
-  PutObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { createBoardPost, updateBoardPost } from "../../api/board";
+import { getPresignedUrl } from "../../api/core";
 import { v4 as uuidv4 } from "uuid";
-
-import { createBoardPost } from "../../api/board";
+import type { BoardItem } from "../../types/board";
 
 type BoardType = "post" | "gallery";
 
 type Props = {
   boardType?: BoardType;
   onBoardTypeChange?: (type: BoardType) => void;
+  post?: BoardItem;
+  mode?: "create" | "edit";
 };
 
-// ✅ S3 클라이언트
-const s3 = new S3Client({
-  region: import.meta.env.VITE_AWS_REGION,
-  credentials: {
-    accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-    secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY,
-  },
-});
-
-// ✅ 이미지 업로드 함수
 async function uploadImageToS3(file: File): Promise<string> {
   const ext = file.name.split(".").pop();
-  const key = `uploads/${uuidv4()}.${ext}`;
+  const fileName = `uploads/${uuidv4()}.${ext}`;
 
-  const command = new PutObjectCommand({
-    Bucket: import.meta.env.VITE_S3_BUCKET_NAME,
-    Key: key,
-    ContentType: file.type,
+  const { upload_url: presignedUrl, file_url } = await getPresignedUrl({
+    file_name: fileName,
+    file_type: file.type,
   });
 
-  const url = await getSignedUrl(s3, command, { expiresIn: 300 });
-  await fetch(url, {
+  const uploadRes = await fetch(presignedUrl, {
     method: "PUT",
-    headers: { "Content-Type": file.type },
+    headers: {
+      "Content-Type": file.type,
+      "x-amz-acl": "public-read",
+    },
     body: file,
   });
 
-  return `https://${command.input.Bucket}.s3.amazonaws.com/${key}`;
+  if (!uploadRes.ok) throw new Error("S3 업로드 실패");
+  return file_url;
 }
 
-// ✅ Quill 모듈 커스터마이징
 const modules = {
   toolbar: {
-    container: [
-      ["bold", "italic", "underline"],
-      ["link", "image", "youtube"],
-      ["clean"],
-    ],
+    container: [["bold", "italic", "underline"], ["link", "image", "youtube"], ["clean"]],
     handlers: {
       youtube: function (this: any) {
         const url = prompt("유튜브 링크를 입력하세요");
@@ -75,7 +60,7 @@ const modules = {
         );
         if (match) {
           const videoId = match[1];
-          const iframe = `<p class="ql-align-center"><iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></p>`;
+          const iframe = `<p class=\"ql-align-center\"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/${videoId}\" frameborder=\"0\" allowfullscreen></iframe></p>`;
           const range = this.quill.getSelection(true);
           this.quill.clipboard.dangerouslyPasteHTML(range?.index ?? 0, iframe);
         } else {
@@ -86,10 +71,7 @@ const modules = {
   },
 };
 
-export default function WriteForm({
-  boardType: initialType = "post",
-  onBoardTypeChange,
-}: Props) {
+export default function WriteForm({ boardType: initialType = "post", onBoardTypeChange, post, mode = "create" }: Props) {
   const [boardType, setBoardType] = useState<BoardType>(initialType);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -100,7 +82,16 @@ export default function WriteForm({
     onBoardTypeChange?.(boardType);
   }, [boardType, onBoardTypeChange]);
 
-  // ✅ 이미지 드롭 & 유튜브 자동 변환
+  useEffect(() => {
+    if (mode === "edit" && post) {
+      if (post.board_type === "post" || post.board_type === "gallery") {
+        setBoardType(post.board_type);
+      }
+      setTitle(post.title);
+      setContent(post.content);
+    }
+  }, [mode, post]);
+
   useEffect(() => {
     const quill = quillRef.current?.getEditor();
     if (!quill) return;
@@ -110,27 +101,28 @@ export default function WriteForm({
       const file = e.dataTransfer?.files?.[0];
       if (!file || !file.type.startsWith("image/")) return;
 
-      const url = await uploadImageToS3(file);
-      const range = quill.getSelection(true);
-      const insertAt = range?.index ?? quill.getLength();
-
-      quill.clipboard.dangerouslyPasteHTML(
-        insertAt,
-        `<p class="ql-align-center"><img src="${url}" class="centered-image" /></p>`
-      );
+      try {
+        const url = await uploadImageToS3(file);
+        const range = quill.getSelection(true);
+        const insertAt = range?.index ?? quill.getLength();
+        quill.clipboard.dangerouslyPasteHTML(
+          insertAt,
+          `<p class=\"ql-align-center\"><img src=\"${url}\" class=\"centered-image\" /></p>`
+        );
+      } catch (err) {
+        alert("이미지 업로드 중 오류가 발생했습니다.");
+      }
     };
 
     const handlePaste = (e: ClipboardEvent) => {
       const text = e.clipboardData?.getData("text/plain");
-      if (!text) return;
-
-      const match = text.match(
+      const match = text?.match(
         /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/
       );
       if (match) {
         e.preventDefault();
         const videoId = match[1];
-        const iframe = `<p class="ql-align-center"><iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></p>`;
+        const iframe = `<p class=\"ql-align-center\"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/${videoId}\" frameborder=\"0\" allowfullscreen></iframe></p>`;
         const range = quill.getSelection(true);
         quill.clipboard.dangerouslyPasteHTML(range?.index ?? 0, iframe);
       }
@@ -145,7 +137,6 @@ export default function WriteForm({
     };
   }, []);
 
-  // ✅ 유튜브 버튼 텍스트 삽입
   useEffect(() => {
     const toolbar = document.querySelector(".ql-toolbar");
     const youtubeBtn = toolbar?.querySelector(".ql-youtube") as HTMLElement;
@@ -154,7 +145,6 @@ export default function WriteForm({
     }
   }, []);
 
-  // ✅ 게시글 작성 API 연결
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) {
       alert("제목과 본문을 입력해주세요.");
@@ -168,17 +158,17 @@ export default function WriteForm({
     };
 
     try {
-      console.log("보내는 데이터:", payload); // ✅ 로그 추가
-      const res = await createBoardPost(payload);
-      console.log("응답 결과:", res); // ✅ 로그 추가
-      alert("게시글이 등록되었습니다!");
+      if (mode === "edit" && post) {
+        await updateBoardPost(post.id, payload);
+        alert("게시글이 수정되었습니다.");
+      } else {
+        await createBoardPost(payload);
+        alert("게시글이 등록되었습니다!");
+      }
       navigate("/board");
     } catch (error: any) {
-      console.error("게시글 등록 실패:", error);
-      if (error.response) {
-        console.error("서버 응답:", error.response.data);
-      }
-      alert("게시글 등록에 실패했습니다.");
+      console.error("게시글 저장 실패:", error);
+      alert("게시글 저장에 실패했습니다.");
     }
   };
 
@@ -215,7 +205,7 @@ export default function WriteForm({
 
       <FileUploadRow>
         <Button type="button" onClick={handleSubmit}>
-          작성 완료
+          {mode === "edit" ? "수정 완료" : "작성 완료"}
         </Button>
       </FileUploadRow>
     </Form>

@@ -50,14 +50,14 @@ export const Category = styled.span<{ $type: string }>`
   width: 40px;
   height: 16px;
   background: ${({ $type, theme }) =>
-    $type === "게시글"
+    $type === "post"
       ? "#CDE6F5"
-      : $type === "갤러리"
+      : $type === "gallery"
       ? "#FAD1D7"
       : theme.colors.subcolor};
   margin-right: 10px;
   text-align: center;
-  font-size: ${({ theme }) => theme.fontSizes.xxs}; // 9px
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   line-height: 16px;
   border-radius: 4px;
 `;

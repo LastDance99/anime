@@ -39,6 +39,7 @@ function App() {
             <Route path="/board" element={<BoardPage />} />
             <Route path="/anime" element={<AniMain />} />
             <Route path="/board/write" element={<WritePage />} />
+            <Route path="/board/edit/:id" element={<WritePage mode="edit" />} />
           </Route>
 
           <Route path="/profile/:userId" element={<ProfileLayout />}>

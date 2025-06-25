@@ -1,3 +1,9 @@
+export interface BoardAuthor {
+  id: number;
+  nickname: string;
+  profile_image?: string;
+}
+
 export interface BoardItem {
   id: number;
   category: string;
@@ -7,12 +13,15 @@ export interface BoardItem {
   views: number;
   comment_count: number;
   like_count: number;
-  images: string[];
+  images?: string[]; // thumbnail만 쓸 거면 생략 가능
+  thumbnail?: string; // 썸네일 필드
   created_at: string;
   updated_at?: string | null;
-  author: {
-    id: number;
-    nickname: string;
-    profile_image?: string;
-  };
+  author: BoardAuthor;
+  // author 객체가 아니라, 닉네임만 별도로
+  author_nickname: string;
+  author_profile_image?: string;
+  // 나중에 프로필 이미지도 쓰고 싶으면 아래 필드 추가
+  is_liked?: boolean;
+  // author_profile_image?: string;
 }
