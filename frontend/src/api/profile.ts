@@ -77,6 +77,7 @@ interface GetUserContentParams {
   format?: string;
   source?: string;
   status?: string;
+  page_size?: number;
 }
 
 export const getUserContent = async (params: GetUserContentParams) => {

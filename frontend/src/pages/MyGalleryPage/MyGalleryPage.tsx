@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import GalleryGrid from "../../components/MyGallery/GalleryGrid";
 import BoardPagination from "../../components/Board/BoardPagination/BoardPagination";
 import SearchInput from "../../components/SearchInput/SearchInput";
-import DetailModal from "../../components/Board/DetailModal";
+import DetailModal from "../../components/Board/DetailModal/DetailModal";
 import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import { getUserContent } from "../../api/profile";
 import {

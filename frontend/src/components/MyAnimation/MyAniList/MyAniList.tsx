@@ -11,6 +11,7 @@ import {
 
 type Props = {
   list: UserAnimeItem[];
+  totalCount?: number;
   onAnimeClick?: (anime: UserAnimeItem) => void;
   myAnimeList?: AnimeItem[];
   onAdd?: (anime: UserAnimeItem) => void;
@@ -20,6 +21,7 @@ type Props = {
 
 export default function MyAniList({
   list,
+  totalCount = 0,
   onAnimeClick,
   myAnimeList,
   onAdd,
@@ -31,7 +33,7 @@ export default function MyAniList({
   return (
     <ListWrapper>
       <ListCountText>
-        총 <span>{list.length}</span>개의 애니
+        총 <span>{totalCount}</span>개의 애니
       </ListCountText>
 
       <ListHeader>

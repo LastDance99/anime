@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import MyAniListFilter from "../../components/MyAnimation/MyAniListFilter/MyAniListFilter";
 import MyAniList from "../../components/MyAnimation/MyAniList/MyAniList";
 import AnimeDetailModal from "../../components/AnimeDetailModal/AnimeDetailModal";
@@ -17,24 +17,27 @@ const MyAniListPage = () => {
   const { user } = useOutletContext<{ user: User }>();
 
   const [filters, setFilters] = useState<AniListFilters>({
-    year: 0,
-    genre: "",
-    season: "",
-    status: "",
-    format: "",
-    keyword: "",
-    original: "",
-    sort: "",
+    year: 0, genre: "", season: "", status: "",
+    format: "", keyword: "", original: "", sort: "",
   });
 
   const [animeList, setAnimeList] = useState<AnimeItem[]>([]);
   const [selectedAnime, setSelectedAnime] = useState<(AnimeItem & { isAdded: boolean }) | null>(null);
   const [myAnimeList, setMyAnimeList] = useState<AnimeItem[]>([]);
   const [favoriteAnimeIds, setFavoriteAnimeIds] = useState<number[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchAnimeList = async () => {
+  const pageRef = useRef(1);
+  const isFetchingRef = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const fetchAnimeList = async (pageNum: number, reset = false) => {
+    if (isFetchingRef.current) return;
+
     try {
+      isFetchingRef.current = true;
+
       const res = await getUserContent({
         userId: user.id,
         type: "anime",
@@ -46,12 +49,24 @@ const MyAniListPage = () => {
         format: filters.format,
         source: filters.original,
         order: filters.sort,
-        page: 1,
+        page: pageNum,
       });
-      setAnimeList(res.results);
-      setMyAnimeList(res.results);
+
+      if (reset) {
+        setAnimeList(res.results);
+        setMyAnimeList(res.results);
+        pageRef.current = 1;
+      } else {
+        setAnimeList((prev) => [...prev, ...res.results]);
+        setMyAnimeList((prev) => [...prev, ...res.results]);
+      }
+
+      setTotalCount(res.count);
+      setHasMore(!!res.next);
     } catch (err) {
       console.error("애니 리스트 불러오기 실패", err);
+    } finally {
+      isFetchingRef.current = false;
     }
   };
 
@@ -65,9 +80,26 @@ const MyAniListPage = () => {
   };
 
   useEffect(() => {
-    fetchAnimeList();
+    fetchAnimeList(1, true);
     fetchFavorites();
   }, [user.id, filters]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      if (scrollTop + windowHeight >= docHeight - 100 && hasMore && !isFetchingRef.current) {
+        const nextPage = pageRef.current + 1;
+        fetchAnimeList(nextPage);
+        pageRef.current = nextPage;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore]);
 
   const handleToggle = async (anime: AnimeItem) => {
     const animeId = anime.anime_id || anime.id;
@@ -129,22 +161,19 @@ const MyAniListPage = () => {
     <PageWrapper>
       <MainLayout>
         <MyAniListFilter filters={filters} setFilters={setFilters} />
-        {isRefreshing ? (
-          <LoadingSpinner />
-        ) : (
-          <MyAniList
-            list={animeList.map((item) => ({
-              ...item,
-              is_favorite: favoriteAnimeIds.includes(item.id),
-              added_at: item.added_at ?? "",
-            }))}
-            onAnimeClick={handleAnimeClick}
-            myAnimeList={myAnimeList}
-            onAdd={handleToggle}
-            onRemove={handleToggle}
-            onToggleFavorite={handleToggleFavorite}
-          />
-        )}
+        <MyAniList
+          list={animeList.map((item) => ({
+            ...item,
+            is_favorite: favoriteAnimeIds.includes(item.id),
+            added_at: item.added_at ?? "",
+          }))}
+          onAnimeClick={handleAnimeClick}
+          myAnimeList={myAnimeList}
+          onAdd={handleToggle}
+          onRemove={handleToggle}
+          onToggleFavorite={handleToggleFavorite}
+          totalCount={totalCount}
+        />
         {selectedAnime && (
           <AnimeDetailModal
             anime={selectedAnime}

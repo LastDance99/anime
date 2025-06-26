@@ -40,6 +40,9 @@ const AnimeProfile: React.FC<Props> = ({ user }) => {
   }, []);
 
   const handleLogout = async () => {
+    const confirm = window.confirm("정말 로그아웃하시겠습니까?");
+    if (!confirm) return;
+
     try {
       await logout();
     } catch (err) {
@@ -81,7 +84,7 @@ const AnimeProfile: React.FC<Props> = ({ user }) => {
             {animeData.attendance_count}일
           </FontRow>
           <FontRow>
-            <Font>내가 리스트:</Font>
+            <Font>내 리스트:</Font>
             {animeData.animelist_count}개
           </FontRow>
           <FontRow>
@@ -89,7 +92,9 @@ const AnimeProfile: React.FC<Props> = ({ user }) => {
             {animeData.review_count}개
           </FontRow>
         </FontBox>
-        <CustomButton>내 리스트</CustomButton>
+        <CustomButton onClick={() => navigate(`/profile/${user.id}/myanilist`)}>
+          내 리스트
+        </CustomButton>
       </BottomBox>
     </Card>
   );

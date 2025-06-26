@@ -1,4 +1,5 @@
 import axios from '../lib/axios';
+import type { BoardComment } from '../types/comment'
 
 export const getBoardPosts = async (params?: {
   page?: number;
@@ -53,7 +54,10 @@ export const removeBoardPostLike = async (postId: number) => {
   return res.data;
 };
 
-export const getBoardComments = async (postId: number, sort: 'latest' | 'like' | 'created' = 'latest') => {
+export const getBoardComments = async (
+  postId: number,
+  sort: "latest" | "like" | "created" = "latest"
+): Promise<{ count: number; results: BoardComment[] }> => {
   const res = await axios.get(`/api/boards/${postId}/comments/?sort=${sort}`);
   return res.data;
 };

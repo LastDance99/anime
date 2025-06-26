@@ -52,7 +52,10 @@ function getLikesFromReviews(reviews: AnimeReview[]) {
     if (review && typeof review.id === "number") {
       obj[review.id] = {
         count: review.like_count ?? 0,
-        liked: review.liked_by_user ?? false,
+        liked:
+          review.liked_by_user ?? // POST 응답용
+          review.is_liked_by_me ?? // GET 응답용
+          false,
       };
     }
   });
@@ -92,7 +95,6 @@ export default function ReviewList({
   const [animatedRating, setAnimatedRating] = useState(editedRating);
   const [likes, setLikes] = useState(() => getLikesFromReviews(reviews));
 
-  // reviews가 바뀔 때마다 likes 최신화
   useEffect(() => {
     setLikes(getLikesFromReviews(reviews));
   }, [reviews]);
@@ -126,19 +128,17 @@ export default function ReviewList({
           liked: updated.liked_by_user,
         },
       }));
-    } catch (err) {
-      console.error(`[handleToggleLike] 실패:`, err);
+    } catch (err: any) {
+      console.error("🛑 likeAnimeReview error:", err.response?.data || err.message);
+      throw err;
     }
   };
 
   const sortedReviews = useMemo(() => {
     const filtered = reviews.filter((r): r is AnimeReview => !!r && typeof r.id === "number");
-
-    // 내 리뷰와 나머지 분리
     const myReview = filtered.find(r => r.user?.id === myUserId);
     const others = filtered.filter(r => r.user?.id !== myUserId);
 
-    // 기존 정렬 로직 (최신순, 오래된순, 따봉순 등)
     let sorted = [...others];
     if (sortType === "latest")
       sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -147,7 +147,6 @@ export default function ReviewList({
     if (sortType === "like")
       sorted.sort((a, b) => (likes[b.id]?.count || 0) - (likes[a.id]?.count || 0));
 
-    // 내 리뷰가 있으면 맨 앞에 붙여서 반환
     return myReview ? [myReview, ...sorted] : sorted;
   }, [reviews, sortType, likes, myUserId]);
 
@@ -186,7 +185,15 @@ export default function ReviewList({
                     {isMyReview && !isEditing && (
                       <>
                         <EditBtn onClick={() => onEditStart(r)}>수정</EditBtn>
-                        <DeleteBtn onClick={() => onDelete(r.id)}>삭제</DeleteBtn>
+                        <DeleteBtn
+                          onClick={() => {
+                            if (window.confirm("삭제하시겠습니까?")) {
+                              onDelete(r.id);
+                            }
+                          }}
+                        >
+                          삭제
+                        </DeleteBtn>
                       </>
                     )}
                   </ReviewerInfo>
@@ -229,8 +236,26 @@ export default function ReviewList({
                           );
                         })}
                       </RatingStars>
-                      <EditBtn as="button" onClick={() => onEditSubmit(r.id)}>완료</EditBtn>
-                      <DeleteBtn as="button" onClick={onEditCancel}>취소</DeleteBtn>
+                      <EditBtn
+                        as="button"
+                        onClick={() => {
+                          if (window.confirm("수정하시겠습니까?")) {
+                            onEditSubmit(r.id);
+                          }
+                        }}
+                      >
+                        완료
+                      </EditBtn>
+                      <DeleteBtn 
+                      as="button"
+                        onClick={() => {
+                          if (window.confirm("취소하시겠습니까?")) {
+                            onEditSubmit(r.id);
+                          }
+                        }}
+                      >
+                        취소
+                      </DeleteBtn>
                     </div>
                   </>
                 ) : (
@@ -238,7 +263,14 @@ export default function ReviewList({
                 )}
 
                 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginTop: 4 }}>
-                  <LikeBtn onClick={() => handleToggleLike(r.id)}>
+                  <LikeBtn
+                    onClick={() => !isMyReview && handleToggleLike(r.id)}
+                    style={{
+                      cursor: isMyReview ? "not-allowed" : "pointer",
+                      opacity: isMyReview ? 0.4 : 1,
+                    }}
+                    title={isMyReview ? "자신의 리뷰에는 좋아요를 누를 수 없습니다" : "이 리뷰를 추천합니다"}
+                  >
                     <ThumbsUp
                       size={16}
                       color={liked ? "#ED7CB8" : "#F8A0BC"}

@@ -7,9 +7,10 @@ type Props = {
   type: 'post' | 'gallery';
   id: number;
   onClose: () => void;
+  onDeleteSuccess?: (deletedId: number) => void; // ✅ 추가
 };
 
-export default function DetailModal({ type, id, onClose }: Props) {
+export default function DetailModal({ type, id, onClose, onDeleteSuccess }: Props) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -33,9 +34,7 @@ export default function DetailModal({ type, id, onClose }: Props) {
         </Header>
         <Content>
           <Left>
-            {type === 'post' || type === 'gallery' ? (
-              <DetailContent key={id} id={id} />
-            ) : null}
+            <DetailContent key={id} id={id} onDeleteSuccess={onDeleteSuccess} />
           </Left>
           <Right>
             <CommentBox contentType={type} contentId={id} />

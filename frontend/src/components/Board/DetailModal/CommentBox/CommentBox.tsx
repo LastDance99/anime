@@ -29,6 +29,7 @@ import {
 } from "./CommentBox.styled";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { ThumbsUp, CornerDownRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ko";
@@ -55,7 +56,7 @@ export default function CommentBox({ contentType, contentId }: Props) {
   const [replyState, setReplyState] = useState<{
     targetId: number | null;
     parentId: number | null;
-    tagged_nickname?: string;
+    tagged_nickname?: string | null;
   }>({ targetId: null, parentId: null, tagged_nickname: undefined });
   const [replyInput, setReplyInput] = useState("");
   const [sort, setSort] = useState<SortType>("createdAsc");
@@ -63,123 +64,214 @@ export default function CommentBox({ contentType, contentId }: Props) {
 
   const commentListRef = useRef<HTMLDivElement>(null);
   const replyInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
-  // 댓글 목록 불러오기 (정렬 연동)
-  const fetchComments = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await getBoardComments(contentId, sortToApi[sort]);
-      console.log("[fetchComments] API data:", res);
-      setComments(Array.isArray(res.results) ? res.results : []);
-    } catch (e) {
-      setComments([]);
-    } finally {
-      setLoading(false);
+  const scrollToBottom = () => {
+    if (commentListRef.current) {
+      commentListRef.current.scrollTo({
+        top: commentListRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
-  }, [contentId, sort]);
+  };
+
+  const fetchComments = useCallback(
+    async (scrollToEnd = false) => {
+      setLoading(true);
+      try {
+        const res = await getBoardComments(contentId, sortToApi[sort]);
+        setComments(Array.isArray(res.results) ? res.results : []);
+        if (scrollToEnd) {
+          setTimeout(scrollToBottom, 100); // 렌더링 이후에 실행되게
+        }
+      } catch (e) {
+        setComments([]);
+        console.error("[fetchComments] 에러:", e);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [contentId, sort]
+  );
 
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);
 
-  // 좋아요 (취소 불가)
-  const handleLike = async (id: number) => {
-    const res = await toggleCommentLike(id);
-    setComments((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              liked: res.liked ?? true,
-              like_count:
-                res.liked === false
-                  ? c.like_count
-                  : typeof c.like_count === "number"
-                  ? c.like_count + 1
-                  : 1,
-            }
-          : c
-      )
-    );
+  function updateCommentLike(list: BoardComment[], id: number): BoardComment[] {
+    return list.map(comment => {
+      if (comment.id === id) {
+        return {
+          ...comment,
+          like_count: comment.like_count + 1,
+          liked: true,
+        };
+      }
+      if (comment.replies && comment.replies.length > 0) {
+        return {
+          ...comment,
+          replies: updateCommentLike(comment.replies, id),
+        };
+      }
+      return comment;
+    });
+  }
+
+  const handleLike = async (id: number, isMyComment: boolean, alreadyLiked: boolean) => {
+    if (isMyComment || alreadyLiked) return;
+    try {
+      await toggleCommentLike(id);
+      setComments(prev => updateCommentLike(prev, id));
+    } catch (err) {
+      console.error("[좋아요 처리 실패]", err);
+    }
   };
 
-  // 댓글 작성 (작성 후 전체 fetch)
   const handleSubmit = async () => {
     if (!input.trim() || !currentUser) return;
-    await addBoardComment(contentId, { content: input });
-    setInput("");
-    fetchComments();
+    try {
+      const newComment = await addBoardComment(contentId, { content: input });
+      setComments(prev =>
+        sort === "createdDesc"
+          ? [newComment, ...prev]
+          : [...prev, newComment]
+      );
+      setInput("");
+      if (sort !== "createdDesc") {
+        setTimeout(scrollToBottom, 100);
+      }
+    } catch (e) {
+      console.error("댓글 등록 실패", e);
+    }
   };
 
-  // 답글 토글/작성
   const handleReplyToggle = (target: BoardComment) => {
     const parentId = target.parent_id ?? target.id;
-    setReplyState({
-      targetId: replyState.targetId === target.id ? null : target.id,
-      parentId: replyState.targetId === target.id ? null : parentId,
-      tagged_nickname: target.author_nickname,
-    });
+    const willOpen = replyState.targetId !== target.id;
+    setReplyState((prev) =>
+      prev.targetId === target.id
+        ? { targetId: null, parentId: null, tagged_nickname: undefined }
+        : {
+            targetId: target.id,
+            parentId,
+            tagged_nickname: target.author_nickname,
+          }
+    );
     setReplyInput("");
   };
 
   const handleReplySubmit = async () => {
     if (!replyInput.trim() || !currentUser || replyState.parentId == null) return;
-    await addBoardComment(contentId, {
-      content: replyInput,
-      parent_id: replyState.parentId,
-      tagged_nickname: replyState.tagged_nickname,
-    });
-    setReplyState({ targetId: null, parentId: null, tagged_nickname: undefined });
-    setReplyInput("");
-    fetchComments();
+    try {
+      const newReply = await addBoardComment(contentId, {
+        content: replyInput,
+        parent_id: replyState.parentId,
+        tagged_nickname: replyState.tagged_nickname ?? undefined,
+      });
+
+      setComments(prev =>
+        prev.map(comment =>
+          comment.id === replyState.parentId
+            ? {
+                ...comment,
+                replies: sort === "createdDesc"
+                  ? [newReply, ...(comment.replies || [])]
+                  : [...(comment.replies || []), newReply],
+              }
+            : comment
+        )
+      );
+
+      setReplyState({ targetId: null, parentId: null, tagged_nickname: undefined });
+      setReplyInput("");
+
+      if (sort !== "createdDesc") {
+        setTimeout(scrollToBottom, 100);
+      }
+    } catch (e) {
+      console.error("답글 등록 실패", e);
+    }
   };
 
-  // 댓글 삭제 (soft delete)
   const handleDelete = async (commentId: number) => {
-    // 경고창 띄우기
     const ok = window.confirm("정말로 삭제하시겠습니까?");
-    if (!ok) return; // 아니오 클릭 시 취소
+    if (!ok) return;
     await deleteComment(contentId, commentId);
     fetchComments();
   };
-  // 최상위 댓글만 반환
-  const getSortedTopLevelComments = () => {
-    if (!Array.isArray(comments)) return [];
-    return comments.filter((c) => !c.parent_id);
+
+  const getTopLevelComments = () => comments.filter(c => !c.parent_id);
+
+  const handleNicknameClick = (userId: number) => {
+    const ok = window.confirm("작성자의 프로필로 이동하시겠습니까?");
+    if (ok) navigate(`/profile/${userId}`);
   };
 
-  // === ⭐️ 재귀적으로 replies 렌더링하는 함수로 수정! ===
   const renderComment = (comment: BoardComment, depth = 0) => {
-    // replies가 없으면 빈 배열로
     const replies = comment.replies || [];
     const indent = 32 + 32 * depth;
+    const isMyComment = !!currentUser && currentUser.id === comment.author_id;
 
     return (
       <div key={comment.id}>
-        <CommentItem style={depth > 0 ? { marginLeft: indent } : undefined}>
+        <CommentItem style={depth > 0 ? { marginLeft: indent } : undefined} depth={depth}>
           {depth > 0 && (
             <CornerDownRight size={16} style={{ marginRight: 8, color: "#B4B4B4" }} />
           )}
-          <Profile src={comment.author_profile_image || "/default_profile.png"} />
+          <Profile
+            src={comment.author_profile_image || "/default_profile.png"}
+            alt={comment.author_nickname}
+          />
           <CommentContent>
-            <Nickname>{comment.author_nickname || "알 수 없음"}</Nickname>
-            <Text>
-              {comment.tagged_nickname && (
-                <TagMention>@{comment.tagged_nickname} </TagMention>
+            <Nickname
+              onClick={() =>
+                !comment.is_deleted && handleNicknameClick(comment.author_id)
+              }
+              style={{
+                cursor: comment.is_deleted ? "default" : "pointer",
+              }}
+            >
+              {comment.author_nickname || "알 수 없음"}
+              {isMyComment && (
+                <span style={{ fontSize: 10, color: "#aaa", marginLeft: 6 }}>
+                  내 댓글
+                </span>
               )}
-              {comment.is_deleted ? "삭제된 댓글입니다." : comment.content}
-            </Text>
+            </Nickname>
+
+            <Text
+              dangerouslySetInnerHTML={{
+                __html: comment.is_deleted
+                  ? "삭제된 댓글입니다."
+                  : (comment.tagged_nickname
+                      ? `<span style="color:#6096fd; font-weight:500;">@${comment.tagged_nickname} </span>`
+                      : "") + comment.content,
+              }}
+            />
+
             <Meta>
               <span>{dayjs(comment.created_at).fromNow()}</span>
               {!comment.is_deleted && (
                 <>
                   <ReplyBtn onClick={() => handleReplyToggle(comment)}>답글</ReplyBtn>
-                  <LikeButton liked={comment.liked} onClick={() => handleLike(comment.id)}>
+                  <LikeButton
+                    liked={!!comment.liked}
+                    disabled={isMyComment}
+                    aria-disabled={isMyComment || !!comment.liked}
+                    onClick={() =>
+                      handleLike(comment.id, isMyComment, !!comment.liked)
+                    }
+                  >
                     <ThumbsUp size={14} />
                     {comment.like_count}
                   </LikeButton>
-                  {currentUser?.nickname === comment.author_nickname && (
-                    <ReplyBtn onClick={() => handleDelete(comment.id)}>삭제</ReplyBtn>
+                  {isMyComment && (
+                    <ReplyBtn
+                      onClick={() => handleDelete(comment.id)}
+                      style={{ color: "#e57373" }}
+                    >
+                      삭제
+                    </ReplyBtn>
                   )}
                 </>
               )}
@@ -187,8 +279,7 @@ export default function CommentBox({ contentType, contentId }: Props) {
           </CommentContent>
         </CommentItem>
 
-        {/* 답글 입력창 */}
-        {replyState.targetId === comment.id && (
+        {replyState.targetId === comment.id && !comment.is_deleted && (
           <ReplyInputWrapper style={{ marginLeft: indent + 32 }}>
             <ReplyInput
               ref={replyInputRef}
@@ -201,7 +292,6 @@ export default function CommentBox({ contentType, contentId }: Props) {
           </ReplyInputWrapper>
         )}
 
-        {/* 대댓글 재귀적으로 렌더 */}
         {replies.map((reply) => renderComment(reply, depth + 1))}
       </div>
     );
@@ -210,15 +300,23 @@ export default function CommentBox({ contentType, contentId }: Props) {
   return (
     <Wrapper>
       <TabList>
-        <Tab selected={sort === "createdAsc"} onClick={() => setSort("createdAsc")}>등록순</Tab>
-        <Tab selected={sort === "createdDesc"} onClick={() => setSort("createdDesc")}>최신순</Tab>
-        <Tab selected={sort === "likeDesc"} onClick={() => setSort("likeDesc")}>따봉순</Tab>
+        <Tab selected={sort === "createdAsc"} onClick={() => setSort("createdAsc")}>
+          등록순
+        </Tab>
+        <Tab selected={sort === "createdDesc"} onClick={() => setSort("createdDesc")}>
+          최신순
+        </Tab>
+        <Tab selected={sort === "likeDesc"} onClick={() => setSort("likeDesc")}>
+          따봉순
+        </Tab>
       </TabList>
 
       <CommentList ref={commentListRef}>
-        {loading
-          ? <div style={{ padding: "2em", textAlign: "center" }}>로딩중...</div>
-          : getSortedTopLevelComments().map((c) => renderComment(c, 0))}
+        {loading ? (
+          <div style={{ padding: "2em", textAlign: "center" }}>로딩중...</div>
+        ) : (
+          getTopLevelComments().map((c) => renderComment(c, 0))
+        )}
       </CommentList>
 
       {currentUser && (

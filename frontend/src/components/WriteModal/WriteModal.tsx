@@ -51,8 +51,37 @@ async function uploadImageToS3(file: File): Promise<string> {
 
 const modules = {
   toolbar: {
-    container: [["bold", "italic", "underline"], ["link", "image", "youtube"], ["clean"]],
+    container: [
+      ["bold", "italic", "underline"],
+      ["link", "image", "youtube"],
+      ["clean"],
+    ],
     handlers: {
+      // 이미지 버튼 핸들러 (S3 업로드 → URL 삽입)
+      image: function (this: any) {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/*");
+        input.click();
+
+        input.onchange = async () => {
+          const file = input.files?.[0];
+          if (file) {
+            try {
+              // S3 업로드 함수 사용 (동일 함수)
+              const url = await uploadImageToS3(file);
+              const range = this.quill.getSelection(true);
+              this.quill.clipboard.dangerouslyPasteHTML(
+                range?.index ?? this.quill.getLength(),
+                `<p class="ql-align-center"><img src="${url}" class="centered-image" /></p>`
+              );
+            } catch {
+              alert("이미지 업로드 실패");
+            }
+          }
+        };
+      },
+      // 유튜브 버튼 핸들러 (링크 → iframe 삽입)
       youtube: function (this: any) {
         const url = prompt("유튜브 링크를 입력하세요");
         const match = url?.match(
@@ -60,7 +89,7 @@ const modules = {
         );
         if (match) {
           const videoId = match[1];
-          const iframe = `<p class=\"ql-align-center\"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/${videoId}\" frameborder=\"0\" allowfullscreen></iframe></p>`;
+          const iframe = `<p class="ql-align-center"><iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></p>`;
           const range = this.quill.getSelection(true);
           this.quill.clipboard.dangerouslyPasteHTML(range?.index ?? 0, iframe);
         } else {
@@ -71,7 +100,12 @@ const modules = {
   },
 };
 
-export default function WriteForm({ boardType: initialType = "post", onBoardTypeChange, post, mode = "create" }: Props) {
+export default function WriteForm({
+  boardType: initialType = "post",
+  onBoardTypeChange,
+  post,
+  mode = "create",
+}: Props) {
   const [boardType, setBoardType] = useState<BoardType>(initialType);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -96,6 +130,7 @@ export default function WriteForm({ boardType: initialType = "post", onBoardType
     const quill = quillRef.current?.getEditor();
     if (!quill) return;
 
+    // ----- 이미지 드롭 -----
     const handleDrop = async (e: DragEvent) => {
       e.preventDefault();
       const file = e.dataTransfer?.files?.[0];
@@ -107,22 +142,72 @@ export default function WriteForm({ boardType: initialType = "post", onBoardType
         const insertAt = range?.index ?? quill.getLength();
         quill.clipboard.dangerouslyPasteHTML(
           insertAt,
-          `<p class=\"ql-align-center\"><img src=\"${url}\" class=\"centered-image\" /></p>`
+          `<p class="ql-align-center"><img src="${url}" class="centered-image" /></p>`
         );
       } catch (err) {
         alert("이미지 업로드 중 오류가 발생했습니다.");
       }
     };
 
-    const handlePaste = (e: ClipboardEvent) => {
-      const text = e.clipboardData?.getData("text/plain");
-      const match = text?.match(
+    // ----- 이미지/유튜브 붙여넣기 (paste) -----
+    const handlePaste = async (e: ClipboardEvent) => {
+      // 1. 이미지 파일 직접 붙여넣기
+      const items = e.clipboardData?.items;
+      if (items) {
+        for (const item of items) {
+          if (item.type.indexOf("image") !== -1) {
+            const file = item.getAsFile();
+            if (file) {
+              e.preventDefault();
+              try {
+                const url = await uploadImageToS3(file);
+                const range = quill.getSelection(true);
+                quill.clipboard.dangerouslyPasteHTML(
+                  range?.index ?? quill.getLength(),
+                  `<p class="ql-align-center"><img src="${url}" class="centered-image" /></p>`
+                );
+              } catch {
+                alert("이미지 업로드 실패");
+              }
+              return; // 하나만 붙여넣고 끝
+            }
+          }
+        }
+      }
+      // 2. data:image Base64 텍스트 붙여넣기 (웹에서 이미지 복사)
+      const text = e.clipboardData?.getData("text/plain") ?? "";
+      if (text.startsWith("data:image/")) {
+        e.preventDefault();
+        try {
+          // Base64 → Blob → File 변환
+          const arr = text.split(",");
+          const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
+          const bstr = atob(arr[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          const file = new File([u8arr], `clipboard.${mime.split("/")[1]}`, { type: mime });
+          const url = await uploadImageToS3(file);
+          const range = quill.getSelection(true);
+          quill.clipboard.dangerouslyPasteHTML(
+            range?.index ?? quill.getLength(),
+            `<p class="ql-align-center"><img src="${url}" class="centered-image" /></p>`
+          );
+        } catch {
+          alert("이미지 업로드 실패");
+        }
+        return;
+      }
+      // 3. 유튜브 링크 붙여넣기
+      const youtubeMatch = text.match(
         /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/
       );
-      if (match) {
+      if (youtubeMatch) {
         e.preventDefault();
-        const videoId = match[1];
-        const iframe = `<p class=\"ql-align-center\"><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/${videoId}\" frameborder=\"0\" allowfullscreen></iframe></p>`;
+        const videoId = youtubeMatch[1];
+        const iframe = `<p class="ql-align-center"><iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></p>`;
         const range = quill.getSelection(true);
         quill.clipboard.dangerouslyPasteHTML(range?.index ?? 0, iframe);
       }
@@ -138,6 +223,7 @@ export default function WriteForm({ boardType: initialType = "post", onBoardType
   }, []);
 
   useEffect(() => {
+    // 툴바에 YT 텍스트 표시
     const toolbar = document.querySelector(".ql-toolbar");
     const youtubeBtn = toolbar?.querySelector(".ql-youtube") as HTMLElement;
     if (youtubeBtn && youtubeBtn.innerHTML.trim() === "") {
@@ -148,6 +234,12 @@ export default function WriteForm({ boardType: initialType = "post", onBoardType
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) {
       alert("제목과 본문을 입력해주세요.");
+      return;
+    }
+
+    // 🧩 갤러리일 경우 이미지가 하나라도 포함되어 있어야 함
+    if (boardType === "gallery" && !/<img\s+[^>]*src=["'][^"']+["']/i.test(content)) {
+      alert("갤러리 글은 이미지를 최소 1개 이상 포함해야 합니다.");
       return;
     }
 

@@ -41,12 +41,17 @@ export const deleteAnimeReview = async (animeId: number, reviewId: number) => {
 };
 
 export const likeAnimeReview = async (animeId: number, reviewId: number) => {
-  const res = await axios.post(`/api/anime/${animeId}/review/${reviewId}/like/`);
-  return res.data as {
-    id: number;
-    like_count: number;
-    liked_by_user: boolean;
-  };
+  try {
+    const res = await axios.post(`/api/anime/${animeId}/review/${reviewId}/like/`);
+    return res.data as {
+      id: number;
+      like_count: number;
+      liked_by_user: boolean;
+    };
+  } catch (err: any) {
+    console.error("🛑 likeAnimeReview error:", err.response?.data || err.message);
+    throw err; // 에러를 다시 던져서 상위에서 처리되도록 유지
+  }
 };
 
 export const rateAnime = async (animeId: number, data: any) => {

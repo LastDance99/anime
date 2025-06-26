@@ -30,15 +30,28 @@ const SORT_OPTIONS = [
   { label: "평점순", value: "rating" },
 ];
 
-const buildAnimeParams = (filters: AnimeFilter, sort: string, offset: number, limit: number) => {
-  const yearParam = filters.year === "2010년 이하" ? undefined : filters.year;
+const buildAnimeParams = (
+  filters: AnimeFilter,
+  sort: string,
+  offset: number,
+  limit: number
+) => {
+  let ordering: string;
+  if (sort === "popular") ordering = "popular";
+  else if (sort === "latest") ordering = "-start_year";
+  else if (sort === "rating") ordering = "-rating";
+  else ordering = "-start_year"; // fallback
+
+  // 2010년 이하 옵션 대응
+  const yearParam = filters.year === "2010년 이하" || filters.year === "" ? undefined : filters.year;
+
   return {
     ...(filters.genre?.length ? { genres: filters.genre.join(",") } : {}),
     ...(filters.season ? { season: filters.season } : {}),
     ...(yearParam ? { year: yearParam } : {}),
     ...(filters.broadcast ? { status: filters.broadcast } : {}),
     ...(filters.keyword ? { q: filters.keyword } : {}),
-    sort: sort === "popular" ? "popular" : sort === "latest" ? "-start_year" : sort,
+    ordering,
     offset,
     limit,
   };
@@ -113,13 +126,28 @@ export default function AniMain() {
   }, [filters, sort]);
 
   useEffect(() => {
+    console.log(
+      "[🎯 애니 정렬 결과]",
+      animeList.map((a, i) => ({
+        i,
+        title: a.title,
+        total: a.total_animelist_users,
+      }))
+    );
+  }, [animeList]);
+
+  useEffect(() => {
     const fetchAnimeList = async () => {
       setLoading(true);
       setIsFetching(true); // ✅ fetching 시작
+
       try {
         const params = buildAnimeParams(filters, sort, offset, LIMIT);
+        console.log("[🔍 요청 파라미터]", params); // ✅ 여기 잘 찍혔는지 콘솔 확인
+
         const data = await searchAnime(params);
         const results = Array.isArray(data.results) ? data.results : [];
+
         setAnimeList(prev => offset === 0 ? results : [...prev, ...results]);
         setTotalCount(data.count || results.length);
       } catch (e) {
@@ -131,6 +159,7 @@ export default function AniMain() {
         setIsFetching(false); // ✅ fetching 종료
       }
     };
+
     fetchAnimeList();
   }, [filters, sort, offset]);
 

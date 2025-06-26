@@ -39,11 +39,15 @@ export const CommentList = styled.div.attrs({ tabIndex: -1 })`
   }
 `;
 
-export const CommentItem = styled.div`
+export const CommentItem = styled.div<{ depth?: number }>`
   padding: 12px 0;
   border-bottom: 1px solid ${({ theme }) => theme.colors.secondary};
   display: flex;
   gap: 12px;
+  background: ${({ depth }) =>
+    depth && depth > 0 ? "#F9F9F9" : "transparent"};
+  margin-top: ${({ depth }) => (depth && depth > 0 ? "4px" : "0")};
+  margin-bottom: ${({ depth }) => (depth && depth > 0 ? "4px" : "0")};
 `;
 
 export const Profile = styled.img`
@@ -118,12 +122,14 @@ export const SubmitBtn = styled.button`
   }
 `;
 
-export const LikeButton = styled.button<{ liked?: boolean }>`
+export const LikeButton = styled.button<{ liked: boolean; disabled?: boolean }>`
   background: none;
   border: none;
-  color: ${({ liked, theme }) =>
-    liked ? theme.colors.bordermain : theme.colors.subtext};
-  cursor: pointer;
+  color: ${({ liked, disabled, theme }) =>
+    disabled ? theme.colors.subtext
+    : liked ? theme.colors.bordermain
+    : theme.colors.subtext};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   display: flex;
   align-items: center;
@@ -131,9 +137,13 @@ export const LikeButton = styled.button<{ liked?: boolean }>`
   padding: 0;
   margin: 0;
   user-select: none;
+  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+  transition: color 0.15s;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.bordermain};
+    color: ${({ liked, disabled, theme }) =>
+      disabled ? theme.colors.subtext
+      : theme.colors.bordermain};
   }
 `;
 

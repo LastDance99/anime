@@ -40,6 +40,9 @@ const BoardProfile: React.FC<Props> = ({ user }) => {
   }, []);
 
   const handleLogout = async () => {
+    const confirm = window.confirm("정말 로그아웃하시겠습니까?");
+    if (!confirm) return;
+
     try {
       await logout();
     } catch (err) {

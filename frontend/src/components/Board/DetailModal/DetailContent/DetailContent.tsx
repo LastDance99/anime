@@ -29,7 +29,13 @@ import {
 import { ThumbsUp } from "lucide-react";
 import DOMPurify from "dompurify";
 
-export default function DetailContent({ id }: { id: number }) {
+export default function DetailContent({
+  id,
+  onDeleteSuccess,
+}: {
+  id: number;
+  onDeleteSuccess?: (deletedId: number) => void;
+}) {
   const [item, setItem] = useState<BoardItem | null>(null);
   const [liked, setLiked] = useState<boolean | null>(null);
   const [likeCount, setLikeCount] = useState<number | null>(null);
@@ -44,7 +50,6 @@ export default function DetailContent({ id }: { id: number }) {
   const fetchData = async () => {
     try {
       const data = await getBoardPostDetail(id);
-      console.log("📦 상세 데이터:", data); // ← 여기서 is_liked: false 라면 백엔드 문제 확정
       setItem(data);
     } catch (err) {
       console.error("게시글 상세 조회 실패", err);
@@ -52,7 +57,6 @@ export default function DetailContent({ id }: { id: number }) {
     }
   };
 
-  // 🔁 item이 바뀌면 liked/likeCount 동기화
   useEffect(() => {
     if (item) {
       setLiked(item.is_liked ?? false);
@@ -65,7 +69,8 @@ export default function DetailContent({ id }: { id: number }) {
   const isGallery = item.board_type === "gallery";
   const authorNickname = item.author_nickname ?? "알 수 없음";
   const profileImage = getFullImageUrl(item.author_profile_image);
-  const isAuthor = currentUser?.nickname === authorNickname;
+  const isAuthor = currentUser?.id === item.author.id;
+  const authorId = item.author.id;
 
   const handleLike = async () => {
     if (isAuthor || liked === null || likeCount === null) return;
@@ -73,7 +78,6 @@ export default function DetailContent({ id }: { id: number }) {
     const prevLiked = liked;
     const prevCount = likeCount;
 
-    // Optimistic UI
     setLiked(!prevLiked);
     setLikeCount(prevLiked ? prevCount - 1 : prevCount + 1);
 
@@ -109,10 +113,30 @@ export default function DetailContent({ id }: { id: number }) {
     try {
       await deleteBoardPost(id);
       alert("삭제되었습니다.");
-      navigate("/board");
+
+      if (onDeleteSuccess) {
+        onDeleteSuccess(id);
+      }
     } catch (err) {
       console.error("삭제 실패", err);
       alert("삭제에 실패했습니다.");
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (window.confirm(`${authorNickname}님의 프로필로 이동하시겠습니까?`)) {
+      navigate(`/profile/${authorId}`);
+    }
+  };
+
+  const handleMoreClick = () => {
+    const target = isGallery ? "mygallery" : "myboard";
+    if (
+      window.confirm(
+        `${authorNickname}님의 다른 ${isGallery ? "갤러리" : "게시글"}을 보시겠습니까?`
+      )
+    ) {
+      navigate(`/profile/${authorId}/${target}`);
     }
   };
 
@@ -127,6 +151,8 @@ export default function DetailContent({ id }: { id: number }) {
         <Profile
           src={profileImage || "/default_profile.png"}
           alt={`${authorNickname}님의 프로필 이미지`}
+          onClick={handleProfileClick}
+          style={{ cursor: "pointer" }}
           onError={(e) => {
             if (!e.currentTarget.src.includes("/default_profile.png")) {
               e.currentTarget.src = "/default_profile.png";
@@ -135,7 +161,9 @@ export default function DetailContent({ id }: { id: number }) {
         />
         <UserInfo>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Nickname>{authorNickname}</Nickname>
+            <Nickname onClick={handleProfileClick} style={{ cursor: "pointer" }}>
+              {authorNickname}
+            </Nickname>
             {isAuthor && (
               <>
                 <button
@@ -195,7 +223,7 @@ export default function DetailContent({ id }: { id: number }) {
       </ContentBox>
 
       <FooterRow>
-        <MoreLink>
+        <MoreLink onClick={handleMoreClick}>
           {authorNickname}님의 다른 {isGallery ? "갤러리" : "게시글"} &gt;
         </MoreLink>
         <IconButtons>

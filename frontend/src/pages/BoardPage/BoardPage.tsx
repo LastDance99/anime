@@ -18,7 +18,7 @@ import BoardProfile from "../../components/Board/ProfileCard/ProfileCard";
 import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import WriteButton from "../../components/WriteButton/WriteButton";
-import DetailModal from "../../components/Board/DetailModal";
+import DetailModal from "../../components/Board/DetailModal/DetailModal";
 import { useNavigate } from "react-router-dom";
 import { getBoardPosts } from "../../api/board";
 import { getMyProfile } from "../../api/profile";
@@ -64,20 +64,33 @@ const BoardPage: React.FC = () => {
   // 게시글 불러오기
   useEffect(() => {
     async function fetchPosts() {
+      const queryType =
+        selectedTab === "post" || selectedTab === "gallery"
+          ? selectedTab
+          : selectedTab === "thirty"
+          ? "like30"
+          : selectedTab === "ten"
+          ? "like10"
+          : "all";
+
+      console.log("🔥 fetchPosts 호출됨. type:", queryType);
+
       try {
         const data = await getBoardPosts({
           page,
           keyword,
           sort,
-          type: selectedTab === "post" || selectedTab === "gallery" ? selectedTab : undefined,
-          minLikes: selectedTab === "thirty" ? 30 : selectedTab === "ten" ? 10 : undefined,
+          type: queryType,
         });
+
+        console.log("📦 받아온 게시글:", data.results ?? data);
         setBoardList(data.results ?? data);
         setTotalCount(data.count ?? data.length);
       } catch (err) {
         console.error("게시글 불러오기 실패", err);
       }
     }
+
     fetchPosts();
   }, [page, keyword, sort, selectedTab]);
 
@@ -145,6 +158,14 @@ const BoardPage: React.FC = () => {
           id={selectedPostId}
           type={selectedType}
           onClose={() => {
+            setSelectedPostId(null);
+            setSelectedType(null);
+          }}
+          onDeleteSuccess={(deletedId) => {
+            // 삭제된 글을 리스트에서 제거
+            setBoardList((prev) => prev.filter((post) => post.id !== deletedId));
+
+            // 모달 닫기
             setSelectedPostId(null);
             setSelectedType(null);
           }}

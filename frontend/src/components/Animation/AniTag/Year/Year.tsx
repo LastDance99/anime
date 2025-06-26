@@ -26,8 +26,8 @@ export default function Year({ value, onChange, options }: YearProps) {
         {visibleYears.map(y => (
           <YearButton
             key={y}
-            $selected={value === y}
-            onClick={() => onChange(y === value ? "" : String(y))}
+            $selected={String(value) === String(y)}
+            onClick={() => onChange(String(y) === String(value) ? "" : String(y))}
           >
             {y}
           </YearButton>

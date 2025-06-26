@@ -4,7 +4,7 @@ import BoardPagination from "../../components/Board/BoardPagination/BoardPaginat
 import ChatBot from "../../components/ChatBot/ChatBot";
 import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
-import DetailModal from "../../components/Board/DetailModal";
+import DetailModal from "../../components/Board/DetailModal/DetailModal";
 import { getUserContent } from "../../api/profile";
 import { useOutletContext } from "react-router-dom";
 import {
