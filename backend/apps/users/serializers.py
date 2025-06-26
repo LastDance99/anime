@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
+from django.utils.timezone import now
 from .models import EmailVerification
 
 User = get_user_model()
@@ -87,7 +88,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         attrs['username'] = attrs.get('email')  # 핵심!
-        return super().validate(attrs)
+        data = super().validate(attrs)
+        # 로그인 성공 시점에서 last_login 갱신
+        self.user.last_login = now()
+        self.user.save(update_fields=["last_login"])
+        return data
 
 # 3. 로그아웃용 – 리프레시 토큰 처리
 class LogoutSerializer(serializers.Serializer):

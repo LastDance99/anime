@@ -22,7 +22,7 @@ class GeneratePresignedURLView(APIView):
             "s3",
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_REGION,
+            region_name=settings.AWS_S3_REGION_NAME,
         )
 
         try:
@@ -31,7 +31,8 @@ class GeneratePresignedURLView(APIView):
                 Params={
                     "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
                     "Key": key,
-                    "ContentType": file_type
+                    "ContentType": file_type,
+                    "ACL": "public-read", # 파일을 공개적으로 읽을 수 있도록 설정
                 },
                 ExpiresIn=300
             )

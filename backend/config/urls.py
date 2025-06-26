@@ -29,6 +29,7 @@ urlpatterns = [
     path("api/boards/", include("apps.boards.urls")), # 게시판 기능 관련
     path("api/anime/", include("apps.anime.urls")), # 애니 기능 관련 
     path("api/core/", include("apps.core.urls")), # 공통 기능 관련
+    path("api/animebot/", include("apps.animebot.urls")), # 애니 봇 기능 관련
     path("api/settings/", include("apps.settings.urls")), # 사용자 설정 관련
 ]
 

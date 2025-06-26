@@ -19,12 +19,18 @@ class BoardPost(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    likes = models.ManyToManyField(
+        User,
+        through='PostLike',
+        related_name='liked_board_posts'
+    )
+
     def __str__(self):
         return f"[{self.get_board_type_display()}] {self.title} / {self.author} ({self.id})"
 
 # 게시글에 좋아요 모델 정의
 class PostLike(models.Model):
-    post = models.ForeignKey(BoardPost, on_delete=models.CASCADE, related_name='likes')
+    post = models.ForeignKey(BoardPost, on_delete=models.CASCADE, related_name='post_likes')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -42,6 +42,8 @@ class AnimeSearchView(APIView):
             avg_rating=Avg('animereview__rating'),
             review_count=Count('animereview')
         )
+        # 헨타이 제외ㅎㅎ(커버 이미지 너무 빡셈)
+        animes = animes.exclude(genres_ko__contains=['헨타이']).exclude(genres_en__contains=['Hentai']).exclude(genres_es__contains=['Hentai'])
 
         # 언어별 검색 필드 동적 처리
         if query:
@@ -69,21 +71,36 @@ class AnimeSearchView(APIView):
         if source:
             animes = animes.filter(**{f"source_{lang}": source})
 
-        # 인기순: 가중 평점 계산
+        ### 정렬 분기
         if ordering == "popular":
-            C = AnimeReview.objects.aggregate(avg=Avg('rating'))['avg'] or 0
-            m = 10 # 최소 평점 수 기준
+            # 인기순: 애니리스트(찜) 수 기준 내림차순
+            animes = animes.annotate(user_count=Count('animelist' , distinct=True)).order_by('-user_count', '-start_year')
+            total_count = animes.count()
+            animes = animes[offset:offset + limit]
+            serializer = AnimeSimpleSerializer(animes, many=True, context={"lang": lang})
+            return Response({
+                "count": total_count,
+                "results": serializer.data
+            })
 
-            animes = animes.filter(review_count__gte=1)
+        elif ordering == "-rating":
+            # 평점순(가중평점)
+            m = 10  # 최소 리뷰수 (가중치)
+            C = AnimeReview.objects.aggregate(avg=Avg('rating'))['avg'] or 0
+
+            animes = animes.annotate(
+                avg_rating=Avg('animereview__rating'),
+                review_count=Count('animereview')
+            )
 
             anime_list = []
             for anime in animes:
-                v = anime.review_count
+                v = anime.review_count or 0
                 S = anime.avg_rating or 0
-                score = (v / (v + m)) * S + (m / (v + m)) * C
+                score = (v / (v + m)) * S + (m / (v + m)) * C if v > 0 else 0
                 anime_list.append((score, anime))
 
-            sorted_animes = sorted(anime_list, key=itemgetter(0), reverse=True)
+            sorted_animes = sorted(anime_list, key=lambda x: x[0], reverse=True)
             paged_animes = sorted_animes[offset:offset + limit]
 
             results = AnimeSimpleSerializer(
@@ -95,19 +112,19 @@ class AnimeSearchView(APIView):
                 "results": results
             })
 
-        # 정렬 (최신순 / 오래된순)
-        if ordering == "-start_year":
+        elif ordering == "-start_year":
+            # 최신순: 방영년도 내림차순
             animes = animes.order_by('-start_year', '-start_month', '-start_day')
         elif ordering == "start_year":
+            # 오래된순: 방영년도 오름차순
             animes = animes.order_by('start_year', 'start_month', 'start_day')
         else:
+            # 기타 정렬
             animes = animes.order_by(ordering)
 
-        # 무한스크롤 처리
+        # 최신순, 오래된순, 기타 정렬일 때 페이징 및 응답
         total_count = animes.count()
         animes = animes[offset:offset + limit]
-
-        # 응답
         serializer = AnimeSimpleSerializer(animes, many=True, context={"lang": lang})
         return Response({
             "count": total_count,
@@ -143,6 +160,10 @@ class AnimeFilterMetaView(APIView):
 
         # None, 빈값 등 정리
         def clean_set(s): return sorted([x for x in s if x and str(x).strip() != ''])
+
+        # genres에서 '헨타이' 제거
+        genres.discard('헨타이')   
+        genres.discard('Hentai')  
 
         return Response({
             "genres": clean_set(genres),

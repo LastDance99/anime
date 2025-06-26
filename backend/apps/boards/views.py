@@ -33,8 +33,8 @@ class BoardPostListCreateView(ListCreateAPIView):
         search = self.request.query_params.get('search', '')
 
         qs = BoardPost.objects.all().annotate(
-            like_count=Count('likes'),
-            comment_count=Count('comments')
+            like_count=Count('likes', distinct=True),
+            comment_count=Count('comments', distinct=True)
         )
 
         if board_type == 'post':
@@ -111,12 +111,15 @@ class BoardPostLikeView(APIView):
         post = get_object_or_404(BoardPost, id=post_id)
         user = request.user
 
-        # 이미 좋아요 한 경우
         if PostLike.objects.filter(post=post, user=user).exists():
             return Response({"message": "이미 좋아요를 눌렀습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         PostLike.objects.create(post=post, user=user)
-        return Response({"message": "좋아요 등록됨"}, status=status.HTTP_201_CREATED)
+        return Response({
+            "message": "좋아요 등록됨",
+            "is_liked": True,
+            "like_count": PostLike.objects.filter(post=post).count()
+        }, status=status.HTTP_201_CREATED)
 
     def delete(self, request, post_id):
         post = get_object_or_404(BoardPost, id=post_id)
@@ -127,7 +130,11 @@ class BoardPostLikeView(APIView):
             return Response({"message": "좋아요를 누른 적이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         like.delete()
-        return Response({"message": "좋아요 취소됨"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            "message": "좋아요 취소됨",
+            "is_liked": False,
+            "like_count": PostLike.objects.filter(post=post).count()
+        }, status=status.HTTP_200_OK)
     
 
 
@@ -142,13 +149,12 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
         qs = BoardComment.objects.filter(
             post_id=post_id,
             parent__isnull=True,
-            is_deleted=False
         ).annotate(
             like_count=Count('likes')
         )
 
         if sort == 'latest':
-            qs = qs.order_by('-created_at')
+            qs = qs.order_by('-created_at') # 최신순
         elif sort == 'like':
             qs = qs.order_by('-like_count')
         else:
@@ -226,8 +232,14 @@ class BoardCommentDeleteView(generics.DestroyAPIView):
             comment.content = ""
             comment.save()
             return Response({"message": "댓글 내용이 삭제 처리되었습니다."}, status=200)
+        else:
+            parent = comment.parent
+            response = super().delete(request, *args, **kwargs)  # 진짜 삭제
 
-        return super().delete(request, *args, **kwargs)
+            # 부모 soft-delete 댓글도 대댓글 없으면 같이 삭제
+            if parent and parent.is_deleted and parent.replies.count() == 0:
+                parent.delete()
+            return response
     
 # 게시판 미니 프로필 뷰
 class BoardMiniProfileView(APIView):

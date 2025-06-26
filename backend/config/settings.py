@@ -73,6 +73,9 @@ INSTALLED_APPS = [
     # 공통 기능 앱
     'apps.core', 
 
+    # 애니 봇 기능 앱
+    'apps.animebot',
+
     # 사용자 설정 앱
     'apps.settings', 
 

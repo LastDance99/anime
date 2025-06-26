@@ -7,10 +7,11 @@ from django.db.models import Avg
 # 애니메이션 목록 조회 시 사용할 Serializer
 class AnimeSimpleSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
+    total_animelist_users = serializers.SerializerMethodField() 
 
     class Meta:
         model = Anime
-        fields = ["id", "title", "cover_image_l"]
+        fields = ["id", "title", "cover_image_l", "total_animelist_users"]
 
     def get_lang(self):
         return self.context.get("lang", "ko")
@@ -18,6 +19,9 @@ class AnimeSimpleSerializer(serializers.ModelSerializer):
     def get_title(self, obj):
         lang = self.get_lang()
         return getattr(obj, f"title_{lang}", obj.title_ko)
+
+    def get_total_animelist_users(self, obj):
+        return getattr(obj, "user_count", 0)
     
 
 # 애니메이션 상세 조회 시 사용할 Serializer

@@ -76,8 +76,8 @@ class ReviewLike(models.Model):
 
 class AnimeList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
-    is_favorite = models.BooleanField(default=False)  # ★ 추가
+    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, related_name='animelist')
+    is_favorite = models.BooleanField(default=False) 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
