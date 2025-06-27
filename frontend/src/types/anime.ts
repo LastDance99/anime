@@ -44,6 +44,9 @@ export interface AnimeItem {
   studio?: string;
   studios?: any[];         // 상세 조회 등에서 [{node:{name, ...}}] 구조일 수도
 
+  status?: string;
+  duration?: string;
+
   // 화수
   episodes?: string | number;
 
@@ -55,6 +58,9 @@ export interface AnimeItem {
 
   // 리스트에 추가된 수
   total_animelist_users?: number;
+
+  // 최애의 애니
+  is_favorite: boolean;
 }
 
 export interface AnimeFilter {

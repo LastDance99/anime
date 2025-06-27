@@ -6,15 +6,20 @@ export default function ActivityReviewDelCard({
   anime_title,
   anime_img,
   created_at,
+  review,
 }: {
   anime_title: string;
   anime_img: string;
   created_at: string;
+  review?: string;
 }) {
   return (
     <BaseCard $type="review_del">
       <AnimeImg src={anime_img} alt={anime_title} />
-      <span>{anime_title}에 리뷰를 <b style={{ color: "#e53935" }}>삭제</b>하였습니다.</span>
+      <span>
+        <b style={{ color: "#B79E12" }}>{anime_title}</b>에 남긴 리뷰가 <b style={{ color: "#f44336" }}>삭제</b>되었습니다.
+      </span>
+      {review && <div style={{ marginTop: "6px" }}>{review}</div>}
       <TimeText>{dayjs(created_at).fromNow()}</TimeText>
     </BaseCard>
   );

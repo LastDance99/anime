@@ -91,9 +91,6 @@ const MyBoardPage: React.FC = () => {
             />
           </Footer>
         </Main>
-
-        <Sidebar>
-        </Sidebar>
       </Container>
     </Section>
   );

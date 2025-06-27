@@ -16,7 +16,7 @@ export default function ActivityReviewAddCard({
   return (
     <BaseCard $type="review_add">
       <AnimeImg src={anime_img} alt={anime_title} />
-      <span>{anime_title}에 리뷰를 <b style={{ color: "#2196f3" }}>작성</b>하였습니다.</span>
+      <span><b style={{ color: "#B79E12" }}>{anime_title}</b>에 리뷰를 <b style={{ color: "#2196f3" }}>작성</b>하였습니다.</span>
       <TimeText>{dayjs(created_at).fromNow()}</TimeText>
     </BaseCard>
   );

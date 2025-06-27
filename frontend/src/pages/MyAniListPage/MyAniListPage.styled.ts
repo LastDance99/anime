@@ -18,6 +18,7 @@ export const MainLayout = styled.div`
   width: 100%;
   max-width: 1280px;
   align-items: flex-start;
+  margin-top: 40px;
   /* 모바일 대응 */
   @media (max-width: 900px) {
     flex-direction: column;

@@ -8,6 +8,7 @@ import {
   MenuBtn,
   MenuDropdown,
   MenuItem,
+  CornerStar,
 } from "./MyAniListCard.styled";
 import { MoreVertical } from "lucide-react";
 
@@ -22,6 +23,7 @@ type MyAniListCardProps = {
   onAdd?: () => void;
   onRemove?: () => void;
   onClick?: () => void;
+  isFavorite?: boolean;
 };
 
 export default function MyAniListCard({
@@ -34,6 +36,7 @@ export default function MyAniListCard({
   onAdd,
   onRemove,
   onClick,
+  isFavorite,
 }: MyAniListCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -61,7 +64,10 @@ export default function MyAniListCard({
       <Thumbnail src={imgUrl || "/images/no_poster.png"} alt={title} />
       <Title>{title}</Title>
       <Genre>{(genres ?? []).join(", ")}</Genre>
-      <Score>{myRating !== undefined ? myRating.toFixed(1) : "-"}</Score>
+      <Score>
+        {myRating !== undefined ? myRating.toFixed(1) : "-"}
+        {isFavorite && <CornerStar />}
+      </Score>
 
       <MenuBtn
         onClick={(e) => {
@@ -77,9 +83,24 @@ export default function MyAniListCard({
         <MenuDropdown ref={menuRef} onClick={(e) => e.stopPropagation()}>
           {!isAdded && onAdd && <MenuItem onClick={onAdd}>리스트에 추가</MenuItem>}
           {isAdded && onRemove && <MenuItem onClick={onRemove}>리스트에서 삭제</MenuItem>}
-          <MenuItem onClick={onToggleFavorite}>즐겨찾기 토글</MenuItem>
+          {onToggleFavorite && (
+            <MenuItem
+              onClick={() => {
+                const confirmed = window.confirm(
+                  isFavorite
+                    ? "최애의 애니에서 취소하시겠습니까?"
+                    : "최애의 애니로 등록하시겠습니까?"
+                );
+                if (confirmed) onToggleFavorite();
+              }}
+            >
+              {isFavorite ? "최애의 애니에서 취소" : "최애의 애니로 등록"}
+            </MenuItem>
+          )}
         </MenuDropdown>
       )}
+
+      
     </CardWrapper>
   );
 }

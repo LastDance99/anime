@@ -1,81 +1,120 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  SectionTitle,
+  LoadMoreButton,
+  ToggleLine,
+  Wrapper,
+  EndText,
+} from "./ActivityList.styled";
+import { ChevronDown } from "lucide-react";
+import type { Activity } from "../../../../types/activity";
+import {
+  getUserActivities
+} from "../../../../api/profile";
 import ActivityListAddCard from "./ActivityListAddCard";
 import ActivityListDelCard from "./ActivityListDelCard";
 import ActivityPostCard from "./ActivityPostCard";
 import ActivityCommentCard from "./ActivityCommentCard";
 import ActivityReviewAddCard from "./ActivityReviewAddCard";
 import ActivityReviewDelCard from "./ActivityReviewDelCard";
-import type { Activity } from "../../../../types/activity";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/ko";
-import {
-  SectionTitle,
-  LoadMoreButton,
-  ToggleLine,
-} from "./ActivityList.styled";
 
-dayjs.extend(relativeTime);
-dayjs.locale("ko");
+export default function ActivityList({ userId }: { userId: number }) {
+  const [activityList, setActivityList] = useState<Activity[]>([]);
+  const [nextUrl, setNextUrl] = useState<string | null>(`/api/profiles/${userId}/activity/?page=1`);
+  const [isLoading, setIsLoading] = useState(false);
 
-export default function ActivityList({ list }: { list: Activity[] }) {
-  // 리스트가 배열이 아닐 경우 early return
-  if (!Array.isArray(list)) {
-    return <div>활동 정보가 올바르지 않습니다.</div>;
-  }
+  useEffect(() => {
+    console.log("list_add 활동", activityList.filter(a => a.type === "list_add"));
+  }, [activityList]);
 
-  // 20개씩 보여줄 개수 상태
-  const [visibleCount, setVisibleCount] = useState(20);
+  const fetchActivities = async () => {
+    if (!nextUrl || isLoading) return;
+    setIsLoading(true);
+    try {
+      const res = await getUserActivities(nextUrl);
+      setActivityList(prev => [...prev, ...res.results]);
+      setNextUrl(res.next);
+    } catch (err) {
+      console.error("활동 목록 로딩 실패:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // 보여줄 리스트만 잘라내기
-  const visibleList = list.slice(0, visibleCount);
+  useEffect(() => {
+    fetchActivities(); // 첫 페이지만 자동 로딩
+  }, []);
 
-  // 더보기 버튼 조건
-  const showLoadMore = list.length > visibleCount;
-
-  const handleLoadMore = () => setVisibleCount((prev) => prev + 20);
+  // const filteredActivities = useMemo(() => {
+  //   const seenComments = new Set<string>();
+  //   return activityList.filter(item => {
+  //     if (item.type !== "comment") return true;
+  //     const key = item.post_title;
+  //     if (seenComments.has(key)) return false;
+  //     seenComments.add(key);
+  //     return true;
+  //   });
+  // }, [activityList]);
 
   return (
-    <div>
+    <Wrapper>
       <SectionTitle>내 활동</SectionTitle>
-      {visibleList.length === 0 ? (
-        <div>아직 활동 내역이 없습니다.</div>
+
+      {activityList.map((item) => {
+        const commonProps = { key: item.id, created_at: item.created_at };
+        switch (item.type) {
+          case "anime_add":
+            return <ActivityListAddCard {...commonProps} anime_title={item.anime_title} anime_img={item.anime_img} />;
+          case "anime_remove":
+            return <ActivityListDelCard {...commonProps} anime_title={item.anime_title} anime_img={item.anime_img} />;
+          case "post":
+            return (
+              <ActivityPostCard
+                {...commonProps}
+                nickname={item.nickname}
+                profile_image={item.profile_image}
+                post_title={item.post_title}
+                content={item.content}
+                like_count={item.like_count}
+                comment_count={item.comment_count}
+                thumbnail={item.thumbnail}
+              />
+            );
+          case "comment":
+            return (
+              <ActivityCommentCard
+                {...commonProps}
+                post_title={item.post_title}
+                comment={item.comment}
+                post_author_nickname={item.post_author_nickname}
+                post_author_profile_image={item.post_author_profile_image}
+                like_count={item.like_count}
+                comment_count={item.comment_count}
+                thumbnail={item.thumbnail}
+              />
+            );
+          case "review_add":
+            return <ActivityReviewAddCard {...commonProps} anime_title={item.anime_title} anime_img={item.anime_img} review={item.review} />;
+          case "review_del":
+            return <ActivityReviewDelCard {...commonProps} anime_title={item.anime_title} anime_img={item.anime_img} review={item.review} />;
+          default:
+            return null;
+        }
+      })}
+
+      {nextUrl ? (
+        <LoadMoreButton onClick={fetchActivities} disabled={isLoading}>
+          <ToggleLine />
+          <ChevronDown size={20} />
+          <ToggleLine />
+        </LoadMoreButton>
       ) : (
-        visibleList.map((item) => {
-          switch (item.type) {
-            case "list_add":
-              return <ActivityListAddCard {...item} key={item.id} />;
-            case "list_del":
-              return <ActivityListDelCard {...item} key={item.id} />;
-            case "post":
-              return <ActivityPostCard {...item} key={item.id} />;
-            case "comment":
-              return <ActivityCommentCard {...item} key={item.id} />;
-            case "review_add":
-              return <ActivityReviewAddCard {...item} key={item.id} />;
-            case "review_del":
-              return <ActivityReviewDelCard {...item} key={item.id} />;
-            default:
-              return null;
-          }
-        })
-      )}
-      {showLoadMore && (
-        <LoadMoreButton onClick={handleLoadMore} aria-label="더보기">
-          <ToggleLine className="toggle-line" />
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <polyline
-              points="5,8 10,13 15,8"
-              stroke="#d75a85"
-              strokeWidth="2.1"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <ToggleLine className="toggle-line" />
+        <LoadMoreButton disabled>
+          <ToggleLine />
+          <EndText>더 이상 없음</EndText>
+          <ToggleLine />
         </LoadMoreButton>
       )}
-    </div>
+    </Wrapper>
   );
 }

@@ -49,6 +49,7 @@ const MyGalleryPage: React.FC = () => {
         order: sort,
         page,
       });
+      console.log("📸 갤러리 리스트:", list);
       setList(res.results);
       setTotalPage(Math.max(1, Math.ceil(res.count / PAGE_SIZE)));
     };
@@ -86,9 +87,6 @@ const MyGalleryPage: React.FC = () => {
             />
           </Footer>
         </Main>
-
-        <Sidebar>
-        </Sidebar>
       </Container>
     </Section>
   );

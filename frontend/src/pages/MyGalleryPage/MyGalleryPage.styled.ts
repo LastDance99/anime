@@ -1,15 +1,19 @@
 import styled from "styled-components";
 
 export const Section = styled.section`
+  width: 100%;
+  max-width: 1920px;
+  height: 100%;
+  min-height: 1080px;
+  max-height: 1440px;
   padding: 40px 20px;
   background: #FCEEF5;
 `;
 
 export const Container = styled.div`
   display: flex;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-  gap: 40px;
 `;
 
 export const Main = styled.main`

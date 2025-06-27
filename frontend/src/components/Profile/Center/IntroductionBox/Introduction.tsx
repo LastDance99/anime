@@ -1,14 +1,32 @@
 import React, { useState } from "react";
-import { IntroductionBox, ProfileButton, IntroTextArea, IntroParagraph } from "./Introduction.styled";
+import {
+  IntroductionBox,
+  ProfileButton,
+  IntroTextArea,
+  IntroParagraph,
+} from "./Introduction.styled";
 import { updateAbout } from "../../../../api/profile";
+import { useAuth } from "../../../../contexts/AuthContext";
 
-export default function Introduction({ about }: { about: string }) {
+interface Props {
+  about: string;
+  userId: number; // ⭐️ 현재 프로필의 유저 ID
+}
+
+export default function Introduction({ about, userId }: Props) {
+  const { currentUser } = useAuth(); // ⭐️ 로그인한 사용자
+  const isMine = currentUser?.id === userId;
+
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(about);
 
+  console.log("currentUser", currentUser);
+  console.log("userId", userId);
+  console.log("isMine", currentUser?.id === userId);
+
   const handleSave = async () => {
     try {
-      await updateAbout({ about: value }); // ✅ API 호출
+      await updateAbout({ about: value });
       setEditing(false);
     } catch (err) {
       console.error("소개글 저장 실패:", err);
@@ -31,8 +49,10 @@ export default function Introduction({ about }: { about: string }) {
         </>
       ) : (
         <>
-          <IntroParagraph>{value}</IntroParagraph>
-          <ProfileButton onClick={() => setEditing(true)}>수정</ProfileButton>
+          <IntroParagraph>{value || "자기소개가 없습니다."}</IntroParagraph>
+          {isMine && (
+            <ProfileButton onClick={() => setEditing(true)}>수정</ProfileButton>
+          )}
         </>
       )}
     </IntroductionBox>

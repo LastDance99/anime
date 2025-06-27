@@ -25,7 +25,7 @@ type Props = {
 export default function Header({ show = true, user, setUser }: Props) {
   const [openSettings, setOpenSettings] = useState(false);
   const navigate = useNavigate();
-  const { logout: clearAuth } = useAuth(); // AuthContext의 logout 사용
+  const { logout: clearAuth, currentUser  } = useAuth(); // AuthContext의 logout 사용
 
   const handleLogout = async () => {
     console.log("🔔 로그아웃 버튼 클릭됨");
@@ -50,7 +50,7 @@ export default function Header({ show = true, user, setUser }: Props) {
           <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
           <Nav>
             <NavList>
-              <NavItem as={Link} to={`/profile/${user.id}`}>프로필</NavItem>
+              <NavItem as={Link} to={`/profile/${currentUser?.id}`}>프로필</NavItem>
               <NavItem as={Link} to="/board">전체 게시판</NavItem>
               <NavItem as={Link} to="/anime">애니</NavItem>
             </NavList>

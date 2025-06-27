@@ -38,7 +38,7 @@ export const ProfileRightColumn = styled.div`
   min-width: 340px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
   box-sizing: border-box;
 `;
 

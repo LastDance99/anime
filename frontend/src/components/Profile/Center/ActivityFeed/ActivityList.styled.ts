@@ -32,3 +32,18 @@ export const ToggleLine = styled.span`
   height: 0;
   transition: border-color 0.15s;
 `;
+
+
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  padding-bottom: 40px;
+`;
+
+export const EndText = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.subtext};
+  padding: 0 12px;
+`;

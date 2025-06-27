@@ -48,6 +48,7 @@ export default function DetailContent({
   }, [id]);
 
   const fetchData = async () => {
+    console.log("📥 getBoardPostDetail 호출!", id);
     try {
       const data = await getBoardPostDetail(id);
       setItem(data);
@@ -124,18 +125,20 @@ export default function DetailContent({
   };
 
   const handleProfileClick = () => {
-    if (window.confirm(`${authorNickname}님의 프로필로 이동하시겠습니까?`)) {
-      navigate(`/profile/${authorId}`);
-    }
+    navigate(`/profile/${authorId}`);
+    // if (window.confirm(`${authorNickname}님의 프로필로 이동하시겠습니까?`)) {
+      
+    // }
   };
 
   const handleMoreClick = () => {
     const target = isGallery ? "mygallery" : "myboard";
-    if (
-      window.confirm(
-        `${authorNickname}님의 다른 ${isGallery ? "갤러리" : "게시글"}을 보시겠습니까?`
-      )
-    ) {
+    // if (
+    //   window.confirm(
+    //     `${authorNickname}님의 다른 ${isGallery ? "갤러리" : "게시글"}을 보시겠습니까?`
+    //   )
+    // )
+    {
       navigate(`/profile/${authorId}/${target}`);
     }
   };

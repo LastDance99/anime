@@ -13,33 +13,63 @@ import {
   ChatText,
   ChatInputWrapper,
   ChatInput,
+  DeleteButton,
 } from "./CommentsBox.styled";
-import { mockUsers } from "../../../../data/userList";
 import type { ProfileComment } from "../../../../types/user";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { addUserComment, deleteUserComment } from "../../../../api/profile";
 
-export default function ProfileComments({ comments }: { comments: ProfileComment[] }) {
+interface Props {
+  comments: ProfileComment[];
+  userId: number; // 댓글이 달린 프로필의 주인 ID
+  onRefresh?: () => void;
+}
+
+export default function ProfileComments({ comments, userId, onRefresh }: Props) {
+  const { currentUser } = useAuth();
   const [showInput, setShowInput] = useState(false);
   const [input, setInput] = useState("");
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    alert("댓글 작성: " + input);
-    setInput("");
-    setShowInput(false);
+    if (!input.trim() || !currentUser) return;
+    try {
+      await addUserComment(userId, input);
+      setInput("");
+      setShowInput(false);
+      onRefresh?.();
+    } catch (err) {
+      console.error("댓글 작성 실패", err);
+    }
+  };
+
+  const handleDelete = async (commentId: number) => {
+    if (!currentUser) return;
+    const ok = window.confirm("댓글을 삭제하시겠습니까?");
+    if (!ok) return;
+
+    try {
+      await deleteUserComment(userId, commentId);
+      onRefresh?.();
+    } catch (err) {
+      console.error("댓글 삭제 실패", err);
+    }
   };
 
   return (
     <CommentsBox>
       <CommentsTitleRow>
         <CommentsTitle>Comments</CommentsTitle>
-        <CommentAddButton
-          onClick={() => setShowInput(v => !v)}
-          aria-label={showInput ? "입력창 닫기" : "댓글 작성"}
-        >
-          {showInput ? "−" : "+"}
-        </CommentAddButton>
+        {currentUser && (
+          <CommentAddButton
+            onClick={() => setShowInput(v => !v)}
+            aria-label={showInput ? "입력창 닫기" : "댓글 작성"}
+          >
+            {showInput ? "−" : "+"}
+          </CommentAddButton>
+        )}
       </CommentsTitleRow>
+
       {showInput && (
         <form style={{ width: "100%" }} onSubmit={handleCommentSubmit}>
           <ChatInputWrapper>
@@ -52,17 +82,28 @@ export default function ProfileComments({ comments }: { comments: ProfileComment
           </ChatInputWrapper>
         </form>
       )}
+
       <ChatContentBox>
         <ChatScrollArea>
           {comments.map(comment => {
-            const author = mockUsers.find(u => u.id === comment.author_id);
+            const isAuthor = currentUser?.id === comment.author?.id;
+            const isProfileOwner = currentUser?.id === userId;
+
+            const canDelete = isAuthor || isProfileOwner;
+
             return (
               <ChatItem key={comment.id}>
-                <ProfileImg src={author?.profile_image} alt="profile" />
+                <ProfileImg
+                  src={comment.author?.profile_image || "/images/default.png"}
+                  alt="profile"
+                />
                 <ChatTextBlock>
-                  <ChatNickname>{author?.nickname}</ChatNickname>
+                  <ChatNickname>{comment.author?.nickname || "알 수 없음"}</ChatNickname>
                   <ChatText>{comment.content}</ChatText>
                 </ChatTextBlock>
+                {canDelete && (
+                  <DeleteButton onClick={() => handleDelete(comment.id)}>삭제</DeleteButton>
+                )}
               </ChatItem>
             );
           })}

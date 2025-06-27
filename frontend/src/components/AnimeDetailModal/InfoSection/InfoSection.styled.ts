@@ -42,10 +42,8 @@ export const MetaRow = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-famaily: ${({ theme }) => theme.fonts.cafe24Light};
   color: ${({ theme }) => theme.colors.subtext};
-  margin-bottom: 8px;
-  span {
-    margin-right: 4px;
-  }
+  display: flex;
+  gap: 6px;
 `;
 
 export const Desc = styled.div`

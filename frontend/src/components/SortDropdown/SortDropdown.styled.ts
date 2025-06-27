@@ -8,7 +8,7 @@ export const Dropdown = styled.div`
   align-items: center;
   justify-content: center;
   border: 1px solid ${({ theme }) => theme.colors.bordermain};
-  background: ${({ theme }) => theme.colors.subcolor};
+  background: ${({ theme }) => theme.colors.background};
   transition: background 0.15s;
 
   &:hover {

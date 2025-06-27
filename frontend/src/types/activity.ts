@@ -1,6 +1,8 @@
 export type ActivityType =
   | 'list_add'
   | 'list_del'
+  | 'anime_add'
+  | 'anime_remove'
   | 'post'
   | 'comment'
   | 'review_add'
@@ -12,6 +14,18 @@ export interface ActivityBase {
   nickname: string;
   profile_image: string;
   created_at: string;
+}
+
+export interface ActivityAnimeAdd extends ActivityBase {
+  type: 'anime_add';
+  anime_title: string;
+  anime_img: string;
+}
+
+export interface ActivityAnimeRemove extends ActivityBase {
+  type: 'anime_remove';
+  anime_title: string;
+  anime_img: string;
 }
 
 export interface ActivityListAdd extends ActivityBase {
@@ -30,14 +44,20 @@ export interface ActivityPost extends ActivityBase {
   type: 'post';
   post_title: string;
   content: string;
+  like_count: number;
+  comment_count: number;
+  thumbnail?: string;
 }
 
 export interface ActivityComment extends ActivityBase {
   type: 'comment';
   post_title: string;
   comment: string;
-  post_author_nickname: string;           
+  post_author_nickname: string;
   post_author_profile_image: string;
+  like_count: number;
+  comment_count: number;
+  thumbnail?: string;
 }
 
 export interface ActivityReviewAdd extends ActivityBase {
@@ -57,6 +77,8 @@ export interface ActivityReviewDel extends ActivityBase {
 export type Activity =
   | ActivityListAdd
   | ActivityListDel
+  | ActivityAnimeAdd
+  | ActivityAnimeRemove
   | ActivityPost
   | ActivityComment
   | ActivityReviewAdd

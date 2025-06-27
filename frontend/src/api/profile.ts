@@ -28,6 +28,22 @@ export const getUserComments = async (userId: number) => {
   return res.data.results;
 };
 
+export const addUserComment = async (
+  userId: number,
+  content: string
+) => {
+  const res = await axios.post(
+    `/api/profiles/${userId}/comments/`,
+    { content },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    }
+  );
+  return res.data; // 작성된 comment 1개
+};
+
 export const deleteUserComment = async (userId: number, pk: number) => {
   const res = await axios.delete(`/api/profiles/${userId}/comments/${pk}/`);
   return res.data;
@@ -40,6 +56,15 @@ export const getUserActivity = async (userId: number) => {
 
 export const getAnimeListStats = async (userId: number) => {
   const res = await axios.get(`/api/profiles/${userId}/animelist-stats/`);
+  return res.data;
+};
+
+export const getUserActivities = async (urlOrUserId: string | number) => {
+  const url = typeof urlOrUserId === "string"
+    ? urlOrUserId
+    : `/api/profiles/${urlOrUserId}/activity/?page=1`;
+
+  const res = await axios.get(url);
   return res.data;
 };
 
@@ -58,11 +83,11 @@ export const getFavoriteAnimes = async (userId: number) => {
   return res.data;
 };
 
-export const toggleFavoriteAnime = async (animeId: number) => {
-  const res = await axios.post(`/api/profiles/${animeId}/favorite/`);
-  return res.data;
+export const toggleFavoriteAnime = async (animeId: number, isFavorite: boolean) => {
+  return axios.patch(`/api/profiles/${animeId}/favorite/`, {
+    is_favorite: isFavorite,
+  });
 };
-
 
 interface GetUserContentParams {
   userId: number;
@@ -91,7 +116,7 @@ export const getUserContent = async (params: GetUserContentParams) => {
   query.append("type", type);
   if (page) query.append("page", String(page));
   if (q) query.append("q", q);
-  if (order) query.append("ordering", order);
+  if (order) query.append("order", order);
   if (year) query.append("year", year);
   if (genres) query.append("genres", genres);
   if (season) query.append("season", season);

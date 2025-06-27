@@ -129,3 +129,16 @@ export const ChatInput = styled.input`
   font-family: ${({ theme }) => theme.fonts.main};
   color: ${({ theme }) => theme.colors.text};
 `;
+
+export const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.colors.subtext};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  margin-left: 8px;
+  cursor: pointer;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
+`;

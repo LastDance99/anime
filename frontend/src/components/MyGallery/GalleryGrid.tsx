@@ -9,13 +9,21 @@ type Props = {
 };
 
 const GalleryGrid: React.FC<Props> = ({ list, onItemClick }) => {
+
+  const getValidThumb = (thumb?: string) => {
+    if (!thumb || thumb === "null" || thumb === "undefined") {
+      return "/images/default-thumb.png";
+    }
+    return thumb;
+  };
+
   return (
     <GridWrapper>
       {list.map(item => (
         <GalleryCard
           key={item.id}
           title={item.title}
-          imageUrl={item.images[0] || "/images/default-thumb.png"}
+          imageUrl={getValidThumb(item.thumbnail)}
           onClick={() => onItemClick(item.id)}
         />
       ))}

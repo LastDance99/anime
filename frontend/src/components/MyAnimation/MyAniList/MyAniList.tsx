@@ -37,9 +37,9 @@ export default function MyAniList({
       </ListCountText>
 
       <ListHeader>
-        <HeaderCol style={{ minWidth: 40 }} />
-        <HeaderCol style={{ minWidth: 360, textAlign: "left" }}>제목</HeaderCol>
-        <HeaderCol style={{ minWidth: 120, textAlign: "center" }}>장르</HeaderCol>
+        <HeaderCol style={{ minWidth: 60 }} />
+        <HeaderCol style={{ minWidth: 500, textAlign: "left" }}>제목</HeaderCol>
+        <HeaderCol style={{ minWidth: 180, textAlign: "left", paddingLeft: 60, }}>장르</HeaderCol>
         <HeaderCol style={{ minWidth: 36, textAlign: "left", marginRight: 10 }}>내 점수</HeaderCol>
       </ListHeader>
 
@@ -73,6 +73,7 @@ export default function MyAniList({
               onRemove={() => onRemove?.(item)}
               onToggleFavorite={() => onToggleFavorite?.(item)}
               onClick={() => onAnimeClick?.(item)}
+              isFavorite={item.is_favorite}
             />
           );
         })}

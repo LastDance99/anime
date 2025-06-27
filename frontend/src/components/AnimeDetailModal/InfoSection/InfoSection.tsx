@@ -53,6 +53,9 @@ export default function InfoSection({
   const format = valid(anime.format, "--");
   const avgRating = valid(anime.average_rating, "--");
   const description = valid(anime.description, "설명 없음");
+  const status = valid(anime.status, "--");
+  const duration = valid(anime.duration, "--");
+  const season = valid(anime.season, "--");
 
   const animationStudios = Array.isArray(anime.studios)
     ? anime.studios
@@ -84,13 +87,23 @@ export default function InfoSection({
           <span>★ {avgRating}</span>
         </ScoreBadge>
         <Title>{title}</Title>
-        <MetaRow>
+        <MetaRow style={{ marginBottom: "2px",  }}>
           <span>원작: {original}</span>
-          <span>/ {genres.length > 0 ? genres.join(", ") : "장르 정보 없음"}</span>
-          <span>/ 유형: {format}</span>
-          <span>/ {year}</span>
-          <span>/ {episodes}화</span>
-          <span>/ {animationStudios}</span>
+          <span>/</span>
+          <span>{genres.length > 0 ? genres.join(", ") : "장르 정보 없음"}</span>
+          <span>/</span>
+          <span>유형: {format}</span>
+          <span>/</span>
+          <span>{year}년 {season}</span>
+        </MetaRow>
+        <MetaRow style={{ marginBottom: "8px",  }}>
+          <span>{episodes}화</span>
+          <span>/</span>
+          <span>{duration}분</span>
+          <span>/</span>
+          <span>제작 스튜디오: {animationStudios}</span>
+          <span>/</span>
+          <span>{status}</span>
         </MetaRow>
         <Desc>
           <span dangerouslySetInnerHTML={{ __html: displayedDesc }} />

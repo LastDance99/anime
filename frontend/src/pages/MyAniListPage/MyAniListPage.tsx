@@ -133,12 +133,24 @@ const MyAniListPage = () => {
   };
 
   const handleToggleFavorite = async (anime: AnimeItem) => {
+    const animeId = anime.anime_id || anime.id;
+    const isNowFavorite = !favoriteAnimeIds.includes(animeId);
+
+    const isInMyList = myAnimeList.some(
+      (a) => (a.anime_id || a.id) === animeId
+    );
+
+    if (!isInMyList) {
+      alert("이 애니는 내 리스트에 추가되어 있지 않아 최애로 등록할 수 없습니다.");
+      return;
+    }
+
     try {
-      await toggleFavoriteAnime(anime.id);
+      await toggleFavoriteAnime(animeId, isNowFavorite);
       setFavoriteAnimeIds((prev) =>
-        prev.includes(anime.id)
-          ? prev.filter((id) => id !== anime.id)
-          : [...prev, anime.id]
+        isNowFavorite
+          ? [...prev, animeId]
+          : prev.filter((id) => id !== animeId)
       );
     } catch (err) {
       console.error("즐겨찾기 토글 실패", err);
@@ -164,7 +176,7 @@ const MyAniListPage = () => {
         <MyAniList
           list={animeList.map((item) => ({
             ...item,
-            is_favorite: favoriteAnimeIds.includes(item.id),
+            is_favorite: favoriteAnimeIds.includes(item.anime_id || item.id),
             added_at: item.added_at ?? "",
           }))}
           onAnimeClick={handleAnimeClick}

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Star } from "lucide-react";
 
 // 썸네일 이미지
 export const Thumbnail = styled.img`
@@ -18,7 +19,7 @@ export const Title = styled.div`
   font-weight: ${({ theme }) => theme.Weights.bold};
   color: ${({ theme }) => theme.colors.text};
   width: 100%;
-  max-width: 450px;
+  max-width: 500px;
   font-size: ${({ theme }) => theme.fontSizes.md};
   transition: color 0.18s;
   word-break: keep-all;
@@ -31,7 +32,7 @@ export const Title = styled.div`
 export const Genre = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.subtext};
-  min-width: 120px;
+  min-width: 180px;
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   transition: color 0.18s;
   white-space: nowrap;
@@ -92,6 +93,17 @@ export const CardWrapper = styled.div`
   }
 `;
 
+export const CornerStar = styled(Star)`
+  position: absolute;
+  top: 30%;
+  left: 67px;
+  fill: gold;
+  stroke: #Fff;
+  width: 20px;
+  height: 20px;
+  z-index: 2;
+`;
+
 // 메뉴 버튼
 export const MenuBtn = styled.button`
   position: absolute;
@@ -108,7 +120,7 @@ export const MenuBtn = styled.button`
 export const MenuDropdown = styled.div`
   position: absolute;
   top: 0px;
-  right: -140px;
+  right: -154px;
   background: ${({ theme }) => theme.colors.background};
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.14);
@@ -134,3 +146,4 @@ export const MenuItem = styled.button`
     background: ${({ theme }) => theme.colors.primary};
   }
 `;
+
