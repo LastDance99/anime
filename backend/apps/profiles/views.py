@@ -223,7 +223,34 @@ class UserActivityListView(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs["user_id"]
-        return UserActivity.objects.filter(user_id=user_id)
+
+        # 1. "댓글 활동"만 게시글별로 하나(최신)씩 뽑기 (남의 글만!)
+        comment_qs = (
+            UserActivity.objects
+            .filter(
+                user_id=user_id,
+                type="comment_create"
+            )
+            .exclude(parent_author_nickname=User.objects.get(id=user_id).nickname)  # 자기 글 제외
+            .values('target_id')  # 게시글 ID별
+            .annotate(latest_id=Max('id'))
+            .values_list('latest_id', flat=True)
+        )
+
+        # 2. 댓글 활동을 제외한 나머지는 전부 표시
+        other_qs = (
+            UserActivity.objects
+            .filter(user_id=user_id)
+            .exclude(type="comment_create")
+            .values_list('id', flat=True)
+        )
+
+        # 3. 합쳐서 최신순으로 정렬
+        all_ids = list(comment_qs) + list(other_qs)
+        queryset = UserActivity.objects.filter(id__in=all_ids).order_by('-created_at')
+
+        return queryset
+
     
 
 # 프로필 컨텐츠 뷰

@@ -70,36 +70,85 @@ class ProfileCommentSerializer(serializers.ModelSerializer):
     
 # 유저 활동 시리얼라이저
 class UserActivitySerializer(serializers.ModelSerializer):
-    
     created_at_display = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = UserActivity
-        fields = [
-            "id",
-            "type",
-            "created_at",
-            "created_at_display",
-            "target_id",
-            "target_title",
-            "target_image",
-            "parent_author_nickname",
-            "parent_author_profile_image",
-            "parent_title"
-        ]
+    anime_title = serializers.SerializerMethodField()
+    anime_img = serializers.SerializerMethodField()
+    post_title = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
+    comment = serializers.SerializerMethodField()
+    review = serializers.SerializerMethodField()
+    nickname = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
+    post_author_nickname = serializers.SerializerMethodField()
+    post_author_profile_image = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     def get_created_at_display(self, obj):
-        # 예시: '2시간 전', '어제', '2024-06-11' 등으로 포맷 (프론트 처리도 가능)
         from django.utils.timesince import timesince
         return timesince(obj.created_at) + " 전"
-    
-    # 게시글/갤러리 활동일 때 좋아요/댓글 수 동적 계산
-    likes = serializers.SerializerMethodField()
-    comments = serializers.SerializerMethodField()
 
-    def get_likes(self, obj):
-        # 게시글/갤러리 활동만 계산
+    def get_anime_title(self, obj):
+        if obj.type in ["anime_add", "anime_remove", "review_add", "review_remove"]:
+            return obj.target_title
+        return None
+
+    def get_anime_img(self, obj):
+        if obj.type in ["anime_add", "anime_remove", "review_add", "review_remove"]:
+            return obj.target_image
+        return None
+
+    def get_post_title(self, obj):
+        if obj.type in ["post_create", "gallery_create", "comment_create"]:
+            return obj.parent_title or obj.target_title
+        return None
+
+    def get_content(self, obj):
         if obj.type in ["post_create", "gallery_create"]:
+            return obj.extra_content
+        return None
+
+    def get_comment(self, obj):
+        if obj.type == "comment_create":
+            return obj.extra_content
+        return None
+
+    def get_review(self, obj):
+        if obj.type == "review_add":
+            return obj.extra_content
+        return None
+    
+    def get_nickname(self, obj):
+        return obj.user.nickname
+
+    def get_profile_image(self, obj):
+        return obj.user.profile_image.url if obj.user.profile_image else None
+
+    def get_post_author_nickname(self, obj):
+        if obj.type == "comment_create":
+            return obj.parent_author_nickname
+        return None
+
+    def get_post_author_profile_image(self, obj):
+        if obj.type == "comment_create":
+            return obj.parent_author_profile_image
+        return None
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        # type 정규화
+        if instance.type == "post_create":
+            rep["type"] = "post"
+        elif instance.type == "comment_create":
+            rep["type"] = "comment"
+        elif instance.type == "review_remove":
+            rep["type"] = "review_del"
+        return rep
+
+    def get_like_count(self, obj):
+        if obj.type == "post_create":
             from apps.boards.models import BoardPost
             try:
                 post = BoardPost.objects.get(id=obj.target_id)
@@ -108,14 +157,35 @@ class UserActivitySerializer(serializers.ModelSerializer):
                 return 0
         return None
 
-    def get_comments(self, obj):
-        if obj.type in ["post_create", "gallery_create"]:
+    def get_comment_count(self, obj):
+        if obj.type == "post_create":
             from apps.boards.models import BoardPost
             try:
                 post = BoardPost.objects.get(id=obj.target_id)
                 return post.comments.count()
             except BoardPost.DoesNotExist:
                 return 0
+        return None
+
+    def get_thumbnail(self, obj):
+        if obj.type == "post_create":
+            from apps.boards.models import BoardPost
+            try:
+                post = BoardPost.objects.get(id=obj.target_id)
+                return post.thumbnail_url  # ← 바로 썸네일 URL 필드 반환!
+            except BoardPost.DoesNotExist:
+                return None
+        return None
+
+    def get_board_type(self, obj):
+        # 활동 타입이 게시글 생성(post_create)일 때만
+        if obj.type == "post_create":
+            from apps.boards.models import BoardPost
+            try:
+                post = BoardPost.objects.get(id=obj.target_id)
+                return post.board_type
+            except BoardPost.DoesNotExist:
+                return None
         return None
 
     class Meta:
@@ -125,14 +195,19 @@ class UserActivitySerializer(serializers.ModelSerializer):
             "type",
             "created_at",
             "created_at_display",
-            "target_id",
-            "target_title",
-            "target_image",
-            "parent_author_nickname",
-            "parent_author_profile_image",
-            "parent_title",
-            "likes",
-            "comments"
+            "anime_title",
+            "nickname", 
+            "profile_image",
+            "anime_img",
+            "post_title",
+            "content",
+            "comment",
+            "review",
+            "post_author_nickname",
+            "post_author_profile_image",
+            "like_count",      
+            "comment_count",    
+            "thumbnail",       
         ]
 
 # 내 게시글 시리얼라이저

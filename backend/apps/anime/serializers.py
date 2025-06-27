@@ -30,6 +30,7 @@ class AnimeDetailSerializer(serializers.ModelSerializer):
     description = serializers.SerializerMethodField()
     genres = serializers.SerializerMethodField()
     studios = serializers.SerializerMethodField()
+    season = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
@@ -41,7 +42,7 @@ class AnimeDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Anime
         fields = [
-            "id", "title", "cover_image_xl", "banner_image", "start_date", "status",
+            "id", "title", "cover_image_xl", "banner_image", "start_date", "season", "status",
             "duration", "episodes", "format", "description", "genres", "studios",
             "source", "average_rating", "user_rating", "user_has_in_animelist", "total_animelist_users"
         ]
@@ -63,6 +64,9 @@ class AnimeDetailSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return getattr(obj, f"status_{self.get_lang()}", obj.status_ko)
+    
+    def get_season(self, obj):
+        return getattr(obj, f"season_{self.get_lang()}", obj.status_ko)
 
     def get_source(self, obj):
         return getattr(obj, f"source_{self.get_lang()}", obj.source_ko)

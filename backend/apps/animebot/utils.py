@@ -136,26 +136,47 @@ def search_excel_candidates(search_key):
 
 def search_web(search_key):
     api_key = os.environ.get("SERPAPI_KEY")
-    params = {
-        "q": f"{search_key} 애니메이션",
-        "api_key": api_key,
-        "engine": "google",
-        "num": 5,
-        "hl": "ko"
-    }
-    try:
-        resp = requests.get("https://serpapi.com/search", params=params, timeout=10)
-        data = resp.json()
-        out = ""
-        for item in data.get("organic_results", []):
-            title = item.get("title", "")
-            snippet = item.get("snippet", "")
-            combined_text = f"{title} {snippet}".lower()
-            if any(word in combined_text for word in ["2025년", "2분기", "애니", "신작", "줄거리"]):
-                out += f"- {title}: {snippet}\n"
-        return out if out else "관련 웹 검색 결과 없음"
-    except Exception as e:
-        return f"웹 검색 실패: {e}"
+    # 공식 위키/포털/애니 뉴스로 제한
+    search_sites = [
+        "site:namu.wiki",              # 나무위키
+        "site:myanimelist.net",        # 마이애니리스트
+        "site:aniplus.co.kr",          # 애니플러스(국내 공식 방송/뉴스)
+        "site:ani.ch",                 # 애니챔프/애니포털 등
+        "site:wikipedia.org",          # 위키피디아(한/영/일)
+        "site:news.naver.com",         # 네이버뉴스 (최신 기사)
+        # 필요시 공식 사이트 추가
+    ]
+    result_text = ""
+    extra_keywords = ["신작", "방영일", "공식 발표", "2024", "2025", "개봉", "최신", "이벤트", "방영 예정"]
+    for site in search_sites:
+        for extra in [""] + extra_keywords:
+            query = f"{search_key} {extra} {site}".strip()
+            params = {
+                "q": query,
+                "api_key": api_key,
+                "engine": "google",
+                "num": 2,
+                "hl": "ko"
+            }
+            try:
+                resp = requests.get("https://serpapi.com/search", params=params, timeout=10)
+                data = resp.json()
+                for item in data.get("organic_results", []):
+                    title = item.get("title", "")
+                    snippet = item.get("snippet", "")
+                    link = item.get("link", "")
+                    # 신뢰 가능한 공식 사이트만
+                    if any(s in link for s in ["namu.wiki", "myanimelist.net", "aniplus.co.kr", "ani.ch", "wikipedia.org", "news.naver.com"]):
+                        # 최신/공식/방영 관련 키워드가 있을 때 더 강조해서 수집
+                        if any(k in snippet for k in extra_keywords) or any(k in title for k in extra_keywords):
+                            result_text += f"📰 [{title}]({link}): {snippet}\n"
+                        # 정보가 부족하면, 공식 위키/포털 정보도 보조로 추가
+                        elif site in ["site:namu.wiki", "site:wikipedia.org", "site:myanimelist.net"]:
+                            result_text += f"📚 [{title}]({link}): {snippet}\n"
+            except Exception:
+                continue
+    return result_text if result_text else "공식 위키/포털/뉴스 기준 최신 정보 없음"
+
 
 def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN"):
     # format hint
@@ -165,14 +186,38 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
 
     # 웹 요약 정리 함수
     def structure_web_summary(raw_web):
+        import re
         summaries = []
+        source_dict = {"공식": [], "위키": [], "뉴스": []}
+        important_patterns = [
+            r"공식", r"발표", r"방영", r"신작", r"최신", r"제작", r"뉴스", r"이벤트", r"출시", r"정보",
+            r"(20[2-9][0-9])년", r"wiki", r"위키", r"나무위키", r"구글", r"트위터", r"공식 사이트",
+            r"특별판", r"PV", r"티저", r"Blu-ray", r"OST", r"콜라보"
+        ]
         for line in (raw_web or "").split("\n"):
             if ":" in line:
                 title, content = line.split(":", 1)
-                content = content.strip()
-                if any(x in content for x in ["제작", "방영", "개봉", "1기", "MAPPA", "WIT"]):
-                    summaries.append(f"📌 {title.strip()}: {content}")
-        return "\n".join(summaries[:5]) if summaries else (raw_web or "")
+                text = f"{title} {content}".lower()
+                # 중복 방지
+                if any(text in s for src in source_dict.values() for s in src):
+                    continue
+                # 카테고리 분리
+                if any(re.search(p, text) for p in important_patterns):
+                    if "공식" in text or "트위터" in text or "공식 사이트" in text:
+                        source_dict["공식"].append(f"📌 {title.strip()}: {content.strip()}")
+                    elif "위키" in text or "나무위키" in text:
+                        source_dict["위키"].append(f"📌 {title.strip()}: {content.strip()}")
+                    elif "뉴스" in text or "구글" in text:
+                        source_dict["뉴스"].append(f"📌 {title.strip()}: {content.strip()}")
+                    else:
+                        summaries.append(f"📌 {title.strip()}: {content.strip()}")
+        output = []
+        for k, v in source_dict.items():
+            if v:
+                output.append(f"[{k}]\n" + "\n".join(v[:2]))
+        if summaries:
+            output.append("\n".join(summaries[:3]))
+        return "\n\n".join(output) if output else (raw_web or "")
 
     web_summary = structure_web_summary(web_data or "")
 

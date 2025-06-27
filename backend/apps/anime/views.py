@@ -33,7 +33,7 @@ class AnimeSearchView(APIView):
         season = request.GET.get("season")
         format_ = request.GET.get("format")
         source = request.GET.get("source")
-        ordering = request.GET.get("ordering", "-start_year")
+        order = request.GET.get("ordering", "-start_year")
         offset = int(request.GET.get("offset", 0))
         limit = int(request.GET.get("limit", 50))
 
@@ -72,7 +72,7 @@ class AnimeSearchView(APIView):
             animes = animes.filter(**{f"source_{lang}": source})
 
         ### 정렬 분기
-        if ordering == "popular":
+        if order == "popular":
             # 인기순: 애니리스트(찜) 수 기준 내림차순
             animes = animes.annotate(user_count=Count('animelist' , distinct=True)).order_by('-user_count', '-start_year')
             total_count = animes.count()
@@ -83,7 +83,7 @@ class AnimeSearchView(APIView):
                 "results": serializer.data
             })
 
-        elif ordering == "-rating":
+        elif order == "-rating":
             # 평점순(가중평점)
             m = 10  # 최소 리뷰수 (가중치)
             C = AnimeReview.objects.aggregate(avg=Avg('rating'))['avg'] or 0
@@ -112,15 +112,15 @@ class AnimeSearchView(APIView):
                 "results": results
             })
 
-        elif ordering == "-start_year":
+        elif order == "-start_year":
             # 최신순: 방영년도 내림차순
             animes = animes.order_by('-start_year', '-start_month', '-start_day')
-        elif ordering == "start_year":
+        elif order == "start_year":
             # 오래된순: 방영년도 오름차순
             animes = animes.order_by('start_year', 'start_month', 'start_day')
         else:
             # 기타 정렬
-            animes = animes.order_by(ordering)
+            animes = animes.order_by(order)
 
         # 최신순, 오래된순, 기타 정렬일 때 페이징 및 응답
         total_count = animes.count()
@@ -343,19 +343,15 @@ class AnimeRatingView(APIView):
 
 # Anime 리스트 추가/제거 API
 class AnimeListToggleView(APIView):
-
     def post(self, request, anime_id):
         anime = get_object_or_404(Anime, id=anime_id)
-
         if AnimeList.objects.filter(anime=anime, user=request.user).exists():
             return Response({"detail": "이미 리스트에 추가되어 있습니다."}, status=400)
-
         AnimeList.objects.create(anime=anime, user=request.user)
 
         # 활동 기록
         lang = getattr(request.user, "language", "ko")
         title = get_localized_title(anime, lang)
-
         create_user_activity(
             user=request.user,
             type="anime_add",
@@ -369,14 +365,12 @@ class AnimeListToggleView(APIView):
     def delete(self, request, anime_id):
         anime = get_object_or_404(Anime, id=anime_id)
         animelist = AnimeList.objects.filter(anime=anime, user=request.user).first()
-
         if not animelist:
             return Response({"detail": "리스트에 존재하지 않는 애니입니다."}, status=404)
-        
+
         # 활동 기록
         lang = getattr(request.user, "language", "ko")
         title = get_localized_title(anime, lang)
-
         create_user_activity(
             user=request.user,
             type="anime_remove",
@@ -387,6 +381,7 @@ class AnimeListToggleView(APIView):
 
         animelist.delete()
         return Response({"detail": "애니 리스트에서 제거되었습니다."}, status=204)
+
     
 # Anime 미니 프로필 API
 class AnimeMiniProfileView(APIView):

@@ -46,5 +46,7 @@ class UserActivity(models.Model):
     parent_author_profile_image = models.URLField(null=True, blank=True)
     parent_title = models.CharField(max_length=255, blank=True)
 
+    extra_content = models.TextField(null=True, blank=True)
+
     class Meta:
         ordering = ["-created_at"]

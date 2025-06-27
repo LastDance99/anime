@@ -15,7 +15,6 @@ class AnimeBotChatAPIView(APIView):
         if not question:
             return Response({"error": "질문이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 욕설 포함해도 그냥 넘어감 (비속어 필터 제거)
         q_type = classify_question_type(question)
         if q_type in ["story", "comparison", "person"]:
             search_key = extract_title_from_question(question)

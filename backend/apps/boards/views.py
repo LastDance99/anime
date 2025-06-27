@@ -191,14 +191,15 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
 
         # 활동 기록
         # 댓글 단 게시글 정보 조회 (게시글/갤러리 모두 대응)
-        create_user_activity(
-            user=self.request.user,
-            type="comment_create",
-            target_id=post.id,
-            parent_author_nickname=post.author.nickname,
-            parent_author_profile_image=post.author.profile_image.url if post.author.profile_image else None,
-            parent_title=post.title
-        )
+        if self.request.user != post.author:
+            create_user_activity(
+                user=self.request.user,
+                type="comment_create",
+                target_id=post.id,
+                parent_author_nickname=post.author.nickname,
+                parent_author_profile_image=post.author.profile_image.url if post.author.profile_image else None,
+                parent_title=post.title
+            )
 
 
 # 댓글 좋아요 등록 (취소 불가)
