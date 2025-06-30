@@ -53,5 +53,17 @@ declare module 'styled-components' {
       h1: string;
       h2: string;
     };
+    media: {
+      mobile: string;
+      tablet: string;
+
+      iosMax: string;
+      iosMid: string;
+      iosSE: string;
+
+      androidLarge: string;
+      androidMid: string;
+      androidSmall: string;
+    };
   }
 }

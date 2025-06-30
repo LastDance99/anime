@@ -13,8 +13,9 @@ export default function ProfileLayout() {
   const [user, setUser] = useState<User | null>(null);
   const [comments, setComments] = useState<ProfileComment[]>([]);
   const [userAnimeList, setUserAnimeList] = useState<UserAnimeItem[]>([]);
-  const [loading, setLoading] = useState(true); // ✅ 로딩 상태 추가
+  const [loading, setLoading] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false); // ✅ 추가
   const lastScroll = useRef(window.scrollY);
 
   useEffect(() => {
@@ -25,8 +26,10 @@ export default function ProfileLayout() {
       } else if (curr < lastScroll.current) {
         setShowHeader(true);
       }
+      setIsScrolled(curr > 0); // ✅ 맨 위 아님 → 불투명도 100%
       lastScroll.current = curr;
     };
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -47,24 +50,21 @@ export default function ProfileLayout() {
         setUserAnimeList(animeRes);
       } catch (err) {
         console.error("❌ 프로필 로딩 실패", err);
-        setUser(null); // 명시적으로 실패 시 null로 설정
+        setUser(null);
       } finally {
-        setLoading(false); // ✅ 로딩 끝
+        setLoading(false);
       }
     };
 
     fetchData();
   }, [userId]);
 
-  // ✅ 아직 로딩 중일 때
   if (loading) return <div>불러오는 중...</div>;
-
-  // ✅ 로딩 끝났는데도 user가 없으면 에러 처리
   if (!user) return <div>유저를 찾을 수 없습니다.</div>;
 
   return (
     <>
-      <ProfileHeader show={showHeader} user={user} setUser={setUser} />
+      <ProfileHeader show={showHeader} isScrolled={isScrolled} user={user} setUser={setUser} />
       <ProfileSection user={user} />
       <NavTabBar user={user} />
       <Outlet context={{ user, comments, userAnimeList }} />

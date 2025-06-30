@@ -137,13 +137,15 @@ export const IconsRow = styled.div`
 `;
 
 export const AddIconButton = styled.button`
-  color: ${({ theme }) => theme.colors.primary};
-  background: none;
-  border: none;
+  color: ${({ theme }) => theme.colors.bordermain};
+  background: transparent;
+  border-radius: 8px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.2s ease;
 
   svg {
     width: 20px;
@@ -151,4 +153,11 @@ export const AddIconButton = styled.button`
   }
 `;
 
-export const SendIconButton = styled(AddIconButton)``;
+export const SendIconButton = styled(AddIconButton)`
+  margin-left: 4px;
+`;
+
+export const ResetButton = styled(AddIconButton)`
+  margin: 0 8px;
+  color: ${({ theme }) => theme.colors.bordermain}; // 또는 다른 구분 색상
+`;

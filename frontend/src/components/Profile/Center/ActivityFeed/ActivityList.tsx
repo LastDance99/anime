@@ -7,7 +7,7 @@ import {
   EndText,
 } from "./ActivityList.styled";
 import { ChevronDown } from "lucide-react";
-import type { Activity } from "../../../../types/activity";
+import type { Activity, ActivityPost, ActivityComment, } from "../../../../types/activity";
 import {
   getUserActivities
 } from "../../../../api/profile";
@@ -17,6 +17,14 @@ import ActivityPostCard from "./ActivityPostCard";
 import ActivityCommentCard from "./ActivityCommentCard";
 import ActivityReviewAddCard from "./ActivityReviewAddCard";
 import ActivityReviewDelCard from "./ActivityReviewDelCard";
+
+function isActivityComment(activity: Activity): activity is ActivityComment {
+  return activity.type === "comment";
+}
+
+function isActivityPost(activity: Activity): activity is ActivityPost {
+  return activity.type === "post";
+}
 
 export default function ActivityList({ userId }: { userId: number }) {
   const [activityList, setActivityList] = useState<Activity[]>([]);
@@ -32,6 +40,7 @@ export default function ActivityList({ userId }: { userId: number }) {
     setIsLoading(true);
     try {
       const res = await getUserActivities(nextUrl);
+      console.log("🎯 응답 결과:", res.results);
       setActivityList(prev => [...prev, ...res.results]);
       setNextUrl(res.next);
     } catch (err) {
@@ -45,17 +54,6 @@ export default function ActivityList({ userId }: { userId: number }) {
     fetchActivities(); // 첫 페이지만 자동 로딩
   }, []);
 
-  // const filteredActivities = useMemo(() => {
-  //   const seenComments = new Set<string>();
-  //   return activityList.filter(item => {
-  //     if (item.type !== "comment") return true;
-  //     const key = item.post_title;
-  //     if (seenComments.has(key)) return false;
-  //     seenComments.add(key);
-  //     return true;
-  //   });
-  // }, [activityList]);
-
   return (
     <Wrapper>
       <SectionTitle>내 활동</SectionTitle>
@@ -68,9 +66,11 @@ export default function ActivityList({ userId }: { userId: number }) {
           case "anime_remove":
             return <ActivityListDelCard {...commonProps} anime_title={item.anime_title} anime_img={item.anime_img} />;
           case "post":
+            if (!isActivityPost(item)) return null;
             return (
               <ActivityPostCard
                 {...commonProps}
+                post_id={item.post_id}
                 nickname={item.nickname}
                 profile_image={item.profile_image}
                 post_title={item.post_title}
@@ -81,9 +81,11 @@ export default function ActivityList({ userId }: { userId: number }) {
               />
             );
           case "comment":
+            if (!isActivityComment(item)) return null;
             return (
               <ActivityCommentCard
                 {...commonProps}
+                post_id={item.post_id}
                 post_title={item.post_title}
                 comment={item.comment}
                 post_author_nickname={item.post_author_nickname}

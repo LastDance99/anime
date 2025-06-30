@@ -43,8 +43,18 @@ export default function SettingsModal({ user, setUser, onClose }: SettingsModalP
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [bgFile, setBgFile] = useState<File | null>(null);
   const [roomFile, setRoomFile] = useState<File | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
+  useEffect(() => {
+    const changed =
+      user.nickname !== tempUser.nickname ||
+      user.language !== tempUser.language ||
+      profileFile !== null ||
+      bgFile !== null ||
+      roomFile !== null;
+
+    setHasChanges(changed);
+  }, [user, tempUser, profileFile, bgFile, roomFile]);
 
   useEffect(() => {
     (async () => {
@@ -109,12 +119,12 @@ export default function SettingsModal({ user, setUser, onClose }: SettingsModalP
   };
 
   const handleTryClose = () => {
-    if (!justSaved && hasChanges) {
-      const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
-      if (!confirmed) return;
-    }
-    onClose();
-  };
+  if (hasChanges && !justSaved) {
+    const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
+    if (!confirmed) return;
+  }
+  onClose();
+};
 
   const handleNicknameChange = async (newNickname: string) => {
     if (newNickname === user.nickname) return;

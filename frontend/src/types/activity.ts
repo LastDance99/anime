@@ -42,6 +42,7 @@ export interface ActivityListDel extends ActivityBase {
 
 export interface ActivityPost extends ActivityBase {
   type: 'post';
+  post_id: number;
   post_title: string;
   content: string;
   like_count: number;
@@ -51,6 +52,7 @@ export interface ActivityPost extends ActivityBase {
 
 export interface ActivityComment extends ActivityBase {
   type: 'comment';
+  post_id: number;
   post_title: string;
   comment: string;
   post_author_nickname: string;

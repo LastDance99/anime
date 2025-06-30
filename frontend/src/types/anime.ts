@@ -92,4 +92,5 @@ export interface AnimeReview {
   like_count: number;
   liked_by_user: boolean;
   is_liked_by_me?: boolean;
+  
 }

@@ -18,34 +18,32 @@ import { useAuth } from "../../../contexts/AuthContext";
 
 type Props = {
   show?: boolean;
+  isScrolled: boolean;
   user: User;
   setUser: (user: User) => void;
 };
 
-export default function Header({ show = true, user, setUser }: Props) {
+export default function Header({ show = true, isScrolled, user, setUser }: Props) {
   const [openSettings, setOpenSettings] = useState(false);
   const navigate = useNavigate();
-  const { logout: clearAuth, currentUser  } = useAuth(); // AuthContext의 logout 사용
+  const { logout: clearAuth, currentUser } = useAuth();
 
   const handleLogout = async () => {
-    console.log("🔔 로그아웃 버튼 클릭됨");
-
     try {
-      await logout(); // 로그 출력 포함
+      await logout();
     } catch (err) {
       console.warn("서버 로그아웃 실패 (무시 가능)", err);
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       clearAuth();
-      console.log("🧼 클라이언트 토큰 제거 & AuthContext 초기화");
       navigate("/login");
     }
   };
 
   return (
     <>
-      <HeaderWrapper $show={show}>
+      <HeaderWrapper $show={show} $scrolled={isScrolled}>
         <HeaderInner>
           <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
           <Nav>

@@ -5,14 +5,13 @@ export const BaseCard = styled.div<{ $type?: string }>`
   min-height: 80px;
   display: flex;
   align-items: center;
-  gap: 12px;
   border-radius: 10px;
-  position: relative;
   background: ${({ theme }) => theme.colors.secondary};
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   color: ${({ theme }) => theme.colors.text};
   box-shadow: 0 2px 8px ${({ theme }) => theme.colors.secondary}55;
+  position: relative;
 `;
 
 export const ProfileImg = styled.img`
@@ -20,7 +19,6 @@ export const ProfileImg = styled.img`
   height: 46px;
   border-radius: 50%;
   object-fit: cover;
-  margin-left: 10px;
   background: ${({ theme }) => theme.colors.subcolor};
 `;
 
@@ -29,6 +27,7 @@ export const AnimeImg = styled.img`
   height: 80px;
   border-radius: 10px;
   object-fit: cover;
+  margin-right: 10px;
   background: ${({ theme }) => theme.colors.subcolor};
 `;
 
@@ -41,28 +40,29 @@ export const TimeText = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.subtext};
   margin-left: auto;
-  min-width: 60px;
+  min-width: 50px;
   text-align: right;
   font-family: ${({ theme }) => theme.fonts.main};
+  padding-right: 10px;
 `;
 
 export const SideInfoBox = styled.div`
-  position: absolute;
-  bottom: 10px;
-  right: 12px;
+  width: 100%;
+  min-width: 60px;
+  max-width: 80px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-end;
   height: 80%;
+  padding-right: 10px;
 `;
 
 export const Thumbnail = styled.img`
-  width: 140px;
-  height: 140px;
+  width: 160px;
+  height: 160px;
   object-fit: cover;
-  border-radius: 6px;
-  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  padding: 6px 0 6px 0;
 `;
 
 export const StatsBox = styled.div`
@@ -84,12 +84,34 @@ export const StatItem = styled.span`
   }
 `;
 
-// export const TopBox = styled.div`
-// 
-// `;
-// export const MiddleBox = styled.div`
-// 
-// `;
-// export const RowBox = styled.div`
-// 
-// `;
+export const FlexBox = styled.div`
+  width: 100%;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0 10px 10px;
+  gap: 8px; // 여백 조금 주기
+`;
+
+export const TopBox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const PostTimeText = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.subtext};
+  font-family: ${({ theme }) => theme.fonts.main};
+  position: absolute;
+  top: 10px;
+`;
+
+export const PostStatsBox = styled.div`
+  display: flex;
+  gap: 6px;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.subtext};
+  position: absolute;
+  bottom: 10px;
+`;

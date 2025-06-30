@@ -6,7 +6,7 @@ import {
   GenderRow, GenderButton, JobInput, SignUpButton, DropdownArrow, Logo,
   LanguageContainer, LanguageSelected, LanguageDropdown, LanguageItem,
   DomainDropdownWrap, DomainDropdownButton, DomainDropdownList, DomainDropdownItem,
-  AbsoluteErrorBox, EmailAuthBox,
+  AbsoluteErrorBox, EmailAuthBox, EmailAuthBtn, CodeInput, EmailTimer, NicknameBox, NicknameErrorBox
 } from "./SignUp.styled";
 import { Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -79,13 +79,14 @@ export default function SignUp() {
 
   // 이메일 인증 타이머
   useEffect(() => {
-    if (emailSent && emailTimer > 0) {
-      emailTimerRef.current = window.setTimeout(() => setEmailTimer(t => t - 1), 1000);
-    }
-    if (emailTimer === 0 && emailSent) {
-      setEmailSent(false);
-      setIsEmailVerified(false);
-      setEmailMessage("인증 시간이 만료되었습니다. 다시 시도해주세요.");
+    if (emailSent) {
+      if (emailTimer > 0) {
+        emailTimerRef.current = window.setTimeout(() => setEmailTimer(t => t - 1), 1000);
+      } else {
+        setEmailSent(false);
+        setIsEmailVerified(false);
+        setEmailMessage("인증 시간이 만료되었습니다. 다시 시도해주세요.");
+      }
     }
     return () => {
       if (emailTimerRef.current !== null) {
@@ -119,7 +120,6 @@ export default function SignUp() {
         setIsEmailVerified(false);
       } else {
         const result = await requestEmailVerification({ email: fullEmail });
-        setEmailMessage("인증 메일을 보냈습니다.");
         setEmailSent(true);
         setEmailTimer(300); // 5분
       }
@@ -130,10 +130,11 @@ export default function SignUp() {
 
   const handleEmailVerify = async () => {
     try {
-      const result = await confirmEmailVerification({ email: fullEmail, code: verificationCode });
+      await confirmEmailVerification({ email: fullEmail, code: verificationCode });
       setIsEmailVerified(true);
       setEmailMessage("이메일 인증 완료");
-      setEmailTimer(0);
+      setEmailTimer(0); // ⛔ 타이머 강제 종료
+      setEmailSent(false); // ✅ 이메일 인증 완료된 상태로 버튼 숨기기
     } catch (err) {
       setIsEmailVerified(false);
       setEmailMessage("인증 코드가 잘못되었습니다.");
@@ -168,7 +169,7 @@ export default function SignUp() {
     };
 
     try {
-      const result = await signup(data);
+      await signup(data);
       navigate("/login");
     } catch (err: any) {
       const resData = err.response?.data;
@@ -242,28 +243,48 @@ export default function SignUp() {
 
           {/* 이메일 인증 박스 */}
           <EmailAuthBox>
-            <button type="button" onClick={handleEmailCheck} disabled={emailSent && emailTimer > 0}>
-              {emailSent && emailTimer > 0 ? "인증 대기중" : "이메일 인증 요청"}
-            </button>
-            {emailSent && (
+            {!isEmailVerified ? (
               <>
-                <input
-                  type="text"
-                  placeholder="인증코드 입력"
-                  value={verificationCode}
-                  onChange={e => setVerificationCode(e.target.value)}
-                  style={{ width: "120px" }}
-                />
-                <button type="button" onClick={handleEmailVerify}>인증 확인</button>
-                <span style={{ color: "#ff4264", fontSize: "0.95em", minWidth: 50 }}>
-                  {`${Math.floor(emailTimer/60)}:${String(emailTimer%60).padStart(2,"0")}`}
-                </span>
+                <EmailAuthBtn
+                  type="button"
+                  onClick={handleEmailCheck}
+                  disabled={emailSent && emailTimer > 0}
+                >
+                  {emailSent && emailTimer > 0 ? "인증 대기중" : "이메일 인증 요청"}
+                </EmailAuthBtn>
+                {emailSent && (
+                  <>
+                    <CodeInput
+                      type="text"
+                      placeholder="인증코드 6자리"
+                      value={verificationCode}
+                      onChange={e => {
+                        // 숫자만, 6자리 제한
+                        const val = e.target.value.replace(/[^0-9]/g, "");
+                        setVerificationCode(val.slice(0, 6));
+                      }}
+                      maxLength={6}
+                      autoComplete="one-time-code"
+                      inputMode="numeric"
+                    />
+                    <EmailTimer>
+                      {`${Math.floor(emailTimer/60)}:${String(emailTimer%60).padStart(2,"0")}`}
+                    </EmailTimer>
+                    <EmailAuthBtn type="button" onClick={handleEmailVerify}>
+                      인증 확인
+                    </EmailAuthBtn>
+                  </>
+                )}
               </>
+            ) : (
+              <EmailAuthBtn as="div" disabled style={{ background: "#F5F5F5", color: "#6abf4b" }}>
+                인증 완료
+              </EmailAuthBtn>
             )}
           </EmailAuthBox>
 
           {/* 닉네임 */}
-          <div style={{ width: "100%", position: "relative" }}>
+          <NicknameBox>
             <NicknameInput
               type="text"
               placeholder="닉네임"
@@ -271,8 +292,8 @@ export default function SignUp() {
               onChange={e => setNickname(e.target.value)}
               onBlur={handleNicknameCheck}
             />
-            {!!nicknameMessage && <AbsoluteErrorBox>{nicknameMessage}</AbsoluteErrorBox>}
-          </div>
+            {!!nicknameMessage && <NicknameErrorBox>{nicknameMessage}</NicknameErrorBox>}
+          </NicknameBox>
 
           {/* 비밀번호 */}
           <PasswordInputRow>

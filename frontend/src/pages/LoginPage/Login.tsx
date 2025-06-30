@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
@@ -19,6 +19,7 @@ import {
   LanguageDropdown,
   LanguageItem,
   StyledLink,
+  AbsoluteErrorBox,
 } from "./Login.styled";
 import { Eye, EyeOff, ChevronDown, ChevronUp } from "lucide-react";
 import { login } from "../../api/auth";
@@ -35,7 +36,6 @@ const languages = [
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname || "/";
 
   const [showPw, setShowPw] = useState(false);
   const [keepLogin, setKeepLogin] = useState(false);
@@ -43,7 +43,11 @@ const Login: React.FC = () => {
   const [pw, setPw] = useState("");
   const [open, setOpen] = useState(false);
   const [lang, setLang] = useState("ko");
-  const [error, setError] = useState("");
+
+  const [emailError, setEmailError] = useState("");
+  const [pwError, setPwError] = useState("");
+
+  const { login: loginToContext } = useAuth();
 
   const handleSelect = (code: string) => {
     setLang(code);
@@ -52,15 +56,12 @@ const Login: React.FC = () => {
 
   const selectedLabel = languages.find((l) => l.code === lang)?.label || "";
 
-  const { login: loginToContext } = useAuth();
-
   const handleLogin = async () => {
-    setError("");
+    setEmailError("");
+    setPwError("");
     try {
       const res = await login({ email, password: pw });
       const { access, refresh } = res;
-
-      // ✅ keepLogin 상태에 따라 저장 위치 결정
       setAccessToken(access, keepLogin);
       setRefreshToken(refresh);
 
@@ -68,7 +69,38 @@ const Login: React.FC = () => {
       loginToContext(userInfo);
       navigate(`/profile/${userInfo.id}`);
     } catch (err: any) {
-      // ...
+
+      const data = err?.response?.data;
+      let emailMsg = "";
+      let pwMsg = "";
+
+      if (data?.email) {
+        emailMsg = Array.isArray(data.email) ? data.email[0] : data.email;
+      }
+      if (data?.password) {
+        pwMsg = Array.isArray(data.password) ? data.password[0] : data.password;
+      }
+
+      if (data?.detail) {
+        const lower = data.detail.toLowerCase();
+        if (lower.includes("이메일") || lower.includes("email")) {
+          emailMsg = data.detail;
+        }
+        if (lower.includes("비밀번호") || lower.includes("password")) {
+          pwMsg = data.detail;
+        }
+        if (!emailMsg && !pwMsg) {
+          emailMsg = data.detail;
+          pwMsg = data.detail;
+        }
+      }
+
+      if (!emailMsg && !pwMsg) {
+        pwMsg = "이메일 또는 비밀번호가 올바르지 않습니다.";
+      }
+
+      setEmailError(emailMsg);
+      setPwError(pwMsg);
     }
   };
 
@@ -82,46 +114,58 @@ const Login: React.FC = () => {
           <LanguageContainer>
             <LanguageSelected onClick={() => setOpen((v) => !v)}>
               {selectedLabel}
-              {open ? <ChevronUp size={14} style={{ marginLeft: "6px" }} /> : <ChevronDown size={14} style={{ marginLeft: "6px" }} />}
+              {open ? <ChevronUp size={14} style={{ marginLeft: 6 }} /> : <ChevronDown size={14} style={{ marginLeft: 6 }} />}
             </LanguageSelected>
             {open && (
               <LanguageDropdown>
-                {languages.map(
-                  (l) =>
-                    l.code !== lang && (
-                      <LanguageItem key={l.code} onClick={() => handleSelect(l.code)}>
-                        {l.label}
-                      </LanguageItem>
-                    )
-                )}
+                {languages
+                  .filter((l) => l.code !== lang)
+                  .map((l) => (
+                    <LanguageItem key={l.code} onClick={() => handleSelect(l.code)}>
+                      {l.label}
+                    </LanguageItem>
+                  ))}
               </LanguageDropdown>
             )}
           </LanguageContainer>
 
-          <InputWrapper>
+          {/* 이메일 입력 */}
+          <InputWrapper style={{ position: "relative" }}>
             <Input
               type="email"
               placeholder="이메일"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) setEmailError("");
+              }}
               autoComplete="username"
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              style={emailError ? { borderColor: "#ff4264" } : undefined}
             />
+            {emailError && <AbsoluteErrorBox>{emailError}</AbsoluteErrorBox>}
           </InputWrapper>
 
-          <InputWrapper>
+          {/* 비밀번호 입력 */}
+          <InputWrapper style={{ position: "relative" }}>
             <PasswordWrapper>
               <Input
                 type={showPw ? "text" : "password"}
                 placeholder="비밀번호"
                 value={pw}
-                onChange={(e) => setPw(e.target.value)}
+                onChange={(e) => {
+                  setPw(e.target.value);
+                  if (pwError) setPwError("");
+                }}
                 autoComplete="current-password"
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                style={pwError ? { borderColor: "#ff4264" } : undefined}
               />
               <IconButton onClick={() => setShowPw((v) => !v)}>
                 {showPw ? <EyeOff size={18} color="#555" /> : <Eye size={18} color="#555" />}
               </IconButton>
             </PasswordWrapper>
+            {pwError && <AbsoluteErrorBox>{pwError}</AbsoluteErrorBox>}
           </InputWrapper>
 
           <KeepLogin onClick={() => setKeepLogin((v) => !v)}>
@@ -134,8 +178,6 @@ const Login: React.FC = () => {
           </KeepLogin>
 
           <LoginButton onClick={handleLogin}>로그인</LoginButton>
-
-          {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
         </SubBox>
 
         <LinkArea>

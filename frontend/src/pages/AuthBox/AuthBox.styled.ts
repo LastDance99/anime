@@ -1,34 +1,55 @@
 import styled from 'styled-components';
 import { Link } from "react-router-dom";
 
-
 export const Container = styled.div`
+  position: relative;
   width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* background: ${({ theme }) => theme.colors.background}; */
   background: url('/images/bgimg.jpg') no-repeat center center;
   background-size: cover;
+  overflow: hidden;
 `;
 
 export const Box = styled.div`
-  width: 460px;
-  height: 340px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  padding: 32px 24px;
   border: 1px solid ${({ theme }) => theme.colors.bordermain};
   border-radius: 18px;
   background: ${({ theme }) => theme.colors.background};
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
+
+  ${({ theme }) => theme.media.mobile} {
+    padding: 24px 16px;
+  }
+  ${({ theme }) => theme.media.iosMax} {
+    max-width: 380px;
+  }
+  ${({ theme }) => theme.media.androidLarge} {
+    max-width: 390px;
+  }
 `;
 
 export const Logo = styled.img`
   width: 147px;
   height: 117px;
   margin: 20px 0 20px 0;
+
+  ${({ theme }) => theme.media.mobile} {
+    width: 120px;
+    height: auto;
+    margin: 12px 0;
+  }
 `;
 
 export const Title = styled.h1`
@@ -38,6 +59,10 @@ export const Title = styled.h1`
   font-weight: ${({ theme }) => theme.Weights.bold};
   margin: 0 0 8px 0;
   letter-spacing: ${({ theme }) => theme.letterSpacings.wider};
+
+  ${({ theme }) => theme.media.mobile} {
+    font-size: ${({ theme }) => theme.fontSizes.md};
+  }
 `;
 
 export const SubTitle = styled.div`
@@ -47,6 +72,11 @@ export const SubTitle = styled.div`
   margin-bottom: 23px;
   text-align: center;
   line-height: ${({ theme }) => theme.lineHeights.normal};
+
+  ${({ theme }) => theme.media.mobile} {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    margin-bottom: 20px;
+  }
 `;
 
 export const LoginButton = styled(Link)`
@@ -67,8 +97,13 @@ export const LoginButton = styled(Link)`
   margin-bottom: 14px;
   transition: filter 0.2s;
   letter-spacing: ${({ theme }) => theme.letterSpacings.normal};
+
   &:hover {
     filter: brightness(0.98);
+  }
+
+  ${({ theme }) => theme.media.mobile} {
+    width: 100%;
   }
 `;
 
@@ -82,6 +117,10 @@ export const LanguageContainer = styled.div`
   top: 10px;
   right: 18px;
   z-index: 10;
+
+  ${({ theme }) => theme.media.mobile} {
+    right: 12px;
+  }
 `;
 
 export const LanguageSelected = styled.div`
@@ -135,4 +174,3 @@ export const LanguageItem = styled.li`
     background: ${({ theme }) => theme.colors.primary};
   }
 `;
-

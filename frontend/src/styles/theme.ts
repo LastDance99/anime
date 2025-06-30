@@ -48,7 +48,24 @@ const theme = {
   display: {
     h1: '2rem', // 32px
     h2: '1.75rem', // 28px
+  },
+  media: {
+    // 공통
+    mobile: "@media (max-width: 768px)",
+    tablet: "@media (max-width: 1024px)",
+
+    // iOS 디바이스
+    iosMax: "@media (max-width: 428px)",     // iPhone Pro Max
+    iosMid: "@media (max-width: 390px)",     // iPhone 12~14 일반
+    iosSE: "@media (max-width: 375px)",      // iPhone SE 2세대
+
+    // Android 디바이스
+    androidLarge: "@media (max-width: 432px)", // 갤럭시 울트라급
+    androidMid: "@media (max-width: 411px)",   // 일반 안드로이드 기기
+    androidSmall: "@media (max-width: 360px)", // 소형 안드로이드
   }
 };
+
+
 
 export default theme;

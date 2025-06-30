@@ -41,7 +41,7 @@ export const addUserComment = async (
       },
     }
   );
-  return res.data; // 작성된 comment 1개
+  return res.data;
 };
 
 export const deleteUserComment = async (userId: number, pk: number) => {

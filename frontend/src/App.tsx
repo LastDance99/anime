@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
-import AuthBox from './components/AuthBox/AuthBox';
+import AuthBox from './pages/AuthBox/AuthBox';
 import Login from './pages/LoginPage/Login';
 import SignUp from "./pages/SignUpPage/SignUp";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
