@@ -9,7 +9,8 @@ def create_user_activity(
     target_image="",
     parent_author_nickname="",
     parent_author_profile_image="",
-    parent_title=""
+    parent_title="",
+    extra_content="",
 ):
     UserActivity.objects.create(
         user=user,
@@ -19,5 +20,6 @@ def create_user_activity(
         target_image=target_image,
         parent_author_nickname=parent_author_nickname,
         parent_author_profile_image=parent_author_profile_image,
-        parent_title=parent_title
+        parent_title=parent_title,
+        extra_content=extra_content,
     )

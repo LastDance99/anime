@@ -198,7 +198,8 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
                 target_id=post.id,
                 parent_author_nickname=post.author.nickname,
                 parent_author_profile_image=post.author.profile_image.url if post.author.profile_image else None,
-                parent_title=post.title
+                parent_title=post.title,
+                extra_content=comment.content,
             )
 
 

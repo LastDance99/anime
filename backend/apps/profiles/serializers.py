@@ -70,6 +70,7 @@ class ProfileCommentSerializer(serializers.ModelSerializer):
     
 # 유저 활동 시리얼라이저
 class UserActivitySerializer(serializers.ModelSerializer):
+    post_id = serializers.SerializerMethodField()
     created_at_display = serializers.SerializerMethodField()
     anime_title = serializers.SerializerMethodField()
     anime_img = serializers.SerializerMethodField()
@@ -84,6 +85,11 @@ class UserActivitySerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
+
+    def get_post_id(self, obj):
+        if obj.type in ["post_create", "comment_create"]:
+            return obj.target_id  # ✔ 게시글 ID는 target_id에 들어 있음
+        return None
 
     def get_created_at_display(self, obj):
         from django.utils.timesince import timesince
@@ -148,7 +154,7 @@ class UserActivitySerializer(serializers.ModelSerializer):
         return rep
 
     def get_like_count(self, obj):
-        if obj.type == "post_create":
+        if obj.type in ["post_create", "comment_create"]:
             from apps.boards.models import BoardPost
             try:
                 post = BoardPost.objects.get(id=obj.target_id)
@@ -158,7 +164,7 @@ class UserActivitySerializer(serializers.ModelSerializer):
         return None
 
     def get_comment_count(self, obj):
-        if obj.type == "post_create":
+        if obj.type in ["post_create", "comment_create"]:
             from apps.boards.models import BoardPost
             try:
                 post = BoardPost.objects.get(id=obj.target_id)
@@ -192,6 +198,7 @@ class UserActivitySerializer(serializers.ModelSerializer):
         model = UserActivity
         fields = [
             "id",
+            "post_id",
             "type",
             "created_at",
             "created_at_display",

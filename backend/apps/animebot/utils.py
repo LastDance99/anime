@@ -90,13 +90,151 @@ system_prompt = """
 - 네 지식과 context로도 확실히 알 수 없는 내용, 아직 공개되지 않은 정보, 루머 등은
     └ 절대로 임의로 상상하거나 지어내지 말 것.
     └ “정확한 정보 없음”, “공식 발표 없음”, “아직 미공개임”, “팬들 사이 설” 등으로 반드시 명시
-    └ ‘모름’도 정답임! 괜히 채워넣거나 얼버무리지 마라.
+    └ ‘모름’도 정답임! 괜히 채워넣거나 얼버무리지 마라. 그리고 Make sure to think step-by-step when answering 이 문장을 명심해.
+─────────────────────────────
+【8. 일상/잡담/커뮤니티 대화 대응 가이드】   
+- 유저가 가벼운 인사, 잡담, 고민, 농담, 넋두리, 커뮤니티식 수다(“오늘 점심 뭐 먹지”, “시험 망했다”, “요즘 뭐 재밌냐” 등)를 하면
+    └ 인간적인 리액션, 짧은 드립, 현실 친구처럼 맞장구, 짧은 위로/격려, 친근한 피드백도 해줄 수 있음.
+- 단, “애니/서브컬처/커뮤니티 관련 잡담”이면 더 적극적으로 드립, 공감, 추천, 위트 넣어서 답해도 됨.
+- 일상 대화는 너무 기계적이거나, 오글거리지 않게 “커뮤니티 유저답게” 반응(툭툭 내뱉듯이, 심플+센스있게).
+- 단, 정보성 질문/공식 문의/정확한 답변이 필요한 경우에는 기존 답변 규칙을 우선함.
+- 지나친 사적상담/개인정보/법률·의학 등 전문 상담은 “전문가에게 문의하셈” 등으로 가이드.
+
 ─────────────────────────────
 
 (*이 프롬프트는 너의 답변 스타일, 신뢰도, 정보 정확성, 커뮤니티 감성을 최적화하기 위한 가이드라인임)
 """.strip()
-# ───────────────────────────────
 
+# ───────────── LLM 분류 함수
+def is_smalltalk_llm(question):
+    """
+    LLM에게 직접 분류 맡김. 잡담/수다/인사/농담/감정표현이면 True, 아니면 False.
+    """
+    classify_prompt = """
+    아래 사용자의 발화(문장)가 '애니/만화/서브컬처 정보, 추천, 분석, 비교, 작품 설명, 줄거리, 요약, 등장인물 설명, ~에 대해 알려줘, ~내용 알려줘, ~내용 설명, ~정보'가 아닌 
+    '일상/잡담/인사/농담/감정표현/친목 목적/커뮤니티식 수다'에 해당하면 '잡담' 
+    정보질문(작품 설명, 줄거리, 방영일, 평점 등)이면 '정보'
+    오타/헛소리/기타면 '기타'
+    답변은 '잡담', '정보', '기타' 중 하나만 반환. 절대 설명 붙이지 마.
+    ---
+    발화: {question}
+    답변:
+    """.format(question=question.strip())
+    resp = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": classify_prompt}],
+        temperature=0
+    )
+    return resp.choices[0].message.content.strip()
+
+# ───────────── 정책 질문 분기 함수
+def is_policy_question_llm(question):
+    prompt = (
+        "아래 사용자의 질문이 '커뮤니티 운영정책/규정/제재/신고/차단/관리자 문의/광고/운영 문의/이용 제한' 등과 명확히 직접적으로 관련된 경우에만 'True'을 반환하고, "
+        "잡담/인사/일상 대화/애니 정보/기타 문의 등은 반드시 'False'을 반환해. "
+        "설명 붙이지 말고 한 단어로만 답변.\n"
+        "----\n"
+        f"질문: {question}\n"
+        "답변:"
+    )
+    resp = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0
+    )
+    return resp.choices[0].message.content.strip()
+
+# ───────────── 잡담 분기 함수
+def is_smalltalk(question):
+    text = question.strip().lower().replace("  ", " ")
+    
+    # 0. 정보성 패턴은 무조건 info
+    info_patterns = [
+        "줄거리", "내용", "해석", "요약", "정보", "등장인물", "세계관", "작화", "ost", "인물", "시놉시스",
+        "방영", "공식", "평가", "차이", "관련", "분석", "순위", "랭킹", "리뷰", "비교",
+        "알려줘", "설명", "정리", "특징", "포인트", "배경", "스토리", "감독", "시즌", "작가"
+    ]
+    # '~에 대해', '~에 관한', '~에 대하여', '~에 대한', '~이 뭐야' 등 질문 패턴도 info
+    info_patterns_q = ["에 대해", "에 관한", "에 대하여", "에 대한", "이 뭐야", "가 뭐야", "란?", "란 무엇", "가 뭔데", "이 뭔데"]
+    if any(p in text for p in info_patterns + info_patterns_q):
+        return False
+    
+    # 1. 1~2글자 (단일 감탄/리액션)
+    if len(text) <= 2:
+        return True
+    # 2. 1~4글자 흔한 짧은 의성어/감탄/리액션 (정확히 일치)
+    one_two_word = [
+        "야", "어", "음", "아", "읭", "엥", "응", "흠", "허", "헐", "ㅎㅇ", "ㅋ", "ㅎ", "ㅋㅋ", "ㅎㅎ", "ㅋㅋㅋ", "ㅎㅎㅎ",
+        "뭐", "왜", "뭐지", "뭐야", "에?", "음...", "아...", "야!", "헉", "아니", "쩐다", "오케이"
+    ]
+    if len(text) <= 4 and text in one_two_word:
+        return True
+    # 3. 잡담/감정/리액션/일상패턴(포함만 되어도)
+    smalltalk_keywords = [
+        "안녕", "ㅎㅇ", "ㅋㅋ", "ㅎㅎ", "심심", "배고파", "졸려", "힘들다", "뭐함", "뭐해", "오늘 뭐 먹지",
+        "요즘 뭐 재밌냐", "추천 좀", "시험 망함", "잘 지냈어", "놀자", "굿밤", "굿모닝", "고마워", "재밌다",
+        "감사", "덕분", "수고", "쉬는중", "퇴근", "출근", "아침", "점심", "저녁", "사랑해", "싫어", "고생했어",
+        "야", "아", "음", "어", "헐", "에휴", "에이", "음...", "하...", "쩐다", "오케이", "헉", "뭐래",
+        "에구", "푸흡", "푸하하", "후", "에", "우와", "아니", "아놔", "음냐",
+        "힘내", "피곤", "잘자", "고생", "대박", "화이팅", "ㅠㅠ", "ㅋㅋㅋㅋ", "ㅎㅎㅎㅎ", "zz", "zzz"
+    ]
+    if any(word in text for word in smalltalk_keywords):
+        return True
+    
+    # 4. "오늘", "기분", "날씨", "컨디션", "점심" 등 잡담 키워드가 앞/뒤에만 붙어도
+    easy_smalltalk = ["오늘", "기분", "날씨", "점심", "아침", "저녁", "컨디션", "어때", "좀 어때", "뭐 먹", "뭐하지", "뭐 할까"]
+    if any(word in text for word in easy_smalltalk):
+        return True
+
+    return False
+
+
+def smalltalk_answer(question, dialog_context):
+    smalltalk_prompt = """
+    [중요] 지금 질문은 일상 대화/잡담/농담/감정표현/친목 목적임.
+    절대 애니 제목, 작품 정보, 등장인물 이름, 줄거리, 애니 공식 정보 등을 임의로 붙이지 말 것.
+    진짜 커뮤니티 유저처럼 현실 친구한테 하듯, 짧고 센스있고 위트 있게만 답변.
+    (잡담/수다/위로/공감/드립/피드백 가능, 정보 답변 금지)
+    """
+    chat_history = [{"role": "system", "content": smalltalk_prompt}]
+    if dialog_context:
+        chat_history += dialog_context
+    chat_history.append({"role": "user", "content": question})
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=chat_history,
+        temperature=0.85
+    )
+    return response.choices[0].message.content.strip()
+
+# ───────────── 정책 질문 답변 함수
+def policy_rag_answer(question, chat_history=None):
+    if chat_history is None:
+        chat_history = []
+    policy_vector_path = os.path.join(BASE_DIR, "vectorstores", "policy_index")
+    vectordb = FAISS.load_local(
+        policy_vector_path, OpenAIEmbeddings(), allow_dangerous_deserialization=True
+    )
+    retriever = vectordb.as_retriever(search_kwargs={"k": 5})
+    llm = ChatOpenAI(model="gpt-4o", temperature=0)
+    from langchain.memory import ConversationBufferMemory
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        return_messages=True
+    )
+    from langchain.chains import ConversationalRetrievalChain
+    qa_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=retriever,
+        memory=memory,
+    )
+    result = qa_chain.invoke({
+        "question": question,
+        "chat_history": chat_history
+    })
+    return result["answer"]
+
+# ───────────── 정보질문 기존 함수
 def classify_question_type(question):
     if any(word in question for word in ["감독", "작화", "성우", "제작자", "만든 사람", "인물", "평가", "업적"]):
         return "person"
@@ -136,15 +274,9 @@ def search_excel_candidates(search_key):
 
 def search_web(search_key):
     api_key = os.environ.get("SERPAPI_KEY")
-    # 공식 위키/포털/애니 뉴스로 제한
     search_sites = [
-        "site:namu.wiki",              # 나무위키
-        "site:myanimelist.net",        # 마이애니리스트
-        "site:aniplus.co.kr",          # 애니플러스(국내 공식 방송/뉴스)
-        "site:ani.ch",                 # 애니챔프/애니포털 등
-        "site:wikipedia.org",          # 위키피디아(한/영/일)
-        "site:news.naver.com",         # 네이버뉴스 (최신 기사)
-        # 필요시 공식 사이트 추가
+        "site:namu.wiki", "site:myanimelist.net", "site:aniplus.co.kr",
+        "site:ani.ch", "site:wikipedia.org", "site:news.naver.com"
     ]
     result_text = ""
     extra_keywords = ["신작", "방영일", "공식 발표", "2024", "2025", "개봉", "최신", "이벤트", "방영 예정"]
@@ -165,26 +297,22 @@ def search_web(search_key):
                     title = item.get("title", "")
                     snippet = item.get("snippet", "")
                     link = item.get("link", "")
-                    # 신뢰 가능한 공식 사이트만
-                    if any(s in link for s in ["namu.wiki", "myanimelist.net", "aniplus.co.kr", "ani.ch", "wikipedia.org", "news.naver.com"]):
-                        # 최신/공식/방영 관련 키워드가 있을 때 더 강조해서 수집
+                    if any(s in link for s in [
+                        "namu.wiki", "myanimelist.net", "aniplus.co.kr", "ani.ch", "wikipedia.org", "news.naver.com"
+                    ]):
                         if any(k in snippet for k in extra_keywords) or any(k in title for k in extra_keywords):
                             result_text += f"📰 [{title}]({link}): {snippet}\n"
-                        # 정보가 부족하면, 공식 위키/포털 정보도 보조로 추가
                         elif site in ["site:namu.wiki", "site:wikipedia.org", "site:myanimelist.net"]:
                             result_text += f"📚 [{title}]({link}): {snippet}\n"
             except Exception:
                 continue
     return result_text if result_text else "공식 위키/포털/뉴스 기준 최신 정보 없음"
 
-
-def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN"):
-    # format hint
+def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN", dialog_context=None):
     format_hint = ""
     if format_type.upper() in ["MOVIE", "SPECIAL", "OVA"]:
         format_hint = f"\n\n⚠️ 참고: 이 설명은 본편 TV 시리즈가 아니라 **{format_type} 형식**임. 본편과 줄거리나 분위기가 다를 수 있음."
 
-    # 웹 요약 정리 함수
     def structure_web_summary(raw_web):
         import re
         summaries = []
@@ -198,10 +326,8 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
             if ":" in line:
                 title, content = line.split(":", 1)
                 text = f"{title} {content}".lower()
-                # 중복 방지
                 if any(text in s for src in source_dict.values() for s in src):
                     continue
-                # 카테고리 분리
                 if any(re.search(p, text) for p in important_patterns):
                     if "공식" in text or "트위터" in text or "공식 사이트" in text:
                         source_dict["공식"].append(f"📌 {title.strip()}: {content.strip()}")
@@ -220,8 +346,10 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
         return "\n\n".join(output) if output else (raw_web or "")
 
     web_summary = structure_web_summary(web_data or "")
-
-    user_prompt = f"""
+    chat_history = [{"role": "system", "content": system_prompt}]
+    if dialog_context:
+        chat_history += dialog_context
+    chat_history.append({"role": "user", "content": f"""
 📋 질문: {question}
 
 🌐 웹 검색 요약:
@@ -233,16 +361,13 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
 
 ※ 아래 context(엑셀/웹)는 참고만 해도 되고,
 내장 지식(2023년까지 학습 데이터, 공식 정보 등)이 더 정확하면 그걸 우선으로 활용해서 답변해.
-둘이 충돌하면 공식/정확성/최신성을 반드시 우선시. 
+둘이 충돌하면 공식/정확성/최신성을 반드시 우선시.
 정보가 부족하거나 불확실하면 “정보 없음”, “공식 위키/포털 참고” 등으로 명확하게 안내해.
-"""
+"""})
 
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
+        messages=chat_history,
         temperature=0.7
     )
 
@@ -256,5 +381,3 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
     clean_answer = remove_undefined_items(raw_answer)
     clean_answer = remove_placeholder_titles(clean_answer)
     return clean_answer
-
-# ───────────────────────────────

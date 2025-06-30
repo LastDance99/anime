@@ -89,7 +89,7 @@ class PasswordResetConfirmView(APIView):
     
 # 6. 이메일 인증 요청
 class EmailVerificationRequestView(APIView):
-    permission_classes = [permissions.AllowAny]  # 누구나 접근 가능
+    permission_classes = [permissions.AllowAny]  
 
     def post(self, request):
         serializer = EmailVerificationRequestSerializer(data=request.data)

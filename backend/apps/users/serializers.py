@@ -1,6 +1,6 @@
 import random
 import re
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -13,6 +13,7 @@ from django.conf import settings
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.utils.timezone import now
+
 from .models import EmailVerification
 
 User = get_user_model()
@@ -79,21 +80,24 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 # 2. 로그인 (email 기반)
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['nickname'] = user.nickname
-        token['email'] = user.email
-        return token
-
     def validate(self, attrs):
-        attrs['username'] = attrs.get('email')  # 핵심!
-        data = super().validate(attrs)
-        # 로그인 성공 시점에서 last_login 갱신
-        self.user.last_login = now()
-        self.user.save(update_fields=["last_login"])
-        return data
+        email = attrs.get('email')
+        password = attrs.get('password')
 
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise exceptions.AuthenticationFailed({'email': ["존재하지 않는 이메일입니다."]})
+
+        if not user.check_password(password):
+            raise exceptions.AuthenticationFailed({'password': ["비밀번호가 올바르지 않습니다."]})
+
+        # 기본 jwt 토큰 발급 로직
+        data = super().validate(attrs)
+        user.last_login = now()
+        user.save(update_fields=["last_login"])
+        return data
+    
 # 3. 로그아웃용 – 리프레시 토큰 처리
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
