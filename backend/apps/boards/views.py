@@ -1,27 +1,26 @@
-from rest_framework import permissions
 from rest_framework.generics import ListCreateAPIView
 from django.db.models import Count, Q
 from .models import BoardPost, PostLike, BoardComment, CommentLike
 from .serializers import BoardPostSummarySerializer
-from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
-from .serializers import BoardPostDetailSerializer, BoardPostCreateSerializer, BoardCommentSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied
+from apps.core.utils.extractor import extract_thumbnail_from_html 
+from apps.core.utils.sanitizer import sanitize_html
+from apps.profiles.utils.activity import create_user_activity
+from apps.profiles.models import Attendance
+from .serializers import (
+    BoardPostDetailSerializer, 
+    BoardPostCreateSerializer, 
+    BoardCommentSerializer,
+)
 
-
-
-# 게시판 목록 조회 API
+# 게시판 목록 조회/게시글 생성 API
 class BoardPostListCreateView(ListCreateAPIView):
-
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]
-        return [AllowAny()]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -34,8 +33,8 @@ class BoardPostListCreateView(ListCreateAPIView):
         search = self.request.query_params.get('search', '')
 
         qs = BoardPost.objects.all().annotate(
-            like_count=Count('likes'),
-            comment_count=Count('comments')
+            like_count=Count('likes', distinct=True),
+            comment_count=Count('comments', distinct=True)
         )
 
         if board_type == 'post':
@@ -58,17 +57,28 @@ class BoardPostListCreateView(ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        content = self.request.data.get("content", "")
+        sanitized_content = sanitize_html(content)
+        thumbnail_url = extract_thumbnail_from_html(sanitized_content)
+
+        post = serializer.save(content=sanitized_content, thumbnail_url=thumbnail_url)
+
+        create_user_activity(
+            user=self.request.user,
+            type="post_create",
+            target_id=post.id,
+            target_title=post.title
+        )
+        
 
 # 게시판 게시글 상세 조회 API
 class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BoardPost.objects.all()
     serializer_class = BoardPostDetailSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_field = 'id'
     lookup_url_kwarg = 'post_id'
 
-    # ✅ 조회 시 조회수 증가
+    # 조회 시 조회수 증가
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.views += 1
@@ -76,14 +86,19 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, context={"request": request})
         return Response(serializer.data)
 
-    # ✅ 수정 권한: 작성자 본인만
+    # 수정 권한: 작성자 본인만
     def perform_update(self, serializer):
         post = self.get_object()
         if post.author != self.request.user:
             raise PermissionDenied("게시글 수정 권한이 없습니다.")
-        serializer.save()
 
-    # ✅ 삭제 권한: 작성자 본인만
+        content = self.request.data.get("content", post.content)
+        sanitized_content = sanitize_html(content)
+        thumbnail_url = extract_thumbnail_from_html(sanitized_content)
+
+        serializer.save(content=sanitized_content, thumbnail_url=thumbnail_url)
+
+    # 삭제 권한: 작성자 본인만
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
             raise PermissionDenied("게시글 삭제 권한이 없습니다.")
@@ -91,18 +106,20 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     
 # 게시글 좋아요/좋아요 취소 API
 class BoardPostLikeView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def post(self, request, post_id):
         post = get_object_or_404(BoardPost, id=post_id)
         user = request.user
 
-        # 이미 좋아요 한 경우
         if PostLike.objects.filter(post=post, user=user).exists():
             return Response({"message": "이미 좋아요를 눌렀습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         PostLike.objects.create(post=post, user=user)
-        return Response({"message": "좋아요 등록됨"}, status=status.HTTP_201_CREATED)
+        return Response({
+            "message": "좋아요 등록됨",
+            "is_liked": True,
+            "like_count": PostLike.objects.filter(post=post).count()
+        }, status=status.HTTP_201_CREATED)
 
     def delete(self, request, post_id):
         post = get_object_or_404(BoardPost, id=post_id)
@@ -113,14 +130,17 @@ class BoardPostLikeView(APIView):
             return Response({"message": "좋아요를 누른 적이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         like.delete()
-        return Response({"message": "좋아요 취소됨"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({
+            "message": "좋아요 취소됨",
+            "is_liked": False,
+            "like_count": PostLike.objects.filter(post=post).count()
+        }, status=status.HTTP_200_OK)
     
 
 
 # 댓글/대댓글 목록 조회 + 작성
 class BoardCommentListCreateView(generics.ListCreateAPIView):
     serializer_class = BoardCommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         post_id = self.kwargs['post_id']
@@ -128,13 +148,13 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
 
         qs = BoardComment.objects.filter(
             post_id=post_id,
-            parent__isnull=True
+            parent__isnull=True,
         ).annotate(
             like_count=Count('likes')
         )
 
         if sort == 'latest':
-            qs = qs.order_by('-created_at')
+            qs = qs.order_by('-created_at') # 최신순
         elif sort == 'like':
             qs = qs.order_by('-like_count')
         else:
@@ -145,20 +165,46 @@ class BoardCommentListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         post_id = self.kwargs['post_id']
+        post = BoardPost.objects.get(id=post_id)
         parent_id = self.request.data.get('parent_id')
         tagged_nickname = self.request.data.get('tagged_nickname')
+        content = self.request.data.get("content", "")
 
-        serializer.save(
+        # content 필드 XSS 방어 처리
+        from apps.core.utils.sanitizer import sanitize_html
+        sanitized_content = sanitize_html(content)
+
+        parent = None
+        if parent_id is not None:
+            try:
+                parent = BoardComment.objects.get(id=parent_id, post_id=post_id)
+            except BoardComment.DoesNotExist:
+                raise ValidationError({"parent_id": "존재하지 않는 댓글입니다."})
+
+        comment = serializer.save(
             author=self.request.user,
-            post_id=post_id,
+            post=post,
             parent_id=parent_id,
-            tagged_nickname=tagged_nickname
+            tagged_nickname=tagged_nickname,
+            content=sanitized_content,
         )
+
+        # 활동 기록
+        # 댓글 단 게시글 정보 조회 (게시글/갤러리 모두 대응)
+        if self.request.user != post.author:
+            create_user_activity(
+                user=self.request.user,
+                type="comment_create",
+                target_id=post.id,
+                parent_author_nickname=post.author.nickname,
+                parent_author_profile_image=post.author.profile_image.url if post.author.profile_image else None,
+                parent_title=post.title,
+                extra_content=comment.content,
+            )
 
 
 # 댓글 좋아요 등록 (취소 불가)
 class BoardCommentLikeView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, comment_id):
         comment = get_object_or_404(BoardComment, id=comment_id)
@@ -174,7 +220,6 @@ class BoardCommentLikeView(APIView):
 # 댓글 삭제 (대댓글 존재 시 soft delete)
 class BoardCommentDeleteView(generics.DestroyAPIView):
     queryset = BoardComment.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
         comment = self.get_object()
@@ -189,6 +234,26 @@ class BoardCommentDeleteView(generics.DestroyAPIView):
             comment.content = ""
             comment.save()
             return Response({"message": "댓글 내용이 삭제 처리되었습니다."}, status=200)
+        else:
+            parent = comment.parent
+            response = super().delete(request, *args, **kwargs)  # 진짜 삭제
 
-        return super().delete(request, *args, **kwargs)
+            # 부모 soft-delete 댓글도 대댓글 없으면 같이 삭제
+            if parent and parent.is_deleted and parent.replies.count() == 0:
+                parent.delete()
+            return response
+    
+# 게시판 미니 프로필 뷰
+class BoardMiniProfileView(APIView):
+
+    def get(self, request):
+        user = request.user
+        post_count = BoardPost.objects.filter(author=user).count()
+        comment_count = BoardComment.objects.filter(author=user).count()
+        attendance_count = Attendance.objects.filter(user=user).count()
+        return Response({
+            "post_count": post_count,
+            "comment_count": comment_count,
+            "attendance_count": attendance_count
+        })
     

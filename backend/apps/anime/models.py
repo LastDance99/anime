@@ -58,6 +58,11 @@ class AnimeReview(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        # 유저, 애니, 평점, 간단 내용 (50자 이내)
+        content_preview = self.content[:30] + ("..." if len(self.content) > 30 else "")
+        return f"[{self.anime.title_ko}] {self.user} / {self.rating}점 / {content_preview}"
+
 class ReviewLike(models.Model):
     review = models.ForeignKey(AnimeReview, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -66,11 +71,19 @@ class ReviewLike(models.Model):
     class Meta:
         unique_together = ('review', 'user')
 
+    def __str__(self):
+        return f"{self.user} → 리뷰({self.review.id})"
+
 class AnimeList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
+    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, related_name='animelist')
+    is_favorite = models.BooleanField(default=False) 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'anime')
+        
+    def __str__(self):
+        star = "★" if self.is_favorite else ""
+        return f"{self.user} - {self.anime.title_ko}{star}"
 

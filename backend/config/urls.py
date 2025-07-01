@@ -16,19 +16,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from django.conf.urls.static import static
 from django.urls import path, include
 from django.conf import settings
-from django.conf.urls.static import static
 
 urlpatterns = [
+    # 관리자 페이지 URL
     path("admin/", admin.site.urls),
-    path("api/users/", include("apps.users.urls")),
-    path("api/profiles/", include("apps.profiles.urls")),
-    path("api/follows/", include("apps.follows.urls")),
-    path("api/boards/", include("apps.boards.urls")),
-    path("api/anime/", include("apps.anime.urls")),
+    # API 엔드포인트 URL
+    path("api/users/", include("apps.users.urls")), # 사용자 인증 및 관리 기능 관련
+    path("api/profiles/", include("apps.profiles.urls")), # 사용자 프로필 기능 관련
+    path("api/boards/", include("apps.boards.urls")), # 게시판 기능 관련
+    path("api/anime/", include("apps.anime.urls")), # 애니 기능 관련 
+    path("api/core/", include("apps.core.urls")), # 공통 기능 관련
+    path("api/animebot/", include("apps.animebot.urls")), # 애니 봇 기능 관련
+    path("api/settings/", include("apps.settings.urls")), # 사용자 설정 관련
 ]
 
 if settings.DEBUG:
+    # Serve static files during development
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # Serve media files during development
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
