@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   HeaderWrapper,
@@ -11,7 +11,6 @@ import {
   BottomBtn,
   Iconbox,
 } from "./ProfileHeader.styled";
-import SettingsModal from "../../Settings/SettingsModal";
 import type { User } from "../../../types/user";
 import { logout } from "../../../api/auth";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -21,10 +20,10 @@ type Props = {
   isScrolled: boolean;
   user: User;
   setUser: (user: User) => void;
+  onOpenSettings: () => void; // ★ 추가!
 };
 
-export default function Header({ show = true, isScrolled, user, setUser }: Props) {
-  const [openSettings, setOpenSettings] = useState(false);
+export default function Header({ show = true, isScrolled, user, setUser, onOpenSettings }: Props) {
   const navigate = useNavigate();
   const { logout: clearAuth, currentUser } = useAuth();
 
@@ -53,20 +52,13 @@ export default function Header({ show = true, isScrolled, user, setUser }: Props
               <NavItem as={Link} to="/anime">애니</NavItem>
             </NavList>
           </Nav>
-          <Iconbox onClick={() => setOpenSettings(true)}>
+          {/* 설정(톱니) 아이콘 클릭 → 트리거 함수 호출 */}
+          <Iconbox onClick={onOpenSettings}>
             <GearIcon size={16} />
           </Iconbox>
           <BottomBtn onClick={handleLogout}>로그아웃</BottomBtn>
         </HeaderInner>
       </HeaderWrapper>
-
-      {openSettings && (
-        <SettingsModal
-          user={user}
-          setUser={setUser}
-          onClose={() => setOpenSettings(false)}
-        />
-      )}
     </>
   );
 }

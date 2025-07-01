@@ -19,6 +19,7 @@ import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import WriteButton from "../../components/WriteButton/WriteButton";
 import DetailModal from "../../components/Board/DetailModal/DetailModal";
+import BoardSideWidget from "../../components/Board/BoardSideWidget"
 import { useNavigate } from "react-router-dom";
 import { getBoardPosts } from "../../api/board";
 import { getMyProfile } from "../../api/profile";
@@ -149,6 +150,8 @@ const BoardPage: React.FC = () => {
             ) : (
               <div>유저 정보를 불러오는 중...</div>
             )}
+
+            <BoardSideWidget />
           </SidebarSection>
         </Wrapper>
       </Container>

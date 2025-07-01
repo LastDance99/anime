@@ -1,5 +1,7 @@
 import axios from '../lib/axios';
+import instance from '../lib/axios'
 import type { BoardComment } from '../types/comment'
+import type { BoardItem} from '../types/board'
 
 export const getBoardPosts = async (params?: {
   page?: number;
@@ -90,4 +92,23 @@ export const deleteComment = async (postId: number, commentId: number) => {
 export const boardsProfileInfo = async () => {
   const res = await axios.get('/api/boards/postcount/');
   return res.data;
+};
+
+
+// 공지글
+export const getBoardNotices = async (limit = 3): Promise<BoardItem[]> => {
+  const res = await instance.get(`/api/boards/notices/?limit=${limit}`);
+  return Array.isArray(res.data) ? res.data : res.data.results;
+};
+
+// 오늘의 인기글 (조회수/좋아요/댓글순 등 order 파라미터 가능)
+export const getBoardPopular = async (limit = 5, order = "views"): Promise<BoardItem[]> => {
+  const res = await instance.get(`/api/boards/popular/?limit=${limit}&order=${order}`);
+  return Array.isArray(res.data) ? res.data : res.data.results;
+};
+
+// 추천글
+export const getBoardRecommend = async (limit = 5): Promise<BoardItem[]> => {
+  const res = await instance.get(`/api/boards/recommend/?limit=${limit}`);
+  return Array.isArray(res.data) ? res.data : res.data.results;
 };

@@ -12,7 +12,7 @@ import {
 import { getMyProfile, getUserContent } from "../../api/profile";
 import type { AnimeItem, AnimeFilter } from "../../types/anime";
 import type { User } from "../../types/user";
-import LoadingSpinner from "../../components/Common/LoadingSpinner";
+// import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import {
   Section,
   Container,
@@ -58,13 +58,19 @@ const buildAnimeParams = (
 };
 
 export default function AniMain() {
-  const [filters, setFilters] = useState<AnimeFilter>({ genre: [], season: "", year: "", broadcast: "", keyword: "" });
+  const [filters, setFilters] = useState<AnimeFilter>({
+    genre: [],
+    season: "",
+    year: "",
+    broadcast: "",
+    keyword: ""
+  });
   const [sort, setSort] = useState("popular");
   const [offset, setOffset] = useState(0);
   const [animeList, setAnimeList] = useState<AnimeItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(false); // ✅ 추가
+  const [isFetching, setIsFetching] = useState(false);
 
   const [selectedAnimeId, setSelectedAnimeId] = useState<number | null>(null);
   const [selectedAnime, setSelectedAnime] = useState<AnimeItem | null>(null);
@@ -73,6 +79,16 @@ export default function AniMain() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
+
+  const isFiltered = useMemo(() => {
+    return (
+      filters.genre.length > 0 ||
+      filters.season !== "" ||
+      filters.year !== "" ||
+      filters.broadcast !== "" ||
+      filters.keyword !== ""
+    );
+  }, [filters]);
 
   const fetchUserAnimeList = async (userId: number) => {
     try {
@@ -94,7 +110,6 @@ export default function AniMain() {
         await addAnimeList(animeId);
       }
 
-      // ✅ 변경: 서버 최신 상태로 동기화
       if (user) {
         await fetchUserAnimeList(user.id);
       }
@@ -120,31 +135,17 @@ export default function AniMain() {
   }, [user]);
 
   useEffect(() => {
-    // ✅ filters 또는 sort 바뀔 때 애니 리스트 초기화 및 offset 0으로
     setAnimeList([]);
     setOffset(0);
   }, [filters, sort]);
 
   useEffect(() => {
-    console.log(
-      "[🎯 애니 정렬 결과]",
-      animeList.map((a, i) => ({
-        i,
-        title: a.title,
-        total: a.total_animelist_users,
-      }))
-    );
-  }, [animeList]);
-
-  useEffect(() => {
     const fetchAnimeList = async () => {
       setLoading(true);
-      setIsFetching(true); // ✅ fetching 시작
+      setIsFetching(true);
 
       try {
         const params = buildAnimeParams(filters, sort, offset, LIMIT);
-        console.log("[🔍 요청 파라미터]", params); // ✅ 여기 잘 찍혔는지 콘솔 확인
-
         const data = await searchAnime(params);
         const results = Array.isArray(data.results) ? data.results : [];
 
@@ -156,7 +157,7 @@ export default function AniMain() {
         setTotalCount(0);
       } finally {
         setLoading(false);
-        setIsFetching(false); // ✅ fetching 종료
+        setIsFetching(false);
       }
     };
 
@@ -215,9 +216,9 @@ export default function AniMain() {
                 loading={loading}
                 userAnimeIds={userAnimeIds}
                 onToggleAnimeList={handleToggleAnimeList}
+                isFiltered={isFiltered} // 🔹 전달됨
               />
               <div ref={loaderRef} style={{ height: 1 }} />
-              {loading && <LoadingSpinner />}
               {selectedAnime && user && (
                 <AnimeDetailModal
                   anime={selectedAnime}

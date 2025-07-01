@@ -18,12 +18,13 @@ type MyAniListCardProps = {
   genres?: string[];
   myRating?: number;
   rating?: number;
-  isAdded: boolean; // ✅ 내 리스트에 있는지 여부
+  isAdded: boolean;
   onToggleFavorite?: () => void;
   onAdd?: () => void;
   onRemove?: () => void;
   onClick?: () => void;
   isFavorite?: boolean;
+  canEdit?: boolean;
 };
 
 export default function MyAniListCard({
@@ -37,6 +38,7 @@ export default function MyAniListCard({
   onRemove,
   onClick,
   isFavorite,
+  canEdit = false,
 }: MyAniListCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -69,38 +71,41 @@ export default function MyAniListCard({
         {isFavorite && <CornerStar />}
       </Score>
 
-      <MenuBtn
-        onClick={(e) => {
-          e.stopPropagation();
-          setMenuOpen((v) => !v);
-        }}
-        aria-label="더보기"
-      >
-        <MoreVertical size={22} />
-      </MenuBtn>
+      {/* 👉 본인 프로필일 때만 더보기 메뉴 사용 가능 */}
+      {canEdit && (
+        <>
+          <MenuBtn
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen((v) => !v);
+            }}
+            aria-label="더보기"
+          >
+            <MoreVertical size={22} />
+          </MenuBtn>
 
-      {menuOpen && (
-        <MenuDropdown ref={menuRef} onClick={(e) => e.stopPropagation()}>
-          {!isAdded && onAdd && <MenuItem onClick={onAdd}>리스트에 추가</MenuItem>}
-          {isAdded && onRemove && <MenuItem onClick={onRemove}>리스트에서 삭제</MenuItem>}
-          {onToggleFavorite && (
-            <MenuItem
-              onClick={() => {
-                const confirmed = window.confirm(
-                  isFavorite
-                    ? "최애의 애니에서 취소하시겠습니까?"
-                    : "최애의 애니로 등록하시겠습니까?"
-                );
-                if (confirmed) onToggleFavorite();
-              }}
-            >
-              {isFavorite ? "최애의 애니에서 취소" : "최애의 애니로 등록"}
-            </MenuItem>
+          {menuOpen && (
+            <MenuDropdown ref={menuRef} onClick={(e) => e.stopPropagation()}>
+              {!isAdded && onAdd && <MenuItem onClick={onAdd}>리스트에 추가</MenuItem>}
+              {isAdded && onRemove && <MenuItem onClick={onRemove}>리스트에서 삭제</MenuItem>}
+              {onToggleFavorite && (
+                <MenuItem
+                  onClick={() => {
+                    const confirmed = window.confirm(
+                      isFavorite
+                        ? "최애의 애니에서 취소하시겠습니까?"
+                        : "최애의 애니로 등록하시겠습니까?"
+                    );
+                    if (confirmed) onToggleFavorite();
+                  }}
+                >
+                  {isFavorite ? "최애의 애니 취소" : "최애의 애니 등록"}
+                </MenuItem>
+              )}
+            </MenuDropdown>
           )}
-        </MenuDropdown>
+        </>
       )}
-
-      
     </CardWrapper>
   );
 }

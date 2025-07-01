@@ -13,7 +13,7 @@ export interface BoardItem {
   views: number;
   comment_count: number;
   like_count: number;
-  images?: string[]; // thumbnail만 쓸 거면 생략 가능
+  images?: string[]; // thumbnail만 쓸 거면 생략 가능a
   thumbnail?: string; // 썸네일 필드
   created_at: string;
   updated_at?: string | null;

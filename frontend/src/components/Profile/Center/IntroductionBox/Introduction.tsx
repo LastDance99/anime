@@ -6,23 +6,16 @@ import {
   IntroParagraph,
 } from "./Introduction.styled";
 import { updateAbout } from "../../../../api/profile";
-import { useAuth } from "../../../../contexts/AuthContext";
 
 interface Props {
   about: string;
-  userId: number; // ⭐️ 현재 프로필의 유저 ID
+  userId: number;
+  isMyPage: boolean;
 }
 
-export default function Introduction({ about, userId }: Props) {
-  const { currentUser } = useAuth(); // ⭐️ 로그인한 사용자
-  const isMine = currentUser?.id === userId;
-
+export default function Introduction({ about, userId, isMyPage }: Props) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(about);
-
-  console.log("currentUser", currentUser);
-  console.log("userId", userId);
-  console.log("isMine", currentUser?.id === userId);
 
   const handleSave = async () => {
     try {
@@ -50,7 +43,7 @@ export default function Introduction({ about, userId }: Props) {
       ) : (
         <>
           <IntroParagraph>{value || "자기소개가 없습니다."}</IntroParagraph>
-          {isMine && (
+          {isMyPage && (
             <ProfileButton onClick={() => setEditing(true)}>수정</ProfileButton>
           )}
         </>

@@ -18,17 +18,20 @@ import {
 import type { ProfileComment } from "../../../../types/user";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { addUserComment, deleteUserComment } from "../../../../api/profile";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   comments: ProfileComment[];
   userId: number; // 댓글이 달린 프로필의 주인 ID
   onRefresh?: () => void;
+  isMyPage: boolean;
 }
 
-export default function ProfileComments({ comments, userId, onRefresh }: Props) {
+export default function ProfileComments({ comments, userId, onRefresh, isMyPage }: Props) {
   const { currentUser } = useAuth();
   const [showInput, setShowInput] = useState(false);
   const [input, setInput] = useState("");
+  const navigate = useNavigate();
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +56,13 @@ export default function ProfileComments({ comments, userId, onRefresh }: Props) 
       onRefresh?.();
     } catch (err) {
       console.error("댓글 삭제 실패", err);
+    }
+  };
+
+  // id 기반 프로필 이동
+  const goToProfile = (authorId?: number) => {
+    if (authorId) {
+      navigate(`/profile/${authorId}`);
     }
   };
 
@@ -87,18 +97,23 @@ export default function ProfileComments({ comments, userId, onRefresh }: Props) 
         <ChatScrollArea>
           {comments.map(comment => {
             const isAuthor = currentUser?.id === comment.author?.id;
-            const isProfileOwner = currentUser?.id === userId;
-
-            const canDelete = isAuthor || isProfileOwner;
+            const canDelete = isMyPage || isAuthor;
 
             return (
               <ChatItem key={comment.id}>
                 <ProfileImg
                   src={comment.author?.profile_image || "/images/default.png"}
                   alt="profile"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => goToProfile(comment.author?.id)}
                 />
                 <ChatTextBlock>
-                  <ChatNickname>{comment.author?.nickname || "알 수 없음"}</ChatNickname>
+                  <ChatNickname
+                    style={{ cursor: "pointer", textDecoration: "underline" }}
+                    onClick={() => goToProfile(comment.author?.id)}
+                  >
+                    {comment.author?.nickname || "알 수 없음"}
+                  </ChatNickname>
                   <ChatText>{comment.content}</ChatText>
                 </ChatTextBlock>
                 {canDelete && (

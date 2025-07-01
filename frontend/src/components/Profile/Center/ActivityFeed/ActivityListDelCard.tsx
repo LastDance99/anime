@@ -1,5 +1,5 @@
 import React from "react";
-import { BaseCard, AnimeImg, TimeText } from "./ActivityCard.styled";
+import { BaseCard, AnimeImg, TimeText } from "./ActivityListReviewCard.styled";
 import dayjs from "dayjs";
 
 export default function ActivityListDelCard({

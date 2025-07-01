@@ -99,19 +99,3 @@ export const TopBox = styled.div`
   gap: 8px;
 `;
 
-export const PostTimeText = styled.span`
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.subtext};
-  font-family: ${({ theme }) => theme.fonts.main};
-  position: absolute;
-  top: 10px;
-`;
-
-export const PostStatsBox = styled.div`
-  display: flex;
-  gap: 6px;
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.subtext};
-  position: absolute;
-  bottom: 10px;
-`;

@@ -1,4 +1,5 @@
 import axios from '../lib/axios';
+import instance from "../lib/axios"; 
 
 type ContentType = "post" | "gallery" | "anime";
 
@@ -41,6 +42,28 @@ export const addUserComment = async (
       },
     }
   );
+  return res.data;
+};
+
+export const getUserAttendance = async (
+  userId: number,
+  summary: boolean = true
+): Promise<{
+  dates: string[];
+  total_attendance: number;
+  last_attendance: string | null;
+}> => {
+  const res = await axios.get(`/api/profiles/${userId}/attendance/`, {
+    params: { summary },
+  });
+  return res.data;
+};
+
+export const getGenreStats = async (userId: number, limit?: number) => {
+  const url = limit
+    ? `/api/profiles/${userId}/genre-stats/?limit=${limit}`
+    : `/api/profiles/${userId}/genre-stats/`;
+  const res = await instance.get(url);
   return res.data;
 };
 

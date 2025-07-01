@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, Outlet } from "react-router-dom";
 import ProfileHeader from "../components/Profile/ProfileHeader/ProfileHeader";
 import ProfileSection from "../components/Profile/ProfileSection/ProfileSection";
@@ -15,9 +15,37 @@ export default function ProfileLayout() {
   const [userAnimeList, setUserAnimeList] = useState<UserAnimeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showHeader, setShowHeader] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false); // ✅ 추가
+  const [isScrolled, setIsScrolled] = useState(false);
   const lastScroll = useRef(window.scrollY);
 
+  // ★ openSettings, setOpenSettings 여기서 관리!
+  const [openSettings, setOpenSettings] = useState(false);
+
+  // fetchAll: 프로필 전체 강제 새로고침 함수
+  const fetchAll = useCallback(async () => {
+    if (!userId) return;
+    setLoading(true);
+    setUser(null);
+    setComments([]);
+    setUserAnimeList([]);
+    try {
+      const profileRes = await getUserProfile(Number(userId));
+      setUser(profileRes);
+
+      const [commentsRes, animeRes] = await Promise.all([
+        getUserComments(profileRes.id),
+        getFavoriteAnimes(profileRes.id),
+      ]);
+      setComments(commentsRes);
+      setUserAnimeList(animeRes);
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  // 스크롤 이벤트
   useEffect(() => {
     const handleScroll = () => {
       const curr = window.scrollY;
@@ -26,7 +54,7 @@ export default function ProfileLayout() {
       } else if (curr < lastScroll.current) {
         setShowHeader(true);
       }
-      setIsScrolled(curr > 0); // ✅ 맨 위 아님 → 불투명도 100%
+      setIsScrolled(curr > 0);
       lastScroll.current = curr;
     };
 
@@ -34,40 +62,22 @@ export default function ProfileLayout() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // userId 변경/첫 진입시 전체 refetch
   useEffect(() => {
-    const fetchData = async () => {
-      if (!userId) return;
-      try {
-        const profileRes = await getUserProfile(Number(userId));
-        setUser(profileRes);
-
-        const [commentsRes, animeRes] = await Promise.all([
-          getUserComments(profileRes.id),
-          getFavoriteAnimes(profileRes.id),
-        ]);
-
-        setComments(commentsRes);
-        setUserAnimeList(animeRes);
-      } catch (err) {
-        console.error("❌ 프로필 로딩 실패", err);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [userId]);
+    fetchAll();
+  }, [fetchAll]);
 
   if (loading) return <div>불러오는 중...</div>;
   if (!user) return <div>유저를 찾을 수 없습니다.</div>;
 
   return (
     <>
-      <ProfileHeader show={showHeader} isScrolled={isScrolled} user={user} setUser={setUser} />
+      {/* “설정” 버튼에 트리거 함수만 넘김 */}
+      <ProfileHeader show={showHeader} isScrolled={isScrolled} user={user} setUser={setUser} onOpenSettings={() => setOpenSettings(true)} />
       <ProfileSection user={user} />
       <NavTabBar user={user} />
-      <Outlet context={{ user, comments, userAnimeList }} />
+      {/* openSettings, setOpenSettings, fetchAll 전부 context로 내림 */}
+      <Outlet context={{ user, comments, userAnimeList, fetchAll, openSettings, setOpenSettings }} />
     </>
   );
 }

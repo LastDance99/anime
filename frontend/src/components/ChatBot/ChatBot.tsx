@@ -11,23 +11,32 @@ import {
   IconsRow,
   AddIconButton,
   SendIconButton,
-  ResetButton, // 👈 새로 추가했다면 스타일도 정의 필요
+  ResetButton,
 } from "./ChatBot.styled";
 import { Menu, Plus, Play, RotateCw } from "lucide-react";
-import { chatWithBot, clearChatContext } from "../../api/core"; // clearChatContext는 선택
+import { chatWithBot, clearChatContext } from "../../api/core";
 
 type Props = {
   visible: boolean;
 };
 
-const initialMessages = [
-  { id: 1, text: "안녕하세요!", isUser: false },
-  { id: 2, text: "무엇을 도와드릴까요?", isUser: false },
+type ChatMessage = {
+  id: number;
+  text: string;
+  isUser: boolean;
+  imageUrl?: string;
+  mode?: "info" | "chat" | "policy";
+};
+
+const initialMessages: ChatMessage[] = [
+  { id: 1, text: "ㅎㅇ", isUser: false },
 ];
 
 export default function ChatBot({ visible }: Props) {
-  const [messages, setMessages] = useState(initialMessages);
-  const [dialogContext, setDialogContext] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+  const [dialogContext, setDialogContext] = useState<
+    { role: "user" | "assistant"; content: string }[]
+  >([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const chatAreaRef = useRef<HTMLDivElement>(null);
@@ -39,13 +48,13 @@ export default function ChatBot({ visible }: Props) {
     if (e) e.preventDefault();
     if (!input.trim()) return;
 
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: Date.now(),
       text: input,
       isUser: true,
     };
 
-    const loadingMessage = {
+    const loadingMessage: ChatMessage = {
       id: Date.now() + 1,
       text: "🤖 답변 생성 중...",
       isUser: false,
@@ -61,39 +70,42 @@ export default function ChatBot({ visible }: Props) {
         dialog_context: dialogContext,
       });
 
-      const botText = res.data.final_answer || "⚠️ 답변 없음";
-      const botMessage = {
+      console.log("📦 응답:", res.data);
+      console.log("📸 이미지 URL:", res.data.cover_image); 
+
+      const { final_answer, mode, cover_image } = res.data;
+
+      const botMessage: ChatMessage = {
         id: Date.now() + 2,
-        text: botText,
+        text: final_answer || "⚠️ 답변 없음",
         isUser: false,
+        mode,
+        ...(mode === "info" && cover_image ? { imageUrl: cover_image } : {}),
       };
 
-      // 메시지 반영
       setMessages((prev) =>
         prev.filter((m) => m.id !== loadingMessage.id).concat(botMessage)
       );
 
-      // context 슬라이딩 윈도우 유지 (최대 20턴 = 40줄)
       setDialogContext((prev) => [
-          ...prev,
-          { role: "user", content: input } as const,
-          { role: "assistant", content: botText } as const,
-        ].slice(-40));
-      } catch (error) {
-        console.error("챗봇 오류:", error);
-        const errorMessage = {
-          id: Date.now() + 3,
-          text: "⚠️ 서버 오류로 챗봇 응답을 받을 수 없음",
-          isUser: false,
-        };
-
-        setMessages((prev) =>
-          prev.filter((m) => m.id !== loadingMessage.id).concat(errorMessage)
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        ...prev,
+        { role: "user" as const, content: input },
+        { role: "assistant" as const, content: final_answer },
+      ].slice(-40));
+    } catch (error) {
+      console.error("챗봇 오류:", error);
+      const errorMessage: ChatMessage = {
+        id: Date.now() + 3,
+        text: "⚠️ 서버 오류로 챗봇 응답을 받을 수 없음",
+        isUser: false,
+      };
+      setMessages((prev) =>
+        prev.filter((m) => m.id !== loadingMessage.id).concat(errorMessage)
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -107,7 +119,7 @@ export default function ChatBot({ visible }: Props) {
     setDialogContext([]);
     setInput("");
     try {
-      await clearChatContext(); // 서버 context도 초기화 (API 존재 시)
+      await clearChatContext();
     } catch (err) {
       console.warn("서버 초기화 실패 (무시 가능)");
     }
@@ -121,14 +133,23 @@ export default function ChatBot({ visible }: Props) {
 
   return (
     <ChatBotWrapper $visible={visible}>
-      {/* <SidebarIcon>
-        <Menu size={20} />
-      </SidebarIcon> */}
-
       <ChatArea ref={chatAreaRef}>
         {messages.map((msg) => (
           <BubbleRow isUser={msg.isUser} key={msg.id}>
-            <ChatBubble isUser={msg.isUser}>{msg.text}</ChatBubble>
+            <ChatBubble isUser={msg.isUser}>
+              {msg.imageUrl && (
+                <img
+                  src={msg.imageUrl}
+                  alt="정보 이미지"
+                  style={{
+                    width: 150,
+                    borderRadius: 12,
+                    margin: "8px 0",
+                  }}
+                />
+              )}
+              {msg.text}
+            </ChatBubble>
           </BubbleRow>
         ))}
       </ChatArea>

@@ -16,7 +16,8 @@ interface AniListProps {
   onAnimeClick?: (anime: AnimeItem) => void;
   loading?: boolean;
   userAnimeIds: number[];
-  onToggleAnimeList: (anime: AnimeItem) => void; // ✅ anime 전체 받도록 변경
+  onToggleAnimeList: (anime: AnimeItem) => void;
+  isFiltered: boolean; // 🔹 추가됨
 }
 
 export default function AniList({
@@ -31,6 +32,7 @@ export default function AniList({
   loading,
   userAnimeIds,
   onToggleAnimeList,
+  isFiltered, // 🔹 추가됨
 }: AniListProps) {
   const processedList = list.map(anime => ({
     ...anime,
@@ -48,6 +50,7 @@ export default function AniList({
         sort={sort}
         sortOptions={sortOptions}
         onSortChange={onSortChange}
+        isFiltered={isFiltered}
       />
       <AniListFlex ref={scrollRef}>
         {processedList.map(anime => (
@@ -56,7 +59,7 @@ export default function AniList({
             anime={anime}
             isAdded={anime.isAdded ?? false}
             onClick={onAnimeClick ? () => onAnimeClick(anime) : undefined}
-            onToggle={() => onToggleAnimeList(anime)} // ✅ anime 전체 넘김
+            onToggle={() => onToggleAnimeList(anime)}
           />
         ))}
         <div ref={loaderRef} style={{ height: 30, background: "yellow" }} />

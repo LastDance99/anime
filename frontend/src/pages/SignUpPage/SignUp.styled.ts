@@ -105,15 +105,15 @@ export const LanguageContainer = styled.div`
 
   ${({ theme }) => theme.media.tablet} {
     right: 10px;
-    top: -34px;
+    top: -30px;
   }
   ${({ theme }) => theme.media.iosSE} {
     right: 7px;
-    top: -26px;
+    top: -30px;
   }
   ${({ theme }) => theme.media.androidSmall} {
     right: 4px;
-    top: -18px;
+    top: -30px;
   }
 `;
 
@@ -186,24 +186,29 @@ export const LanguageItem = styled.li`
 `;
 
 export const EmailRow = styled.div`
-  width: 460px;
+  width: 100%;
+  max-width: 460px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 4px;
   margin-top: 20px;
-  pposition: relative;
+  position: relative;
 
   ${({ theme }) => theme.media.tablet} {
-    width: 98%;
+    width: 100%;
+    max-width: 400px;
     gap: 2px;
   }
   ${({ theme }) => theme.media.iosSE} {
-    width: 99%;
+    width: 100%;
+    max-width: 350px;
     gap: 1px;
     margin-top: 12px;
   }
   ${({ theme }) => theme.media.androidSmall} {
     width: 100%;
+    max-width: 310px;
     gap: 0;
     margin-top: 10px;
   }
@@ -222,8 +227,8 @@ export const EmailInput = styled.input`
   outline: none;
 
   ${({ theme }) => theme.media.tablet} {
-    width: 40%;
-    min-width: 120px;
+    min-width: 100px;
+    max-width: 200px;
     height: 40px;
     border: 1px solid ${({ theme }) => theme.colors.bordermain};
     border-radius: 8px;
@@ -235,12 +240,14 @@ export const EmailInput = styled.input`
     outline: none;
   }
   ${({ theme }) => theme.media.iosSE} {
-    max-width: 90px;
+    min-width: 100px;
+    max-width: 140px;
     font-size: ${({ theme }) => theme.fontSizes.sm};
     padding: 0 4px;
   }
   ${({ theme }) => theme.media.androidSmall} {
-    max-width: 80px;
+    min-width: 100px;
+    max-width: 120px;
     font-size: ${({ theme }) => theme.fontSizes.xs};
     padding: 0 2px;
   }
@@ -264,14 +271,15 @@ export const AtMark = styled.span`
 
 export const DomainDropdownWrap = styled.div`
   position: relative;
-  width: 70%;
+  width: 100%;
+  max-width: 140px;
   height: 40px;
 
   ${({ theme }) => theme.media.tablet} {
-    width: 110px;
+    width: 130px;
   }
   ${({ theme }) => theme.media.iosSE} {
-    width: 85px;
+    width: 100px;
   }
 `;
 
@@ -364,12 +372,12 @@ export const JobInput = styled.input`
   outline: none;
 
   ${({ theme }) => theme.media.tablet} {
-    width: 110px;
+    width: 130px;
     font-size: ${({ theme }) => theme.fontSizes.base};
     padding: 0 7px;
   }
   ${({ theme }) => theme.media.iosSE} {
-    width: 80px;
+    width: 100px;
     font-size: ${({ theme }) => theme.fontSizes.sm};
     padding: 0 4px;
   }
@@ -566,6 +574,7 @@ export const SignUpButton = styled.button`
     border-radius: 10px;
   }
   ${({ theme }) => theme.media.iosSE} {
+  
     font-size: ${({ theme }) => theme.fontSizes.sm};
     border-radius: 8px;
   }
@@ -610,7 +619,7 @@ export const NicknameErrorBox = styled(AbsoluteErrorBox)`
 `;
 
 export const EmailErrorBox = styled(AbsoluteErrorBox)`
-  
+  top: 180%;
 `;
 
 
@@ -618,20 +627,22 @@ export const EmailAuthBox = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 7px 0 2px 0;
+  margin: 10px 0 0 0;
   position: relative;
   width: 100%;
   max-width: 460px;
 
   ${({ theme }) => theme.media.tablet} {
-    flex-direction: column;
-    align-items: flex-start;
+    justify-content: space-between;
     gap: 5px;
+    width: 98%;
+    max-width: 400px;
   }
 `;
 
 export const EmailAuthBtn = styled.button`
   width: 100%;
+  max-width: 135px;
   min-width: 0;
   height: 40px;
   border-radius: 8px;
@@ -649,10 +660,14 @@ export const EmailAuthBtn = styled.button`
     cursor: not-allowed;
     filter: grayscale(0.2);
   }
+
+  ${({ theme }) => theme.media.tablet} {
+    max-width: 100px;
+  }
 `;
 
 export const CodeInput = styled.input`
-  width: 110px;
+  width: 140px;
   height: 36px;
   border-radius: 8px;
   border: 1px solid ${({ theme }) => theme.colors.bordermain};
@@ -666,6 +681,7 @@ export const CodeInput = styled.input`
     color: ${({ theme }) => theme.colors.subtext};
     font-size: ${({ theme }) => theme.fontSizes.xs};
   }
+
 `;
 
 export const EmailTimer = styled.span`
@@ -675,5 +691,5 @@ export const EmailTimer = styled.span`
   min-width: 50px;
   margin-left: 6px;
   letter-spacing: 0.06em;
-  text-align: right;
+  text-align: center;
 `;

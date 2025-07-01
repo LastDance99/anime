@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { ThumbsUp, MessageCircle } from "lucide-react";
 import {
-  BaseCard,
+  PostCommentCard,
   ProfileImg,
   Nickname,
   PostTimeText,
@@ -12,9 +13,15 @@ import {
   StatItem,
   FlexBox,
   TopBox,
-} from "./ActivityCard.styled";
-import { getBoardComments } from "../../../../api/board"; // ← 이거 너가 만든 API
+  CommentContainer,
+  WrapperBox,
+} from "./ActivityPostCommentCard.styled";
+import { getBoardComments } from "../../../../api/board";
 import type { BoardComment } from "../../../../types/comment";
+import CommentListBox from "./CommentListBox";
+import { AnimatePresence, motion } from "framer-motion";
+
+dayjs.extend(relativeTime);
 
 interface Props {
   nickname: string;
@@ -25,7 +32,7 @@ interface Props {
   like_count: number;
   comment_count: number;
   thumbnail?: string;
-  post_id: number; // 🔥 이거 추가해야 함
+  post_id: number;
 }
 
 export default function ActivityPostCard({
@@ -41,64 +48,73 @@ export default function ActivityPostCard({
 }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<BoardComment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (isExpanded && contentRef.current) {
+      requestAnimationFrame(() => {
+        if (contentRef.current) {
+          setHeight(contentRef.current.scrollHeight + 24);
+        }
+      });
+    } else {
+      setHeight(0);
+    }
+  }, [isExpanded, comments]);
 
   const handleClick = async () => {
-    console.log("🔥 clicked post_id:", post_id); // 🔍 확인
-    if (!isExpanded) {
+    if (!isExpanded && comments.length === 0) {
+      setLoading(true);
       try {
         const res = await getBoardComments(post_id, "created");
-        console.log("📦 댓글 응답:", res);
         setComments(res.results);
       } catch (err) {
         console.error("❌ 댓글 로딩 실패:", err);
+      } finally {
+        setLoading(false);
       }
     }
     setIsExpanded(prev => !prev);
   };
 
   return (
-    <BaseCard $type="post" onClick={handleClick}>
-      <FlexBox>
-        <TopBox>
-          <ProfileImg src={profile_image} alt={nickname} />
-          <Nickname>{nickname}</Nickname>
-        </TopBox> 
-        
-        {post_title}
-        {thumbnail && <Thumbnail src={thumbnail} alt="썸네일" />}
-      </FlexBox>    
+    <PostCommentCard $type="post">
+      <WrapperBox onClick={handleClick}>
+        <FlexBox>
+          <TopBox>
+            <ProfileImg src={profile_image} alt={nickname} />
+            <Nickname>{nickname}</Nickname>
+          </TopBox>
+          <div>{post_title}</div>
+          {content && <div>{content}</div>}
+          {thumbnail && <Thumbnail src={thumbnail} alt="썸네일" />}
+        </FlexBox>
 
-      <SideInfoBox>
-        <PostTimeText>{dayjs(created_at).fromNow()}</PostTimeText>
-        <PostStatsBox>
-          <StatItem>
-            <ThumbsUp size={14} />
-            {like_count}
-          </StatItem>
-          <StatItem>
-            <MessageCircle size={14} />
-            {comment_count}
-          </StatItem>
-        </PostStatsBox>
-      </SideInfoBox>
+        <SideInfoBox>
+          <PostTimeText>{dayjs(created_at).fromNow()}</PostTimeText>
+          <PostStatsBox>
+            <StatItem><ThumbsUp size={14} />{like_count}</StatItem>
+            <StatItem><MessageCircle size={14} />{comment_count}</StatItem>
+          </PostStatsBox>
+        </SideInfoBox>
+      </WrapperBox>
 
-      {/* 🔽 댓글 표시 */}
-      {isExpanded && (
-        <ul style={{ marginTop: "12px", paddingLeft: "20px" }}>
-          {comments.map((c: BoardComment) => (
-            <li key={c.id}>
-              <b>{c.author_nickname}</b>: {c.is_deleted ? "(삭제됨)" : c.content}
-              <ul>
-                {c.replies.map((r: BoardComment) => (
-                  <li key={r.id}>
-                    ↳ <b>{r.author_nickname}</b>: {r.is_deleted ? "(삭제됨)" : r.content}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      )}
-    </BaseCard>
+      <AnimatePresence>
+        {isExpanded && comments.length > 0 && (
+          <CommentContainer
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height, opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div ref={contentRef}>
+              <CommentListBox comments={comments} />
+            </div>
+          </CommentContainer>
+        )}
+      </AnimatePresence>
+    </PostCommentCard>
   );
 }

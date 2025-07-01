@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 // 전체 챗봇 래퍼
 export const ChatBotWrapper = styled.section<{ $visible: boolean }>`
-  width: 340px;
+  width: 380px;
   height: 600px;
   background: ${({ theme }) => theme.colors.secondary};
   box-sizing: border-box;
@@ -13,6 +13,7 @@ export const ChatBotWrapper = styled.section<{ $visible: boolean }>`
   bottom: 80px;
   right: 20px;
   z-index: 98;
+  border-radius: 20px;
 
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transform: ${({ $visible }) =>
@@ -38,7 +39,7 @@ export const SidebarIcon = styled.div`
 
 // 대화 영역
 export const ChatArea = styled.div`
-  width: 315px;
+  width: 355px;
   height: 674px;
   margin: 20px auto 0 auto;
   display: flex;
@@ -68,11 +69,14 @@ export const BubbleRow = styled.div<{ isUser?: boolean }>`
 `;
 
 export const ChatBubble = styled.div<{ isUser?: boolean }>`
-  max-width: 70%;
+  max-width: 80%;
   min-width: 48px;
   min-height: 32px;
   padding: 10px 18px;
   border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background: ${({ isUser, theme }) =>
     isUser ? "#B5EAD7" : theme.colors.subcolor};
   border: 1px solid

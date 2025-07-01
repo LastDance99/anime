@@ -147,7 +147,6 @@ export default function CommentBox({ contentType, contentId }: Props) {
 
   const handleReplyToggle = (target: BoardComment) => {
     const parentId = target.parent_id ?? target.id;
-    const willOpen = replyState.targetId !== target.id;
     setReplyState((prev) =>
       prev.targetId === target.id
         ? { targetId: null, parentId: null, tagged_nickname: undefined }
@@ -314,6 +313,10 @@ export default function CommentBox({ contentType, contentId }: Props) {
       <CommentList ref={commentListRef}>
         {loading ? (
           <div style={{ padding: "2em", textAlign: "center" }}>로딩중...</div>
+        ) : getTopLevelComments().length === 0 ? (
+          <div style={{ padding: "2em", textAlign: "center", color: "#bbb" }}>
+            아직 작성된 댓글이 없습니다.
+          </div>
         ) : (
           getTopLevelComments().map((c) => renderComment(c, 0))
         )}

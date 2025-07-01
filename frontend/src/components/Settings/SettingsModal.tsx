@@ -32,9 +32,10 @@ type SettingsModalProps = {
   user: User;
   setUser: (user: User) => void;
   onClose: () => void;
+  onSaved?: () => void;
 };
 
-export default function SettingsModal({ user, setUser, onClose }: SettingsModalProps) {
+export default function SettingsModal({ user, setUser, onClose, onSaved }: SettingsModalProps) {
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [isNicknameModalOpen, setNicknameModalOpen] = useState(false);
   const [tempUser, setTempUser] = useState<TempUser>(convertUserToTempUser(user));
@@ -46,12 +47,23 @@ export default function SettingsModal({ user, setUser, onClose }: SettingsModalP
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
+    // 이미지도 값이 달라졌는지 직접 비교!
     const changed =
       user.nickname !== tempUser.nickname ||
       user.language !== tempUser.language ||
       profileFile !== null ||
       bgFile !== null ||
-      roomFile !== null;
+      roomFile !== null ||
+      // 이미지 비교: File이거나, string이거나, null이거나
+      (typeof user.profile_image === "string"
+        ? user.profile_image !== (typeof tempUser.profile_image === "string" ? tempUser.profile_image : null)
+        : user.profile_image !== tempUser.profile_image) ||
+      (typeof user.background_image === "string"
+        ? user.background_image !== (typeof tempUser.background_image === "string" ? tempUser.background_image : null)
+        : user.background_image !== tempUser.background_image) ||
+      (typeof user.myroom_image === "string"
+        ? user.myroom_image !== (typeof tempUser.myroom_image === "string" ? tempUser.myroom_image : null)
+        : user.myroom_image !== tempUser.myroom_image);
 
     setHasChanges(changed);
   }, [user, tempUser, profileFile, bgFile, roomFile]);
@@ -105,6 +117,10 @@ export default function SettingsModal({ user, setUser, onClose }: SettingsModalP
       setUser(tempUser as User);
       setJustSaved(true);
       onClose();
+      if (onSaved) {
+        console.log("🟣 onSaved 호출!!");
+        onSaved();
+      }
     } catch (err: any) {
       console.error("설정 저장 실패:", err);
       if (err.response) {
@@ -119,12 +135,12 @@ export default function SettingsModal({ user, setUser, onClose }: SettingsModalP
   };
 
   const handleTryClose = () => {
-  if (hasChanges && !justSaved) {
-    const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
-    if (!confirmed) return;
-  }
-  onClose();
-};
+    if (hasChanges && !justSaved) {
+      const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
+      if (!confirmed) return;
+    }
+    onClose();
+  };
 
   const handleNicknameChange = async (newNickname: string) => {
     if (newNickname === user.nickname) return;

@@ -17,6 +17,7 @@ type Props = {
   onAdd?: (anime: UserAnimeItem) => void;
   onRemove?: (anime: UserAnimeItem) => void;
   onToggleFavorite?: (anime: UserAnimeItem) => void;
+  isMyPage: boolean; // ✅ 추가!
 };
 
 export default function MyAniList({
@@ -27,6 +28,7 @@ export default function MyAniList({
   onAdd,
   onRemove,
   onToggleFavorite,
+  isMyPage, // ✅ props로 받음
 }: Props) {
   if (!list.length) return <div>등록된 애니가 없습니다.</div>;
 
@@ -69,11 +71,12 @@ export default function MyAniList({
               rating={item.rating}
               myRating={item.my_rating}
               isAdded={isAdded}
-              onAdd={() => onAdd?.(item)}
-              onRemove={() => onRemove?.(item)}
-              onToggleFavorite={() => onToggleFavorite?.(item)}
+              onAdd={isMyPage ? (() => onAdd?.(item)) : undefined}
+              onRemove={isMyPage ? (() => onRemove?.(item)) : undefined}
+              onToggleFavorite={isMyPage ? (() => onToggleFavorite?.(item)) : undefined}
               onClick={() => onAnimeClick?.(item)}
               isFavorite={item.is_favorite}
+              canEdit={isMyPage}
             />
           );
         })}
