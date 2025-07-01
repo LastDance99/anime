@@ -77,3 +77,25 @@ export const animeProfileInfo = async () => {
   const res = await axios.get('/api/anime/animecount/');
   return res.data;
 };
+
+export interface AnimeRankingItem {
+  id: number;
+  title: string;
+  cover_image_l: string;
+  total_animelist_users: number;
+  favorite_count: number;
+  avg_rating: number;
+  popularity_score: number;
+  // 필요한 경우 다른 필드도 추가
+}
+
+export const getPopularAnimeRanking = async (limit = 10, lang = "ko"): Promise<AnimeRankingItem[]> => {
+  const res = await axios.get(`/api/anime/rankings/popular/?limit=${limit}&lang=${lang}`);
+  // 만약 results로 감싸져 있으면 return res.data.results;
+  return Array.isArray(res.data) ? res.data : res.data.results;
+};
+
+export const getUpcomingAnimeRanking = async (limit = 10, lang = "ko"): Promise<AnimeRankingItem[]> => {
+  const res = await axios.get(`/api/anime/rankings/upcoming/?limit=${limit}&lang=${lang}`);
+  return Array.isArray(res.data) ? res.data : res.data.results;
+};

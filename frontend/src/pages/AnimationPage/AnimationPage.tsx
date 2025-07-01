@@ -3,6 +3,7 @@ import FilterSidebar from "../../components/Animation/AniTag/FilterSidebar";
 import AniList from "../../components/Animation/AniList/AniList";
 import AnimeProfile from "../../components/Animation/ProfileCard/ProfileCard";
 import AnimeDetailModal from "../../components/AnimeDetailModal/AnimeDetailModal";
+import AnimeRankingWidget from "../../components/Animation/AnimeRankingWidget";
 import {
   searchAnime,
   getAnimeDetail,
@@ -40,9 +41,8 @@ const buildAnimeParams = (
   if (sort === "popular") ordering = "popular";
   else if (sort === "latest") ordering = "-start_year";
   else if (sort === "rating") ordering = "-rating";
-  else ordering = "-start_year"; // fallback
+  else ordering = "-start_year";
 
-  // 2010년 이하 옵션 대응
   const yearParam = filters.year === "2010년 이하" || filters.year === "" ? undefined : filters.year;
 
   return {
@@ -216,7 +216,7 @@ export default function AniMain() {
                 loading={loading}
                 userAnimeIds={userAnimeIds}
                 onToggleAnimeList={handleToggleAnimeList}
-                isFiltered={isFiltered} // 🔹 전달됨
+                isFiltered={isFiltered}
               />
               <div ref={loaderRef} style={{ height: 1 }} />
               {selectedAnime && user && (
@@ -233,7 +233,16 @@ export default function AniMain() {
               )}
             </AnimeListBox>
           </AnimeSectionBox>
-          <SidebarSection>{user && <AnimeProfile user={user} />}</SidebarSection>
+          <SidebarSection>
+            {user && <AnimeProfile user={user} />}
+            {user && (
+              <AnimeRankingWidget
+                user={user}
+                userAnimeIds={userAnimeIds}
+                onToggleAnimeList={handleToggleAnimeList}
+              />
+            )}
+          </SidebarSection>
         </Wrapper>
       </Container>
     </Section>
