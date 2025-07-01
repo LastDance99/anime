@@ -9,7 +9,9 @@ from .views import (
     FavoriteAnimeListView,
     AnimeFavoriteToggleView,
     UpdateAboutView,
-    ProfileContentListView
+    ProfileContentListView,
+    UnifiedAttendanceView,
+    UserGenreStatsView,
 )
 
 urlpatterns = [
@@ -21,6 +23,8 @@ urlpatterns = [
     path('<int:user_id>/activity/', UserActivityListView.as_view(), name='profile-activity'),
     path('<int:user_id>/animelist-stats/', AnimeListStatsView.as_view()),
     path('<int:user_id>/attendance-stats/', AttendanceStatsView.as_view()),
+    path("<int:user_id>/attendance/", UnifiedAttendanceView.as_view()),
+    path("<int:user_id>/genre-stats/", UserGenreStatsView.as_view()),
     path('<int:user_id>/favorite-animes/', FavoriteAnimeListView.as_view()),
     path('<int:anime_id>/favorite/', AnimeFavoriteToggleView.as_view()),
     path('<int:user_id>/content/', ProfileContentListView.as_view()),

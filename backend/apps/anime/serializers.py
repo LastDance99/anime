@@ -8,10 +8,13 @@ from django.db.models import Avg
 class AnimeSimpleSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     total_animelist_users = serializers.SerializerMethodField() 
+    favorite_count = serializers.IntegerField(read_only=True)
+    avg_rating = serializers.FloatField(read_only=True)
+    popularity_score = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Anime
-        fields = ["id", "title", "cover_image_l", "total_animelist_users"]
+        fields = ["id", "title", "cover_image_l", "total_animelist_users","favorite_count", "avg_rating", "popularity_score"]
 
     def get_lang(self):
         return self.context.get("lang", "ko")

@@ -12,6 +12,7 @@ BOARD_TYPE_CHOICES = [
 class BoardPost(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='board_posts')
     board_type = models.CharField(max_length=20, choices=BOARD_TYPE_CHOICES)
+    is_notice = models.BooleanField(default=False)  # 공지 여부
     title = models.CharField(max_length=200)
     content = models.TextField()
     thumbnail_url = models.URLField(null=True, blank=True)

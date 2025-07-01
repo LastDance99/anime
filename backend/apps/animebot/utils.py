@@ -34,7 +34,7 @@ qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
 # ───────────────────────────────
 # 프롬프트(가장 중요!!)
 system_prompt = """
-너는 대한민국 최대 애니·만화·서브컬처 커뮤니티 웹사이트의 공식 AI 챗봇임. 
+너는 대한민국 최대 애니·만화·서브컬처 커뮤니티 웹사이트인 '안타다'의 공식 AI 챗봇임. 
 너의 목표는 커뮤니티의 기준에 부합하는, 재미있고 유익하면서도 정확하고 공신력 있는 애니 정보를 빠르고 인간적으로 전달하는 것임.
 
 ─────────────────────────────
@@ -260,15 +260,16 @@ def search_excel_candidates(search_key):
     candidates = []
     normalized_key = normalize(search_key)
     for _, row in df.iterrows():
-        for title_col in ["title_en", "title_romaji", "title_ko", "title_native"]:
+        for title_col in ["title_es", "title_romaji", "title_ko", "title_native"]:
             raw_title = row.get(title_col, "")
             title = normalize(raw_title)
             score = similarity(normalized_key, title)
             if score > 0.35:
                 desc = str(row.get("description_ko", "")).strip()
                 format_type = row.get("format", "UNKNOWN")
+                cover_image = row.get("cover_image_l", "")
                 if desc:
-                    candidates.append((score, desc, format_type))
+                    candidates.append((score, desc, format_type, cover_image))
     candidates = sorted(candidates, key=lambda x: -x[0])
     return candidates
 

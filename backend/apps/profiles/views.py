@@ -13,6 +13,7 @@ from apps.anime.models import AnimeReview, AnimeList
 from django.shortcuts import get_object_or_404
 from apps.anime.serializers import AnimeSimpleSerializer
 from django.db.models import Avg, Max
+from collections import Counter
 from datetime import date
 from .serializers import (
     UserProfileSerializer,
@@ -25,6 +26,7 @@ from .serializers import (
     BoardPostSummarySerializer,
     GallerySummarySerializer,
     MyAnimeListItemSerializer,
+    GenreStatSerializer,
 )
 
 User = get_user_model()
@@ -161,6 +163,58 @@ class AttendanceStatsView(APIView):
         }
         serializer = AttendanceStatsSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+# 프로필 내 출석 날짜 목록 조회 및 오늘 출석 체크 뷰
+class UnifiedAttendanceView(APIView):
+    def get(self, request, user_id):
+        summary = request.query_params.get("summary") == "true"
+
+        dates = Attendance.objects.filter(user_id=user_id).values_list("date", flat=True)
+        if summary:
+            total_attendance = len(dates)
+            last_attendance = max(dates) if dates else None
+
+            return Response({
+                "dates": dates,
+                "total_attendance": total_attendance,
+                "last_attendance": last_attendance,
+            })
+
+        return Response(dates)
+    
+# 프로필 장르 통계 조회 뷰
+from django.shortcuts import get_object_or_404
+from collections import Counter
+
+class UserGenreStatsView(APIView):
+    def get(self, request, user_id):
+        # 우선 쿼리파라미터(lang)가 있으면 그걸 사용
+        lang = request.GET.get("lang")
+        # 없으면 해당 유저 DB의 language 필드를 자동으로 사용
+        if not lang:
+            user = get_object_or_404(User, pk=user_id)
+            lang = user.language or "ko"
+
+        genre_field = f"genres_{lang}"
+
+        anime_lists = AnimeList.objects.filter(user_id=user_id).select_related("anime")
+        all_genres = []
+        for al in anime_lists:
+            genres = getattr(al.anime, genre_field, None)
+            if not genres or not isinstance(genres, list):
+                continue
+            all_genres.extend([g.strip() for g in genres if isinstance(g, str)])
+
+        genre_counts = Counter(all_genres)
+        data = [{"genre": g, "count": c} for g, c in genre_counts.items()]
+
+        limit = int(request.GET.get("limit", 0))
+        if limit:
+            data = data[:limit]
+        
+        serializer = GenreStatSerializer(data=data, many=True)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
     
 # 프로필 최애 애니메이션 목록 조회 뷰
 class FavoriteAnimeListView(generics.ListAPIView):

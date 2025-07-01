@@ -1,4 +1,6 @@
-from rest_framework.generics import ListCreateAPIView
+import random
+
+from rest_framework.generics import ListCreateAPIView, ListAPIView
 from django.db.models import Count, Q
 from .models import BoardPost, PostLike, BoardComment, CommentLike
 from .serializers import BoardPostSummarySerializer
@@ -8,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
+from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied
 from apps.core.utils.extractor import extract_thumbnail_from_html 
 from apps.core.utils.sanitizer import sanitize_html
@@ -257,3 +260,43 @@ class BoardMiniProfileView(APIView):
             "attendance_count": attendance_count
         })
     
+# 게시판 공지사항 목록 조회 API
+class BoardNoticeListView(ListAPIView):
+    serializer_class = BoardPostSummarySerializer 
+    def get_queryset(self):
+        qs = BoardPost.objects.filter(is_notice=True).order_by("-created_at")
+        limit = int(self.request.GET.get("limit", 3))
+        return qs[:limit]
+    
+
+# 게시판 인기 게시글 목록 조회 API
+class BoardPopularListView(ListAPIView):
+    serializer_class = BoardPostSummarySerializer
+    def get_queryset(self):
+        period = self.request.GET.get("period", "today")
+        limit = int(self.request.GET.get("limit", 5))
+        qs = BoardPost.objects.all()
+        if period == "today":
+            today = timezone.now().date()
+            qs = qs.filter(created_at__date=today)
+        # 조회수, 좋아요 등 순 정렬
+        order = self.request.GET.get("order", "views")
+        if order == "likes":
+            qs = qs.order_by("-like_count")
+        elif order == "comments":
+            qs = qs.order_by("-comment_count")
+        else:
+            qs = qs.order_by("-views")
+        return qs[:limit]
+    
+# 게시판 추천 게시글 목록 조회 API
+class BoardRecommendListView(ListAPIView):
+    serializer_class = BoardPostSummarySerializer
+    def get_queryset(self):
+        limit = int(self.request.GET.get("limit", 5))
+        # 랜덤 추천: 최근 100개 중 랜덤 N개
+        ids = list(BoardPost.objects.order_by("-created_at").values_list("id", flat=True)[:100])
+        if not ids:
+            return BoardPost.objects.none()
+        chosen = random.sample(ids, min(limit, len(ids)))
+        return BoardPost.objects.filter(id__in=chosen)

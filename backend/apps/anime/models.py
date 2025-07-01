@@ -46,6 +46,10 @@ class Anime(models.Model):
     genres_en = models.JSONField()
     genres_es = models.JSONField()
     studios = models.JSONField()
+    
+    tags = models.JSONField()
+    characters = models.JSONField()
+    staff = models.JSONField()
 
     def __str__(self):
         return self.title_ko

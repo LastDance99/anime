@@ -79,9 +79,9 @@ class AnimeBotChatAPIView(APIView):
 
         candidates = search_excel_candidates(search_key)
         if candidates:
-            _, excel_answer, format_type = candidates[0]
+            _, excel_answer, format_type, cover_image = candidates[0]
         else:
-            excel_answer, format_type = "엑셀 데이터 없음", "UNKNOWN"
+            excel_answer, format_type, cover_image = "엑셀 데이터 없음", "UNKNOWN", ""
 
         web_answer = search_web(search_key)
         gpt_answer = ask_gpt_full_context_v2(
@@ -91,6 +91,7 @@ class AnimeBotChatAPIView(APIView):
         return Response({
             "mode": "info",
             "excel": excel_answer,
+            "cover_image": cover_image,
             "web": web_answer,
             "gpt": gpt_answer,
             "final_answer": gpt_answer

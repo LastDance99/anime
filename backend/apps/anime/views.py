@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Q, Avg, Count
+from django.db.models.functions import Coalesce
 from .models import Anime, AnimeReview, ReviewLike, AnimeList
 from .serializers import AnimeSimpleSerializer, AnimeDetailSerializer, AnimeReviewSerializer, AnimeReviewCreateSerializer
 from operator import itemgetter
@@ -396,3 +397,53 @@ class AnimeMiniProfileView(APIView):
             "review_count": review_count,
             "attendance_count": attendance_count
         })
+    
+from rest_framework.generics import ListAPIView
+from django.db.models import Count, Avg, F
+from .serializers import AnimeSimpleSerializer
+
+# 인기 점수: 찜(AnimeList, is_favorite=True) 수 + (평균 평점 * 10)
+class PopularAnimeRankingView(ListAPIView):
+    serializer_class = AnimeSimpleSerializer
+
+    def get_queryset(self):
+        queryset = (
+            Anime.objects
+            .annotate(
+                favorite_count=Count('animelist', distinct=True),
+                avg_rating=Coalesce(Avg("animereview__rating", distinct=True), 0.0)
+            )
+            .annotate(
+                popularity_score=F('favorite_count') + (F('avg_rating') * 10)
+            )
+            .order_by('-popularity_score', '-favorite_count', '-avg_rating')
+        )
+        limit = int(self.request.GET.get("limit", 10))
+        return queryset[:limit]
+
+# 방영예정 인기 애니 (status_ko='방영예정' 또는 status_en='upcoming' 등)
+class UpcomingAnimeRankingAPIView(APIView):
+    def get(self, request):
+        limit = int(request.query_params.get("limit", 5))
+        lang = request.query_params.get("lang", "ko")
+
+        try:
+            queryset = (
+                Anime.objects
+                .filter(status_ko="아직 방영되지 않음")
+                .annotate(
+                    favorite_count=Coalesce(Count("animelist", distinct=True), 0),
+                    avg_rating=Coalesce(Avg("animereview__rating", distinct=True), 0.0),
+                )
+                .annotate(
+                    popularity_score=F("favorite_count") + F("avg_rating") * 10
+                )
+                .order_by("-popularity_score")[:limit]
+            )
+
+            serializer = AnimeSimpleSerializer(queryset, many=True, context={"lang": lang})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print("🔥 기대작 랭킹 에러:", str(e))
+            return Response({"detail": "서버 오류가 발생했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

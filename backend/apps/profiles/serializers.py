@@ -36,6 +36,11 @@ class AnimeListStatsSerializer(serializers.Serializer):
 class AttendanceStatsSerializer(serializers.Serializer):
     total_attendance = serializers.IntegerField()
     last_attendance = serializers.DateField(allow_null=True)
+    
+# 애니메이션 장르 통계 시리얼라이저
+class GenreStatSerializer(serializers.Serializer):
+    genre = serializers.CharField()
+    count = serializers.IntegerField()
 
 # 최애 애니메이션 토글 시리얼라이저
 class AnimeFavoriteToggleSerializer(serializers.Serializer):

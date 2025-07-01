@@ -9,6 +9,8 @@ from .views import (
     AnimeListToggleView,
     AnimeFilterMetaView,
     AnimeMiniProfileView,
+    PopularAnimeRankingView,
+    UpcomingAnimeRankingAPIView,
 )
 
 urlpatterns = [
@@ -38,4 +40,10 @@ urlpatterns = [
 
     # 내 애니 리스트 미니 프로필 조회
     path('animecount/', AnimeMiniProfileView.as_view(), name="anime-count"),
+
+    # 애니메이션 랭킹 -  인기 점수: 찜(AnimeList, is_favorite=True) 수 + (평균 평점 * 10)
+    path('rankings/popular/', PopularAnimeRankingView.as_view()),
+
+    # 애니메이션 랭킹 - 방영예정 인기 애니
+    path('rankings/upcoming/', UpcomingAnimeRankingAPIView.as_view()),
 ]
