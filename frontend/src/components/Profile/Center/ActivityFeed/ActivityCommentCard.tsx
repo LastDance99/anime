@@ -19,6 +19,7 @@ import { getBoardComments } from "../../../../api/board";
 import type { BoardComment } from "../../../../types/comment";
 import CommentListBox from "./CommentListBox";
 import { AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   post_id: number;
@@ -43,6 +44,7 @@ export default function ActivityCommentCard({
   comment_count,
   thumbnail,
 }: Props) {
+  const { t, i18n } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<BoardComment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,13 +55,17 @@ export default function ActivityCommentCard({
     if (isExpanded && contentRef.current) {
       requestAnimationFrame(() => {
         if (contentRef.current) {
-          setHeight(contentRef.current.scrollHeight + 24); // 패딩 고려
+          setHeight(contentRef.current.scrollHeight + 24);
         }
       });
     } else {
       setHeight(0);
     }
   }, [isExpanded, comments]);
+
+  useEffect(() => {
+    dayjs.locale(i18n.language);
+  }, [i18n.language]);
 
   const handleClick = async () => {
     if (!isExpanded && comments.length === 0) {
@@ -68,7 +74,7 @@ export default function ActivityCommentCard({
         const res = await getBoardComments(post_id, "created");
         setComments(res.results);
       } catch (err) {
-        console.error("\u274C \uCEF4\uBA54\uC50D \uB85C\uB529 \uC2E4\uD328:", err);
+        console.error("\u274C 댓글 로딩 실패:", err);
       } finally {
         setLoading(false);
       }
@@ -85,10 +91,10 @@ export default function ActivityCommentCard({
             <Nickname>{post_author_nickname}</Nickname>
           </TopBox>
           <div>
-            <b>"{post_title}"</b>에 댓글을 남겼습니다.<br />
+            <b>"{post_title}"</b> {t("activity.commented_on")}<br />
             {comment}
           </div>
-          {thumbnail && <Thumbnail src={thumbnail} alt="\uC368\uBAA8\uB378" />}
+          {thumbnail && <Thumbnail src={thumbnail} alt="썸네일" />}
         </FlexBox>
 
         <SideInfoBox>
@@ -111,6 +117,19 @@ export default function ActivityCommentCard({
           >
             <div ref={contentRef}>
               <CommentListBox comments={comments} />
+            </div>
+          </CommentContainer>
+        )}
+        {isExpanded && comments.length === 0 && !loading && (
+          <CommentContainer
+            key="empty"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 60 }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <div style={{ padding: "12px 16px", fontSize: 14 }}>
+              {t("activity.no_comments")}
             </div>
           </CommentContainer>
         )}

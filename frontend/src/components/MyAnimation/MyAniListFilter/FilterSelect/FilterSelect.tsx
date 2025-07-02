@@ -2,6 +2,7 @@ import React from "react";
 import Select, { components } from "react-select";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useTheme } from "styled-components";
+import { useTranslation } from "react-i18next";
 
 type OptionType = { value: string; label: string };
 
@@ -10,10 +11,12 @@ type Props = {
   onChange: (v: string) => void;
   options: OptionType[];
   label?: string;
+  labelKey?: string; // optional: 다국어 키
 };
 
-export default function FormatSelect({ value, onChange, options, label }: Props) {
+export default function FormatSelect({ value, onChange, options, label, labelKey }: Props) {
   const theme = useTheme();
+  const { t } = useTranslation();
   const selected = options.find(opt => opt.value === value) || null;
 
   const customStyles = {
@@ -95,7 +98,7 @@ export default function FormatSelect({ value, onChange, options, label }: Props)
           fontFamily: theme.fonts.cafe24,
           fontSize: theme.fontSizes.sm,
         }}>
-          {label}
+          {labelKey ? t(labelKey) : label}
         </div>
       )}
       <Select
@@ -105,7 +108,7 @@ export default function FormatSelect({ value, onChange, options, label }: Props)
         components={{ DropdownIndicator }}
         isClearable
         styles={customStyles}
-        placeholder="선택"
+        placeholder={t("common.select")}
       />
     </div>
   );

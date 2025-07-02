@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SectionTitle,
   LoadMoreButton,
@@ -7,16 +7,15 @@ import {
   EndText,
 } from "./ActivityList.styled";
 import { ChevronDown } from "lucide-react";
-import type { Activity, ActivityPost, ActivityComment, } from "../../../../types/activity";
-import {
-  getUserActivities
-} from "../../../../api/profile";
+import type { Activity, ActivityPost, ActivityComment } from "../../../../types/activity";
+import { getUserActivities } from "../../../../api/profile";
 import ActivityListAddCard from "./ActivityListAddCard";
 import ActivityListDelCard from "./ActivityListDelCard";
 import ActivityPostCard from "./ActivityPostCard";
 import ActivityCommentCard from "./ActivityCommentCard";
 import ActivityReviewAddCard from "./ActivityReviewAddCard";
 import ActivityReviewDelCard from "./ActivityReviewDelCard";
+import { useTranslation } from "react-i18next"; // ✅ i18n 추가
 
 function isActivityComment(activity: Activity): activity is ActivityComment {
   return activity.type === "comment";
@@ -27,20 +26,16 @@ function isActivityPost(activity: Activity): activity is ActivityPost {
 }
 
 export default function ActivityList({ userId }: { userId: number }) {
+  const { t } = useTranslation(); // ✅ 다국어 훅
   const [activityList, setActivityList] = useState<Activity[]>([]);
   const [nextUrl, setNextUrl] = useState<string | null>(`/api/profiles/${userId}/activity/?page=1`);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    console.log("list_add 활동", activityList.filter(a => a.type === "list_add"));
-  }, [activityList]);
 
   const fetchActivities = async () => {
     if (!nextUrl || isLoading) return;
     setIsLoading(true);
     try {
       const res = await getUserActivities(nextUrl);
-      console.log("🎯 응답 결과:", res.results);
       setActivityList(prev => [...prev, ...res.results]);
       setNextUrl(res.next);
     } catch (err) {
@@ -56,10 +51,11 @@ export default function ActivityList({ userId }: { userId: number }) {
 
   return (
     <Wrapper>
-      <SectionTitle>내 활동</SectionTitle>
+      <SectionTitle>{t("activity.title")}</SectionTitle>
 
       {activityList.map((item) => {
         const commonProps = { key: item.id, created_at: item.created_at };
+
         switch (item.type) {
           case "anime_add":
             return <ActivityListAddCard {...commonProps} anime_title={item.anime_title} anime_img={item.anime_img} />;
@@ -113,7 +109,7 @@ export default function ActivityList({ userId }: { userId: number }) {
       ) : (
         <LoadMoreButton disabled>
           <ToggleLine />
-          <EndText>더 이상 없음</EndText>
+          <EndText>{t("activity.no_more")}</EndText>
           <ToggleLine />
         </LoadMoreButton>
       )}

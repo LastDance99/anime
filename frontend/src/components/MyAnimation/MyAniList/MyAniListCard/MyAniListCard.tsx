@@ -11,6 +11,7 @@ import {
   CornerStar,
 } from "./MyAniListCard.styled";
 import { MoreVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type MyAniListCardProps = {
   imgUrl?: string;
@@ -40,10 +41,10 @@ export default function MyAniListCard({
   isFavorite,
   canEdit = false,
 }: MyAniListCardProps) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // 메뉴 바깥 클릭 시 닫기
   React.useEffect(() => {
     if (!menuOpen) return;
     const handleClick = (e: MouseEvent) => {
@@ -59,7 +60,7 @@ export default function MyAniListCard({
     <CardWrapper
       tabIndex={0}
       role="button"
-      aria-label={`${title} 상세보기`}
+      aria-label={t("mylist.card_detail", { title })}
       onClick={onClick}
       onMouseLeave={() => setMenuOpen(false)}
     >
@@ -71,7 +72,6 @@ export default function MyAniListCard({
         {isFavorite && <CornerStar />}
       </Score>
 
-      {/* 👉 본인 프로필일 때만 더보기 메뉴 사용 가능 */}
       {canEdit && (
         <>
           <MenuBtn
@@ -79,27 +79,33 @@ export default function MyAniListCard({
               e.stopPropagation();
               setMenuOpen((v) => !v);
             }}
-            aria-label="더보기"
+            aria-label={t("mylist.more_menu")}
           >
             <MoreVertical size={22} />
           </MenuBtn>
 
           {menuOpen && (
             <MenuDropdown ref={menuRef} onClick={(e) => e.stopPropagation()}>
-              {!isAdded && onAdd && <MenuItem onClick={onAdd}>리스트에 추가</MenuItem>}
-              {isAdded && onRemove && <MenuItem onClick={onRemove}>리스트에서 삭제</MenuItem>}
+              {!isAdded && onAdd && (
+                <MenuItem onClick={onAdd}>{t("mylist.add_to_list")}</MenuItem>
+              )}
+              {isAdded && onRemove && (
+                <MenuItem onClick={onRemove}>{t("mylist.remove_from_list")}</MenuItem>
+              )}
               {onToggleFavorite && (
                 <MenuItem
                   onClick={() => {
                     const confirmed = window.confirm(
                       isFavorite
-                        ? "최애의 애니에서 취소하시겠습니까?"
-                        : "최애의 애니로 등록하시겠습니까?"
+                        ? t("mylist.confirm_unfavorite")
+                        : t("mylist.confirm_favorite")
                     );
                     if (confirmed) onToggleFavorite();
                   }}
                 >
-                  {isFavorite ? "최애의 애니 취소" : "최애의 애니 등록"}
+                  {isFavorite
+                    ? t("mylist.unfavorite")
+                    : t("mylist.favorite")}
                 </MenuItem>
               )}
             </MenuDropdown>

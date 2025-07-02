@@ -39,7 +39,7 @@ export const FontBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-right: 4px;
+  padding-right: 10px;
   gap: 4px;
 `;
 
@@ -90,7 +90,7 @@ export const BottomBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 40px;
 `;
 
 export const CustomButton = styled(Button)`

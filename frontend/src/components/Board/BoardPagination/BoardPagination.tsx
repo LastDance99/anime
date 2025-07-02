@@ -1,6 +1,7 @@
 import React from "react";
 import { PaginationWrapper, PageButton } from "./BoardPagination.styled";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type BoardPaginationProps = {
   page: number;
@@ -13,6 +14,8 @@ const BoardPagination: React.FC<BoardPaginationProps> = ({
   totalPage,
   onChange,
 }) => {
+  const { t } = useTranslation();
+
   // 페이지 버튼 5개만 보여주기 (ex: 1 2 3 4 5)
   const maxPage = Math.min(5, totalPage);
   let start = Math.max(1, page - 2);
@@ -33,7 +36,7 @@ const BoardPagination: React.FC<BoardPaginationProps> = ({
         selected={false}
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
-        aria-label="이전 페이지"
+        aria-label={t("pagination.prev")}
         style={{
           background: "none",
           color: "#f9b8c7",
@@ -63,7 +66,7 @@ const BoardPagination: React.FC<BoardPaginationProps> = ({
         selected={false}
         onClick={() => onChange(page + 1)}
         disabled={page === totalPage}
-        aria-label="다음 페이지"
+        aria-label={t("pagination.next")}
         style={{
           background: "none",
           color: "#f9b8c7",

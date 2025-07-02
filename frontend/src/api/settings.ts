@@ -10,8 +10,8 @@ export const updateAccount = async (data: any) => {
   return res.data;
 };
 
-export const updateLanguage = async (data: any) => {
-  const res = await axios.put('/api/settings/language/', data);
+export const updateLanguage = async (data: { language: "ko" | "en" | "es" }) => {
+  const res = await axios.put("/api/settings/language/", data);
   return res.data;
 };
 

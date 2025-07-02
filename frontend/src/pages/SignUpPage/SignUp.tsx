@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Container, MainBox, FormBox, EmailRow, EmailInput, AtMark,
   NicknameInput, PasswordInputRow, PasswordInput, EyeIconButton,
@@ -14,6 +15,7 @@ import {
   signup, requestEmailVerification, confirmEmailVerification,
   checkEmail, checkNickname
 } from "../../api/auth";
+import i18n from "i18next";
 
 const emailDomains = [
   { value: "naver.com", label: "naver.com" },
@@ -26,7 +28,7 @@ const emailDomains = [
 const languages = [
   { code: "ko", label: "한국어" },
   { code: "en", label: "English" },
-  { code: "ja", label: "\u65e5\u672c\u8a9e" },
+  { code: "es", label: "Español" },
 ];
 
 interface SignupData {
@@ -39,6 +41,7 @@ interface SignupData {
 }
 
 export default function SignUp() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [emailId, setEmailId] = useState("");
@@ -61,7 +64,6 @@ export default function SignUp() {
   const [error, setError] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
   const [nicknameMessage, setNicknameMessage] = useState("");
-
   const [pwError, setPwError] = useState("");
   const [pwCheckError, setPwCheckError] = useState("");
   const [emailTimer, setEmailTimer] = useState(0);
@@ -75,10 +77,8 @@ export default function SignUp() {
   const isValidPw = pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
   const isSamePw = pw === pwCheck;
   const isValidGender = gender !== "";
-
   const isActive = isValidEmail && isValidNickname && isValidPw && isSamePw && isValidGender && isEmailVerified;
 
-  // 이메일 인증 타이머
   useEffect(() => {
     if (emailSent) {
       if (emailTimer > 0) {
@@ -86,46 +86,42 @@ export default function SignUp() {
       } else {
         setEmailSent(false);
         setIsEmailVerified(false);
-        setEmailMessage("다시 시도해주세요.");
+        setEmailMessage(t("auth.error.verificationExpired"));
       }
     }
     return () => {
-      if (emailTimerRef.current !== null) {
-        clearTimeout(emailTimerRef.current);
-      }
+      if (emailTimerRef.current !== null) clearTimeout(emailTimerRef.current);
     };
   }, [emailSent, emailTimer]);
 
-  // 비밀번호 유효성 체크
   useEffect(() => {
     if (!pw) setPwError("");
-    else if (!isValidPw) setPwError("8자 이상, 영문+숫자 포함");
+    else if (!isValidPw) setPwError(t("auth.error.passwordInvalid"));
     else setPwError("");
 
     if (!pwCheck) setPwCheckError("");
-    else if (pw !== pwCheck) setPwCheckError("비밀번호가 다릅니다.");
+    else if (pw !== pwCheck) setPwCheckError(t("auth.error.passwordMismatch"));
     else setPwCheckError("");
   }, [pw, pwCheck]);
 
-  // 이메일 인증 요청
   const handleEmailCheck = async () => {
     if (!isValidEmail) {
-      setEmailMessage("올바른 이메일을 입력하세요.");
+      setEmailMessage(t("auth.error.invalidEmail"));
       return;
     }
     setEmailMessage("");
     try {
       const res = await checkEmail(fullEmail);
       if (res.exists) {
-        setEmailMessage("이미 가입된 이메일입니다.");
+        setEmailMessage(t("auth.error.emailExists"));
         setIsEmailVerified(false);
       } else {
-        const result = await requestEmailVerification({ email: fullEmail });
+        await requestEmailVerification({ email: fullEmail });
         setEmailSent(true);
-        setEmailTimer(300); // 5분
+        setEmailTimer(300);
       }
-    } catch (err) {
-      setEmailMessage("이메일 인증 요청 실패");
+    } catch {
+      setEmailMessage(t("auth.error.emailRequestFail"));
     }
   };
 
@@ -133,26 +129,26 @@ export default function SignUp() {
     try {
       await confirmEmailVerification({ email: fullEmail, code: verificationCode });
       setIsEmailVerified(true);
-      setEmailMessage("이메일 인증 완료");
-      setEmailTimer(0); // ⛔ 타이머 강제 종료
-      setEmailSent(false); // ✅ 이메일 인증 완료된 상태로 버튼 숨기기
-    } catch (err) {
+      setEmailMessage(t("auth.verified"));
+      setEmailTimer(0);
+      setEmailSent(false);
+    } catch {
       setIsEmailVerified(false);
-      setEmailMessage("인증 코드가 잘못되었습니다.");
+      setEmailMessage(t("auth.error.verificationFail"));
     }
   };
 
   const handleNicknameCheck = async () => {
     if (!isValidNickname) {
-      setNicknameMessage("2~16자 닉네임 입력");
+      setNicknameMessage(t("auth.error.nicknameInvalid"));
       return;
     }
     try {
       const res = await checkNickname(nickname);
-      if (res.exists) setNicknameMessage("이미 사용 중인 닉네임입니다.");
-      else setNicknameMessage("사용 가능한 닉네임입니다.");
-    } catch (err) {
-      setNicknameMessage("닉네임 확인 실패");
+      if (res.exists) setNicknameMessage(t("auth.error.nicknameExists"));
+      else setNicknameMessage(t("auth.error.nicknameAvailable"));
+    } catch {
+      setNicknameMessage(t("auth.error.nicknameCheckFail"));
     }
   };
 
@@ -176,20 +172,19 @@ export default function SignUp() {
       const resData = err.response?.data;
       if (resData && typeof resData === "object") {
         const firstKey = Object.keys(resData)[0];
-        setError(resData[firstKey]?.[0] || "회원가입 실패");
+        setError(resData[firstKey]?.[0] || t("auth.error.signup"));
       } else {
-        setError("회원가입 실패");
+        setError(t("auth.error.signup"));
       }
     }
   };
 
-  // ----------- 렌더링 ----------
   return (
     <Container>
       <MainBox>
         <Link to="/"><Logo src="/logos/mainlog.png" alt="AnTada 로고" /></Link>
         <FormBox onSubmit={handleSubmit}>
-          {/* 언어 */}
+          {/* 언어 선택 */}
           <LanguageContainer>
             <LanguageSelected onClick={() => setOpen(v => !v)}>
               {languages.find(l => l.code === lang)?.label}
@@ -198,7 +193,14 @@ export default function SignUp() {
             {open && (
               <LanguageDropdown>
                 {languages.filter(l => l.code !== lang).map(l => (
-                  <LanguageItem key={l.code} onClick={() => { setLang(l.code); setOpen(false); }}>
+                  <LanguageItem
+                    key={l.code}
+                    onClick={() => {
+                      setLang(l.code);
+                      i18n.changeLanguage(l.code);
+                      setOpen(false);
+                    }}
+                  >
                     {l.label}
                   </LanguageItem>
                 ))}
@@ -208,19 +210,19 @@ export default function SignUp() {
 
           {/* 이메일 */}
           <EmailRow>
-            <EmailInput value={emailId} onChange={e => setEmailId(e.target.value)} placeholder="이메일" />
+            <EmailInput value={emailId} onChange={e => setEmailId(e.target.value)} placeholder={t("auth.email")} />
             <AtMark>@</AtMark>
             <DomainDropdownWrap>
               {showJobInput ? (
                 <>
-                  <JobInput value={job} onChange={e => setJob(e.target.value)} placeholder="직접입력" />
+                  <JobInput value={job} onChange={e => setJob(e.target.value)} placeholder={t("auth.jobInput")} />
                   <DropdownArrow onClick={() => setDomainDropdownOpen(v => !v)}>
                     {domainDropdownOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </DropdownArrow>
                 </>
               ) : (
                 <DomainDropdownButton type="button" onClick={() => setDomainDropdownOpen(v => !v)}>
-                  {emailDomains.find(opt => opt.value === emailDomain)?.label || "도메인 선택"}
+                  {emailDomains.find(opt => opt.value === emailDomain)?.label || t("auth.domainSelect")}
                   <DropdownArrow>{domainDropdownOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</DropdownArrow>
                 </DomainDropdownButton>
               )}
@@ -232,57 +234,45 @@ export default function SignUp() {
                       setShowJobInput(opt.value === "");
                       setDomainDropdownOpen(false);
                     }}>
-                      {opt.label}
+                      {opt.value || t("auth.jobInput")}
                     </DomainDropdownItem>
                   ))}
                 </DomainDropdownList>
               )}
             </DomainDropdownWrap>
-            {/* 이메일 오류 메시지 */}
             {!!emailMessage && <EmailErrorBox>{emailMessage}</EmailErrorBox>}
           </EmailRow>
 
-          {/* 이메일 인증 박스 */}
+          {/* 이메일 인증 */}
           <EmailAuthBox>
             {!isEmailVerified ? (
               <>
-                {/* 인증 요청 버튼 - emailSent가 false일 때만 보임 */}
                 {!emailSent && (
-                  <EmailAuthBtn
-                    type="button"
-                    onClick={handleEmailCheck}
-                  >
-                    이메일 인증 요청
+                  <EmailAuthBtn type="button" onClick={handleEmailCheck}>
+                    {t("auth.requestVerification")}
                   </EmailAuthBtn>
                 )}
-
-                {/* 인증 대기 중일 때 인증코드 입력창/타이머/확인 버튼 표시 */}
                 {emailSent && (
                   <>
                     <CodeInput
                       type="text"
-                      placeholder="인증코드 6자리"
+                      placeholder={t("auth.verificationCode")}
                       value={verificationCode}
-                      onChange={e => {
-                        const val = e.target.value.replace(/[^0-9]/g, "");
-                        setVerificationCode(val.slice(0, 6));
-                      }}
+                      onChange={e => setVerificationCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
                       maxLength={6}
                       autoComplete="one-time-code"
                       inputMode="numeric"
                     />
-                    <EmailTimer>
-                      {`${Math.floor(emailTimer / 60)}:${String(emailTimer % 60).padStart(2, "0")}`}
-                    </EmailTimer>
+                    <EmailTimer>{`${Math.floor(emailTimer / 60)}:${String(emailTimer % 60).padStart(2, "0")}`}</EmailTimer>
                     <EmailAuthBtn type="button" onClick={handleEmailVerify}>
-                      인증 확인
+                      {t("auth.verifyCode")}
                     </EmailAuthBtn>
                   </>
                 )}
               </>
             ) : (
               <EmailAuthBtn as="div" disabled style={{ background: "#F5F5F5", color: "#6abf4b" }}>
-                인증 완료
+                {t("auth.verified")}
               </EmailAuthBtn>
             )}
           </EmailAuthBox>
@@ -291,7 +281,7 @@ export default function SignUp() {
           <NicknameBox>
             <NicknameInput
               type="text"
-              placeholder="닉네임"
+              placeholder={t("auth.nickname")}
               value={nickname}
               onChange={e => setNickname(e.target.value)}
               onBlur={handleNicknameCheck}
@@ -303,7 +293,7 @@ export default function SignUp() {
           <PasswordInputRow>
             <PasswordInput
               type={showPw ? "text" : "password"}
-              placeholder="비밀번호"
+              placeholder={t("auth.password")}
               value={pw}
               onChange={e => setPw(e.target.value)}
             />
@@ -315,7 +305,7 @@ export default function SignUp() {
           <PasswordInputRow>
             <PasswordInput
               type={showPwCheck ? "text" : "password"}
-              placeholder="비밀번호 확인"
+              placeholder={t("auth.passwordCheck")}
               value={pwCheck}
               onChange={e => setPwCheck(e.target.value)}
             />
@@ -327,14 +317,20 @@ export default function SignUp() {
 
           {/* 성별 */}
           <GenderRow>
-            <GenderButton type="button" selected={gender === "male"} onClick={() => setGender("male")}>남자</GenderButton>
-            <GenderButton type="button" selected={gender === "female"} onClick={() => setGender("female")}>여자</GenderButton>
-            <GenderButton type="button" selected={gender === ""} onClick={() => setGender("")}>선택안함</GenderButton>
+            <GenderButton type="button" selected={gender === "male"} onClick={() => setGender("male")}>
+              {t("auth.gender.male")}
+            </GenderButton>
+            <GenderButton type="button" selected={gender === "female"} onClick={() => setGender("female")}>
+              {t("auth.gender.female")}
+            </GenderButton>
+            <GenderButton type="button" selected={gender === ""} onClick={() => setGender("")}>
+              {t("auth.gender.none")}
+            </GenderButton>
           </GenderRow>
 
-          {/* 제출 */}
-          <SignUpButton type="submit" disabled={!isActive}>회원가입</SignUpButton>
+          <SignUpButton type="submit" disabled={!isActive}>{t("auth.signUp")}</SignUpButton>
         </FormBox>
+
         {error && <div style={{ color: "#d44", marginTop: 16 }}>{error}</div>}
       </MainBox>
     </Container>

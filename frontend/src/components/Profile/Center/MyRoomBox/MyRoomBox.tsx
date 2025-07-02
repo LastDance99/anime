@@ -1,9 +1,8 @@
 import React from "react";
 import { MyRoomBox, RoomTitle, RoomImage } from "./MyRoomBox.styled";
-import { getFullImageUrl } from "../../../../utils/getFullImageUrl"; // 경로 맞게 조정
+import { getFullImageUrl } from "../../../../utils/getFullImageUrl";
 
 export default function MyRoom({ myroom_image }: { myroom_image: string }) {
-  console.log("MyRoomBox 이미지", myroom_image);
 
   return (
     <MyRoomBox>

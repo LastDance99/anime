@@ -5,6 +5,7 @@ import {
   SeasonButtonList,
   SeasonButton
 } from "./Season.styled";
+import { useTranslation } from "react-i18next";
 
 interface SeasonProps {
   value: string;
@@ -13,11 +14,13 @@ interface SeasonProps {
 }
 
 export default function Season({ value, onChange, options }: SeasonProps) {
+  const { t } = useTranslation();
+
   if (!options || options.length === 0) return null;
 
   return (
     <SeasonSection>
-      <SeasonTitle>계절</SeasonTitle>
+      <SeasonTitle>{t("anime.season")}</SeasonTitle>
       <SeasonButtonList>
         {options.map(s => (
           <SeasonButton

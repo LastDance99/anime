@@ -120,7 +120,7 @@ export const MenuBtn = styled.button`
 export const MenuDropdown = styled.div`
   position: absolute;
   top: 0px;
-  right: -154px;
+  right: -140px;
   background: ${({ theme }) => theme.colors.background};
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.14);

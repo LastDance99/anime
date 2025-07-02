@@ -9,6 +9,7 @@ import {
 } from "./AniListCard.styled";
 import { Plus, Minus } from "lucide-react";
 import type { AnimeItem } from "../../../../types/anime";
+import { useTranslation } from "react-i18next";
 
 // AnimeItem에 isAdded를 포함한 확장 타입 정의
 type AnimeItemWithAdded = AnimeItem & { isAdded?: boolean };
@@ -26,6 +27,8 @@ export default function AniListCard({
   isAdded = false,
   onToggle,
 }: Props) {
+  const { t } = useTranslation();
+
   const handleAddClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggle?.();
@@ -43,7 +46,7 @@ export default function AniListCard({
       onClick={() => onClick?.(anime)}
       tabIndex={0}
       role="button"
-      aria-label={`${anime.title} 상세보기`}
+      aria-label={t("anime.view_detail", { title: anime.title })}
     >
       <ImgBox>
         <AniImg src={posterUrl} alt={anime.title} />
@@ -51,7 +54,7 @@ export default function AniListCard({
         <AniTitle>{anime.title}</AniTitle>
         <AddButton
           onClick={handleAddClick}
-          aria-label="리스트에 추가 또는 제거"
+          aria-label={t("anime.toggle_add")}
           tabIndex={-1}
         >
           {isAdded ? (

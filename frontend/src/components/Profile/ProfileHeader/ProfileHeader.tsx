@@ -14,18 +14,20 @@ import {
 import type { User } from "../../../types/user";
 import { logout } from "../../../api/auth";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   show?: boolean;
   isScrolled: boolean;
   user: User;
   setUser: (user: User) => void;
-  onOpenSettings: () => void; // ★ 추가!
+  onOpenSettings: () => void;
 };
 
 export default function Header({ show = true, isScrolled, user, setUser, onOpenSettings }: Props) {
   const navigate = useNavigate();
   const { logout: clearAuth, currentUser } = useAuth();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     try {
@@ -41,24 +43,27 @@ export default function Header({ show = true, isScrolled, user, setUser, onOpenS
   };
 
   return (
-    <>
-      <HeaderWrapper $show={show} $scrolled={isScrolled}>
-        <HeaderInner>
-          <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
-          <Nav>
-            <NavList>
-              <NavItem as={Link} to={`/profile/${currentUser?.id}`}>프로필</NavItem>
-              <NavItem as={Link} to="/board">전체 게시판</NavItem>
-              <NavItem as={Link} to="/anime">애니</NavItem>
-            </NavList>
-          </Nav>
-          {/* 설정(톱니) 아이콘 클릭 → 트리거 함수 호출 */}
-          <Iconbox onClick={onOpenSettings}>
-            <GearIcon size={16} />
-          </Iconbox>
-          <BottomBtn onClick={handleLogout}>로그아웃</BottomBtn>
-        </HeaderInner>
-      </HeaderWrapper>
-    </>
+    <HeaderWrapper $show={show} $scrolled={isScrolled}>
+      <HeaderInner>
+        <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        <Nav>
+          <NavList>
+            <NavItem as={Link} to={`/profile/${currentUser?.id}`}>
+              {t("nav.profile")}
+            </NavItem>
+            <NavItem as={Link} to="/board">
+              {t("nav.board")}
+            </NavItem>
+            <NavItem as={Link} to="/anime">
+              {t("nav.anime")}
+            </NavItem>
+          </NavList>
+        </Nav>
+        <Iconbox onClick={onOpenSettings}>
+          <GearIcon size={16} />
+        </Iconbox>
+        <BottomBtn onClick={handleLogout}>{t("nav.logout")}</BottomBtn>
+      </HeaderInner>
+    </HeaderWrapper>
   );
 }

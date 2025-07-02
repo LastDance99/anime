@@ -1,16 +1,23 @@
 import React from "react";
-import { ResetButtonBox, ResetButtonStyled, FilterTitle } from "./ResetButton.styled";
+import {
+  ResetButtonBox,
+  ResetButtonStyled,
+  FilterTitle,
+} from "./ResetButton.styled";
+import { useTranslation } from "react-i18next";
 
 interface ResetButtonProps {
   onClick: () => void;
 }
 
 export default function ResetButton({ onClick }: ResetButtonProps) {
+  const { t } = useTranslation();
+
   return (
     <ResetButtonBox>
-      <FilterTitle>필터</FilterTitle>
+      <FilterTitle>{t("anime.filter")}</FilterTitle>
       <ResetButtonStyled onClick={onClick}>
-        전체 초기화
+        {t("anime.reset")}
       </ResetButtonStyled>
     </ResetButtonBox>
   );

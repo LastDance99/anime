@@ -30,6 +30,7 @@ import {
 import { useAuth } from "../../../../contexts/AuthContext";
 import { ThumbsUp, CornerDownRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ko";
@@ -51,13 +52,18 @@ const sortToApi: Record<SortType, "latest" | "created" | "like"> = {
 
 export default function CommentBox({ contentType, contentId }: Props) {
   const { currentUser } = useAuth();
+  const { t } = useTranslation();
   const [comments, setComments] = useState<BoardComment[]>([]);
   const [input, setInput] = useState("");
-  const [replyState, setReplyState] = useState<{
+  const [replyState, setReplyState] = useState({
+    targetId: null,
+    parentId: null,
+    tagged_nickname: undefined,
+  } as {
     targetId: number | null;
     parentId: number | null;
     tagged_nickname?: string | null;
-  }>({ targetId: null, parentId: null, tagged_nickname: undefined });
+  });
   const [replyInput, setReplyInput] = useState("");
   const [sort, setSort] = useState<SortType>("createdAsc");
   const [loading, setLoading] = useState(false);
@@ -75,24 +81,18 @@ export default function CommentBox({ contentType, contentId }: Props) {
     }
   };
 
-  const fetchComments = useCallback(
-    async (scrollToEnd = false) => {
-      setLoading(true);
-      try {
-        const res = await getBoardComments(contentId, sortToApi[sort]);
-        setComments(Array.isArray(res.results) ? res.results : []);
-        if (scrollToEnd) {
-          setTimeout(scrollToBottom, 100); // 렌더링 이후에 실행되게
-        }
-      } catch (e) {
-        setComments([]);
-        console.error("[fetchComments] 에러:", e);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [contentId, sort]
-  );
+  const fetchComments = useCallback(async (scrollToEnd = false) => {
+    setLoading(true);
+    try {
+      const res = await getBoardComments(contentId, sortToApi[sort]);
+      setComments(Array.isArray(res.results) ? res.results : []);
+      if (scrollToEnd) setTimeout(scrollToBottom, 100);
+    } catch (e) {
+      setComments([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [contentId, sort]);
 
   useEffect(() => {
     fetchComments();
@@ -101,17 +101,10 @@ export default function CommentBox({ contentType, contentId }: Props) {
   function updateCommentLike(list: BoardComment[], id: number): BoardComment[] {
     return list.map(comment => {
       if (comment.id === id) {
-        return {
-          ...comment,
-          like_count: comment.like_count + 1,
-          liked: true,
-        };
+        return { ...comment, like_count: comment.like_count + 1, liked: true };
       }
       if (comment.replies && comment.replies.length > 0) {
-        return {
-          ...comment,
-          replies: updateCommentLike(comment.replies, id),
-        };
+        return { ...comment, replies: updateCommentLike(comment.replies, id) };
       }
       return comment;
     });
@@ -122,40 +115,24 @@ export default function CommentBox({ contentType, contentId }: Props) {
     try {
       await toggleCommentLike(id);
       setComments(prev => updateCommentLike(prev, id));
-    } catch (err) {
-      console.error("[좋아요 처리 실패]", err);
-    }
+    } catch (err) {}
   };
 
   const handleSubmit = async () => {
     if (!input.trim() || !currentUser) return;
     try {
       const newComment = await addBoardComment(contentId, { content: input });
-      setComments(prev =>
-        sort === "createdDesc"
-          ? [newComment, ...prev]
-          : [...prev, newComment]
-      );
+      setComments(prev => sort === "createdDesc" ? [newComment, ...prev] : [...prev, newComment]);
       setInput("");
-      if (sort !== "createdDesc") {
-        setTimeout(scrollToBottom, 100);
-      }
-    } catch (e) {
-      console.error("댓글 등록 실패", e);
-    }
+      if (sort !== "createdDesc") setTimeout(scrollToBottom, 100);
+    } catch (e) {}
   };
 
   const handleReplyToggle = (target: BoardComment) => {
     const parentId = target.parent_id ?? target.id;
-    setReplyState((prev) =>
-      prev.targetId === target.id
-        ? { targetId: null, parentId: null, tagged_nickname: undefined }
-        : {
-            targetId: target.id,
-            parentId,
-            tagged_nickname: target.author_nickname,
-          }
-    );
+    setReplyState(prev => prev.targetId === target.id
+      ? { targetId: null, parentId: null, tagged_nickname: undefined }
+      : { targetId: target.id, parentId, tagged_nickname: target.author_nickname });
     setReplyInput("");
   };
 
@@ -167,33 +144,21 @@ export default function CommentBox({ contentType, contentId }: Props) {
         parent_id: replyState.parentId,
         tagged_nickname: replyState.tagged_nickname ?? undefined,
       });
-
-      setComments(prev =>
-        prev.map(comment =>
-          comment.id === replyState.parentId
-            ? {
-                ...comment,
-                replies: sort === "createdDesc"
-                  ? [newReply, ...(comment.replies || [])]
-                  : [...(comment.replies || []), newReply],
-              }
-            : comment
-        )
-      );
-
+      setComments(prev => prev.map(comment =>
+        comment.id === replyState.parentId
+          ? { ...comment, replies: sort === "createdDesc"
+              ? [newReply, ...(comment.replies || [])]
+              : [...(comment.replies || []), newReply] }
+          : comment
+      ));
       setReplyState({ targetId: null, parentId: null, tagged_nickname: undefined });
       setReplyInput("");
-
-      if (sort !== "createdDesc") {
-        setTimeout(scrollToBottom, 100);
-      }
-    } catch (e) {
-      console.error("답글 등록 실패", e);
-    }
+      if (sort !== "createdDesc") setTimeout(scrollToBottom, 100);
+    } catch (e) {}
   };
 
   const handleDelete = async (commentId: number) => {
-    const ok = window.confirm("정말로 삭제하시겠습니까?");
+    const ok = window.confirm(t("comment.confirm_delete"));
     if (!ok) return;
     await deleteComment(contentId, commentId);
     fetchComments();
@@ -202,7 +167,7 @@ export default function CommentBox({ contentType, contentId }: Props) {
   const getTopLevelComments = () => comments.filter(c => !c.parent_id);
 
   const handleNicknameClick = (userId: number) => {
-    const ok = window.confirm("작성자의 프로필로 이동하시겠습니까?");
+    const ok = window.confirm(t("comment.go_to_profile"));
     if (ok) navigate(`/profile/${userId}`);
   };
 
@@ -214,36 +179,23 @@ export default function CommentBox({ contentType, contentId }: Props) {
     return (
       <div key={comment.id}>
         <CommentItem style={depth > 0 ? { marginLeft: indent } : undefined} depth={depth}>
-          {depth > 0 && (
-            <CornerDownRight size={16} style={{ marginRight: 8, color: "#B4B4B4" }} />
-          )}
-          <Profile
-            src={comment.author_profile_image || "/default_profile.png"}
-            alt={comment.author_nickname}
-          />
+          {depth > 0 && <CornerDownRight size={16} style={{ marginRight: 8, color: "#B4B4B4" }} />}
+          <Profile src={comment.author_profile_image || "/default_profile.png"} alt={comment.author_nickname} />
           <CommentContent>
             <Nickname
-              onClick={() =>
-                !comment.is_deleted && handleNicknameClick(comment.author_id)
-              }
-              style={{
-                cursor: comment.is_deleted ? "default" : "pointer",
-              }}
+              onClick={() => !comment.is_deleted && handleNicknameClick(comment.author_id)}
+              style={{ cursor: comment.is_deleted ? "default" : "pointer" }}
             >
-              {comment.author_nickname || "알 수 없음"}
-              {isMyComment && (
-                <span style={{ fontSize: 10, color: "#aaa", marginLeft: 6 }}>
-                  내 댓글
-                </span>
-              )}
+              {comment.author_nickname || t("comment.unknown")}
+              {isMyComment && <span style={{ fontSize: 10, color: "#aaa", marginLeft: 6 }}>{t("comment.my_comment")}</span>}
             </Nickname>
 
             <Text
               dangerouslySetInnerHTML={{
                 __html: comment.is_deleted
-                  ? "삭제된 댓글입니다."
+                  ? t("comment.deleted")
                   : (comment.tagged_nickname
-                      ? `<span style="color:#6096fd; font-weight:500;">@${comment.tagged_nickname} </span>`
+                      ? `<span style=\"color:#6096fd; font-weight:500;\">@${comment.tagged_nickname} </span>`
                       : "") + comment.content,
               }}
             />
@@ -252,25 +204,18 @@ export default function CommentBox({ contentType, contentId }: Props) {
               <span>{dayjs(comment.created_at).fromNow()}</span>
               {!comment.is_deleted && (
                 <>
-                  <ReplyBtn onClick={() => handleReplyToggle(comment)}>답글</ReplyBtn>
+                  <ReplyBtn onClick={() => handleReplyToggle(comment)}>{t("comment.reply")}</ReplyBtn>
                   <LikeButton
                     liked={!!comment.liked}
                     disabled={isMyComment}
                     aria-disabled={isMyComment || !!comment.liked}
-                    onClick={() =>
-                      handleLike(comment.id, isMyComment, !!comment.liked)
-                    }
+                    onClick={() => handleLike(comment.id, isMyComment, !!comment.liked)}
                   >
                     <ThumbsUp size={14} />
                     {comment.like_count}
                   </LikeButton>
                   {isMyComment && (
-                    <ReplyBtn
-                      onClick={() => handleDelete(comment.id)}
-                      style={{ color: "#e57373" }}
-                    >
-                      삭제
-                    </ReplyBtn>
+                    <ReplyBtn onClick={() => handleDelete(comment.id)} style={{ color: "#e57373" }}>{t("comment.delete")}</ReplyBtn>
                   )}
                 </>
               )}
@@ -282,12 +227,12 @@ export default function CommentBox({ contentType, contentId }: Props) {
           <ReplyInputWrapper style={{ marginLeft: indent + 32 }}>
             <ReplyInput
               ref={replyInputRef}
-              placeholder={`@${replyState.tagged_nickname} 님에게 답글을 입력하세요`}
+              placeholder={t("comment.reply_placeholder", { nickname: replyState.tagged_nickname })}
               value={replyInput}
               onChange={(e) => setReplyInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleReplySubmit()}
             />
-            <ReplySubmitBtn onClick={handleReplySubmit}>등록</ReplySubmitBtn>
+            <ReplySubmitBtn onClick={handleReplySubmit}>{t("comment.submit")}</ReplySubmitBtn>
           </ReplyInputWrapper>
         )}
 
@@ -299,24 +244,16 @@ export default function CommentBox({ contentType, contentId }: Props) {
   return (
     <Wrapper>
       <TabList>
-        <Tab selected={sort === "createdAsc"} onClick={() => setSort("createdAsc")}>
-          등록순
-        </Tab>
-        <Tab selected={sort === "createdDesc"} onClick={() => setSort("createdDesc")}>
-          최신순
-        </Tab>
-        <Tab selected={sort === "likeDesc"} onClick={() => setSort("likeDesc")}>
-          따봉순
-        </Tab>
+        <Tab selected={sort === "createdAsc"} onClick={() => setSort("createdAsc")}>{t("comment.sort.createdAsc")}</Tab>
+        <Tab selected={sort === "createdDesc"} onClick={() => setSort("createdDesc")}>{t("comment.sort.createdDesc")}</Tab>
+        <Tab selected={sort === "likeDesc"} onClick={() => setSort("likeDesc")}>{t("comment.sort.likeDesc")}</Tab>
       </TabList>
 
       <CommentList ref={commentListRef}>
         {loading ? (
-          <div style={{ padding: "2em", textAlign: "center" }}>로딩중...</div>
+          <div style={{ padding: "2em", textAlign: "center" }}>{t("comment.loading")}</div>
         ) : getTopLevelComments().length === 0 ? (
-          <div style={{ padding: "2em", textAlign: "center", color: "#bbb" }}>
-            아직 작성된 댓글이 없습니다.
-          </div>
+          <div style={{ padding: "2em", textAlign: "center", color: "#bbb" }}>{t("comment.empty")}</div>
         ) : (
           getTopLevelComments().map((c) => renderComment(c, 0))
         )}
@@ -325,12 +262,12 @@ export default function CommentBox({ contentType, contentId }: Props) {
       {currentUser && (
         <InputWrapper>
           <CommentInput
-            placeholder="댓글을 입력하세요"
+            placeholder={t("comment.input_placeholder")}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           />
-          <SubmitBtn onClick={handleSubmit}>등록</SubmitBtn>
+          <SubmitBtn onClick={handleSubmit}>{t("comment.submit")}</SubmitBtn>
         </InputWrapper>
       )}
     </Wrapper>

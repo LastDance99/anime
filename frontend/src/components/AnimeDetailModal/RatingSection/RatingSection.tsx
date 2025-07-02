@@ -10,22 +10,22 @@ import {
   ListCount,
 } from "./RatingSection.styled";
 import { Star as StarFull, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface RatingSectionProps {
   myRating: number;
   avgRating: number;
   listCount: number;
   onChangeMyRating?: (score: number) => void;
-  
 }
 
-// 별점 렌더 (수정)
+// 별점 렌더링 함수
 function renderStars(
   score: number,
   onClick?: (val: number) => void,
   onHover?: (val: number) => void,
   onLeave?: () => void,
-  hoverScore: number | null = null // undefined 안 씀
+  hoverScore: number | null = null
 ) {
   return Array.from({ length: 5 }).map((_, i) => {
     const val = i + 1;
@@ -69,8 +69,8 @@ export default function RatingSection({
   onChangeMyRating,
 }: RatingSectionProps) {
   const [hoverScore, setHoverScore] = useState<number | null>(null);
+  const { t } = useTranslation();
 
-  // **myRating이 바뀔 때 hoverScore 초기화** (리뷰 동기화 대응)
   useEffect(() => {
     setHoverScore(null);
   }, [myRating]);
@@ -78,7 +78,7 @@ export default function RatingSection({
   return (
     <RatingSectionWrapper>
       <RatingCol>
-        <RatingTitle>내 평점</RatingTitle>
+        <RatingTitle>{t("anime.my_rating")}</RatingTitle>
         <RatingScore>{Number(hoverScore ?? myRating ?? 0).toFixed(1)}</RatingScore>
         <StarRow style={{ userSelect: "none" }}>
           {renderStars(
@@ -91,14 +91,13 @@ export default function RatingSection({
         </StarRow>
       </RatingCol>
       <RatingCol>
-        <RatingTitle>평균 평점</RatingTitle>
+        <RatingTitle>{t("anime.average_rating")}</RatingTitle>
         <RatingScore>{Number(avgRating ?? 0).toFixed(1)}</RatingScore>
         <StarRow>{renderStars(avgRating)}</StarRow>
       </RatingCol>
       <RatingCol>
         <RatingTitle>
-          리스트에<br />
-          추가된 수
+          {t("anime.list_added")}
         </RatingTitle>
         <ListAddRow>
           <ListAddIcon>

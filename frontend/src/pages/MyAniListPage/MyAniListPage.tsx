@@ -12,8 +12,10 @@ import { PageWrapper, MainLayout } from "./MyAniListPage.styled";
 import type { User } from "../../types/user";
 import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const MyAniListPage = () => {
+  const { t } = useTranslation();
   const { user } = useOutletContext<{ user: User }>();
   const { currentUser } = useAuth();
 
@@ -22,25 +24,21 @@ const MyAniListPage = () => {
     format: "", keyword: "", original: "", sort: "",
   });
 
-  // 🟢 리스트: 프로필 주인 기준!
   const [animeList, setAnimeList] = useState<AnimeItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  // 상세 모달 상태
   const [selectedAnime, setSelectedAnime] = useState<null | (AnimeItem & {
     isAdded: boolean;
     isFavorite: boolean;
   })>(null);
 
-  // 현재 로그인한 사용자의 "내 리스트/최애"
   const [myAnimeList, setMyAnimeList] = useState<AnimeItem[]>([]);
   const [myFavoriteAnimeIds, setMyFavoriteAnimeIds] = useState<number[]>([]);
 
   const pageRef = useRef(1);
   const isFetchingRef = useRef(false);
 
-  // ⭐️ 1. 프로필 주인 기준 리스트/최애 fetch (리스트 화면용)
   const fetchAnimeList = async (pageNum: number, reset = false) => {
     if (isFetchingRef.current) return;
     try {
@@ -94,9 +92,8 @@ const MyAniListPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore]);
 
-  // ⭐️ 2. 내 리스트/내 최애를 로그인 유저 기준으로 fetch (상세 모달용)
   const fetchMyAnimeData = async () => {
-  if (!currentUser) return;
+    if (!currentUser) return;
     try {
       const [listRes, favRes] = await Promise.all([
         getUserContent({ userId: currentUser.id, type: "anime" }),
@@ -106,7 +103,7 @@ const MyAniListPage = () => {
       setMyFavoriteAnimeIds(favRes.map((a: AnimeItem) => a.id));
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
-        alert("세션이 만료되었습니다. 다시 로그인 해주세요.");
+        alert(t("anime.session_expired"));
       }
     }
   };
@@ -115,10 +112,9 @@ const MyAniListPage = () => {
     fetchMyAnimeData();
   }, [currentUser]);
 
-  // ✅ 상세 모달 열기: 항상 내 기준!
   const handleAnimeClick = async (anime: AnimeItem) => {
     if (!currentUser) {
-      alert("로그인 후 이용 가능합니다!");
+      alert(t("anime.login_required"));
       return;
     }
     await fetchMyAnimeData();
@@ -136,11 +132,10 @@ const MyAniListPage = () => {
       });
     } catch (err) {
       console.error("상세 불러오기 실패", err);
-      alert("애니메이션 상세 정보를 불러올 수 없습니다.");
+      alert(t("anime.detail_fetch_failed"));
     }
   };
 
-  // 리스트에서 토글(추가/삭제)는 프로필 주인 것만 동작!
   const handleToggle = async (anime: AnimeItem) => {
     const animeId = anime.anime_id || anime.id;
     const isAlreadyAdded = animeList.some((item) => (item.anime_id || item.id) === animeId);
@@ -158,24 +153,28 @@ const MyAniListPage = () => {
       if (axios.isAxiosError(err) && err.response?.status === 404) {
         console.warn("이미 삭제된 항목입니다:", animeId);
       } else {
-        alert("리스트 토글 중 오류가 발생했습니다.");
+        alert(t("anime.toggle_error"));
       }
     }
   };
 
-  // 최애 토글도 프로필 주인 것만
   const handleToggleFavorite = async (anime: AnimeItem) => {
     const animeId = anime.anime_id || anime.id;
     const isNowFavorite = !animeList.some(a => (a.anime_id || a.id) === animeId && a.is_favorite);
     const isInMyList = animeList.some(a => (a.anime_id || a.id) === animeId);
     if (!isInMyList) {
-      alert("이 애니는 내 리스트에 추가되어 있지 않아 최애로 등록할 수 없습니다.");
+      alert(t("anime.favorite_require_list"));
       return;
     }
     try {
       await toggleFavoriteAnime(animeId, isNowFavorite);
-      // 리스트 갱신
-      fetchAnimeList(pageRef.current, true);
+      setAnimeList(prev =>
+        prev.map(a =>
+          (a.anime_id || a.id) === animeId
+            ? { ...a, is_favorite: isNowFavorite }
+            : a
+        )
+      );
     } catch (err) {
       console.error("즐겨찾기 토글 실패", err);
     }

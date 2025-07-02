@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import YearSlider from "./Year/Year";
 import Format from "./FilterSelect/FilterSelect";
 import Search from "../../Animation/AniTag/Search/Search";
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function MyAniListFilter({ filters, setFilters }: Props) {
+  const { t } = useTranslation();
   const [meta, setMeta] = useState<null | {
     genres: string[];
     formats: string[];
@@ -46,7 +48,7 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
       });
   }, []);
 
-  if (!meta) return <div>필터 옵션 로딩중...</div>;
+  if (!meta) return <div>{t("common.loading")}</div>;
 
   return (
     <FilterContainer>
@@ -62,7 +64,7 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
           value={filters.genre}
           onChange={v => setFilters(f => ({ ...f, genre: v }))}
           options={meta.genres.map(g => ({ value: g, label: g }))}
-          label="장르"
+          label={t("filter.genre")}
         />
       </FilterGroup>
 
@@ -71,7 +73,7 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
           value={filters.season}
           onChange={v => setFilters(f => ({ ...f, season: v }))}
           options={meta.seasons.map(s => ({ value: s, label: s }))}
-          label="계절"
+          label={t("filter.season")}
         />
       </FilterGroup>
 
@@ -80,7 +82,7 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
           value={filters.original}
           onChange={v => setFilters(f => ({ ...f, original: v as OriginalType }))}
           options={meta.originals.map(o => ({ value: o, label: o }))}
-          label="원작"
+          label={t("filter.source")}
         />
       </FilterGroup>
 
@@ -89,12 +91,12 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
           value={filters.sort}
           onChange={v => setFilters(f => ({ ...f, sort: v as SortType }))}
           options={[
-            { value: "favorite", label: "최애의 애니" },
-            { value: "latest", label: "최신순" },
-            { value: "oldest", label: "오래된 순" },
-            { value: "score", label: "평점" },
+            { value: "favorite", label: t("filter.sort.favorite") },
+            { value: "latest", label: t("filter.sort.latest") },
+            { value: "oldest", label: t("filter.sort.oldest") },
+            { value: "score", label: t("filter.sort.score") },
           ]}
-          label="정렬"
+          label={t("filter.sort.label")}
         />
       </FilterGroup>
 
@@ -103,7 +105,7 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
           value={filters.format}
           onChange={v => setFilters(f => ({ ...f, format: v }))}
           options={meta.formats.map(f => ({ value: f, label: f }))}
-          label="포맷"
+          label={t("filter.format")}
         />
       </FilterGroup>
 
@@ -112,15 +114,15 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
           value={filters.status}
           onChange={v => setFilters(f => ({ ...f, status: v }))}
           options={meta.statuses.map(s => ({ value: s, label: s }))}
-          label="방영상태"
+          label={t("filter.status")}
         />
       </FilterGroup>
 
       <FilterGroup>
         <YearSlider
           value={Number(filters.year)}
-          min={Math.min(...meta.years.filter((y): y is number => typeof y === "number"))}
-          max={Math.max(...meta.years.filter((y): y is number => typeof y === "number"))}
+          min={Math.min(...meta.years)}
+          max={Math.max(...meta.years)}
           onChange={v => setFilters(f => ({ ...f, year: v }))}
           onReset={() => setFilters(f => ({ ...f, year: 0 }))}
         />

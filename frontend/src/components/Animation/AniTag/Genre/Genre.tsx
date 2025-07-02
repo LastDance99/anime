@@ -7,6 +7,7 @@ import {
   GenreToggleButton,
   ToggleLine
 } from "./Genre.styled";
+import { useTranslation } from "react-i18next";
 
 interface GenreProps {
   value: string[];
@@ -15,6 +16,7 @@ interface GenreProps {
 }
 
 export default function Genre({ value, onChange, options }: GenreProps) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = React.useState(false);
   const VISIBLE_COUNT = 8;
   const visibleGenres = showAll ? options : options.slice(0, VISIBLE_COUNT);
@@ -29,7 +31,7 @@ export default function Genre({ value, onChange, options }: GenreProps) {
 
   return (
     <GenreSection>
-      <GenreTitle>장르</GenreTitle>
+      <GenreTitle>{t("anime.genre")}</GenreTitle>
       <GenreButtonList>
         {visibleGenres.map(g => (
           <GenreButton
@@ -44,7 +46,7 @@ export default function Genre({ value, onChange, options }: GenreProps) {
       {options.length > VISIBLE_COUNT && (
         <GenreToggleButton
           onClick={() => setShowAll(v => !v)}
-          aria-label={showAll ? "접기" : "더보기"}
+          aria-label={t(showAll ? "anime.collapse" : "anime.expand")}
         >
           <ToggleLine className="toggle-line" />
           {showAll ? (

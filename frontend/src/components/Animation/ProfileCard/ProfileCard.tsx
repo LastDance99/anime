@@ -18,12 +18,14 @@ import { getFullImageUrl } from "../../../utils/getFullImageUrl";
 import { useAuth } from "../../../contexts/AuthContext";
 import { logout } from "../../../api/auth";
 import { animeProfileInfo } from "../../../api/anime";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   user: User;
 }
 
 const AnimeProfile: React.FC<Props> = ({ user }) => {
+  const { t } = useTranslation();
   const [isImageError, setImageError] = useState(false);
   const [animeData, setAnimeData] = useState({
     animelist_count: 0,
@@ -40,13 +42,13 @@ const AnimeProfile: React.FC<Props> = ({ user }) => {
   }, []);
 
   const handleLogout = async () => {
-    const confirm = window.confirm("정말 로그아웃하시겠습니까?");
-    if (!confirm) return;
+    const confirmLogout = window.confirm(t("profile.logout_confirm"));
+    if (!confirmLogout) return;
 
     try {
       await logout();
     } catch (err) {
-      console.warn("서버 로그아웃 실패", err);
+      console.warn(t("profile.logout_failed"), err);
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
@@ -73,27 +75,27 @@ const AnimeProfile: React.FC<Props> = ({ user }) => {
         <FontBox>
           <Name>{user.nickname}</Name>
           <Email>{user.email}</Email>
-          <Font>포인트: {user.point ?? 0}</Font>
+          <Font>{t("profile.point", { point: user.point ?? 0 })}</Font>
         </FontBox>
-        <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
+        <LogoutButton onClick={handleLogout}>{t("profile.logout")}</LogoutButton>
       </TopBox>
       <BottomBox>
         <FontBox style={{ borderRight: "1px solid #FFB6C1", width: "40%" }}>
           <FontRow>
-            <Font>출석일:</Font>
-            {animeData.attendance_count}일
+            <Font>{t("profile.attendance")}:</Font>
+            {animeData.attendance_count}{t("profile.day_unit")}
           </FontRow>
           <FontRow>
-            <Font>내 리스트:</Font>
-            {animeData.animelist_count}개
+            <Font>{t("profile.list")}:</Font>
+            {animeData.animelist_count}{t("profile.item_unit")}
           </FontRow>
           <FontRow>
-            <Font>내가 쓴 리뷰:</Font>
-            {animeData.review_count}개
+            <Font>{t("profile.review")}:</Font>
+            {animeData.review_count}{t("profile.item_unit")}
           </FontRow>
         </FontBox>
         <CustomButton onClick={() => navigate(`/profile/${user.id}/myanilist`)}>
-          내 리스트
+          {t("profile.view_list")}
         </CustomButton>
       </BottomBox>
     </Card>

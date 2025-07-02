@@ -6,6 +6,7 @@ import {
   IntroParagraph,
 } from "./Introduction.styled";
 import { updateAbout } from "../../../../api/profile";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   about: string;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function Introduction({ about, userId, isMyPage }: Props) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(about);
 
@@ -23,7 +25,7 @@ export default function Introduction({ about, userId, isMyPage }: Props) {
       setEditing(false);
     } catch (err) {
       console.error("소개글 저장 실패:", err);
-      alert("소개글 저장에 실패했어요.");
+      alert(t("profile.intro_save_failed"));
     }
   };
 
@@ -34,17 +36,23 @@ export default function Introduction({ about, userId, isMyPage }: Props) {
           <IntroTextArea
             value={value}
             onChange={e => setValue(e.target.value)}
-            placeholder="자기소개를 입력해 주세요."
+            placeholder={t("profile.intro_placeholder")}
             maxLength={200}
             rows={7}
           />
-          <ProfileButton onClick={handleSave}>저장</ProfileButton>
+          <ProfileButton onClick={handleSave}>
+            {t("common.save")}
+          </ProfileButton>
         </>
       ) : (
         <>
-          <IntroParagraph>{value || "자기소개가 없습니다."}</IntroParagraph>
+          <IntroParagraph>
+            {value || t("profile.intro_empty")}
+          </IntroParagraph>
           {isMyPage && (
-            <ProfileButton onClick={() => setEditing(true)}>수정</ProfileButton>
+            <ProfileButton onClick={() => setEditing(true)}>
+              {t("common.edit")}
+            </ProfileButton>
           )}
         </>
       )}

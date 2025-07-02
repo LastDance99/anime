@@ -15,14 +15,9 @@ import {
   Footer,
   Sidebar,
 } from "./MyGalleryPage.styled";
+import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 40;
-
-const SORT_OPTIONS = [
-  { label: "최신순", value: "latest" },
-  { label: "오래된순", value: "oldest" },
-  { label: "추천순", value: "like" },
-];
 
 type ProfileContext = {
   user: {
@@ -32,6 +27,7 @@ type ProfileContext = {
 };
 
 const MyGalleryPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useOutletContext<ProfileContext>();
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
@@ -39,6 +35,12 @@ const MyGalleryPage: React.FC = () => {
   const [list, setList] = useState([]);
   const [totalPage, setTotalPage] = useState(1);
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+
+  const SORT_OPTIONS = [
+    { label: t("sort.latest"), value: "latest" },
+    { label: t("sort.oldest"), value: "oldest" },
+    { label: t("sort.likes"), value: "like" },
+  ];
 
   useEffect(() => {
     const fetch = async () => {
@@ -49,7 +51,6 @@ const MyGalleryPage: React.FC = () => {
         order: sort,
         page,
       });
-      console.log("📸 갤러리 리스트:", list);
       setList(res.results);
       setTotalPage(Math.max(1, Math.ceil(res.count / PAGE_SIZE)));
     };
@@ -61,7 +62,7 @@ const MyGalleryPage: React.FC = () => {
       <Container>
         <Main>
           <Header>
-            <Title>{user.nickname}님의 갤러리</Title>
+            <Title>{t("mygallery.title", { nickname: user.nickname })}</Title>
             <div style={{ marginRight: "52px" }}>
               <SortDropdown value={sort} onChange={setSort} options={SORT_OPTIONS} />
             </div>
@@ -83,7 +84,7 @@ const MyGalleryPage: React.FC = () => {
               value={keyword}
               onChange={e => setKeyword(e.target.value)}
               onSearch={() => setPage(1)}
-              placeholder="제목 또는 내용을 검색하세요"
+              placeholder={t("mygallery.search_placeholder")}
             />
           </Footer>
         </Main>

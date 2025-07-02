@@ -4,6 +4,7 @@ import { AniListWrapper } from "./AniList.styled";
 import { AniListFlex } from "./AniListFlex.styled";
 import AniListCard from "./AniListCard/AniListCard";
 import type { AnimeItem } from "../../../types/anime";
+import { useTranslation } from "react-i18next";
 
 interface AniListProps {
   list: AnimeItem[];
@@ -17,7 +18,7 @@ interface AniListProps {
   loading?: boolean;
   userAnimeIds: number[];
   onToggleAnimeList: (anime: AnimeItem) => void;
-  isFiltered: boolean; // 🔹 추가됨
+  isFiltered: boolean;
 }
 
 export default function AniList({
@@ -32,15 +33,17 @@ export default function AniList({
   loading,
   userAnimeIds,
   onToggleAnimeList,
-  isFiltered, // 🔹 추가됨
+  isFiltered,
 }: AniListProps) {
+  const { t } = useTranslation();
+
   const processedList = list.map(anime => ({
     ...anime,
     isAdded: userAnimeIds.includes(anime.id),
   }));
 
   if (!loading && (!list || list.length === 0)) {
-    return <AniListWrapper>애니메이션 목록이 없습니다.</AniListWrapper>;
+    return <AniListWrapper>{t("anime.empty_list")}</AniListWrapper>;
   }
 
   return (

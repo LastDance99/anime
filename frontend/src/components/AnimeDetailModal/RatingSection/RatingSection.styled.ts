@@ -25,6 +25,7 @@ export const RatingTitle = styled.div`
   color: ${({ theme }) => theme.colors.text};
   margin-top: 6px;
   margin-bottom: 2px;
+  white-space: pre-line;
 `;
 
 export const RatingScore = styled.div`

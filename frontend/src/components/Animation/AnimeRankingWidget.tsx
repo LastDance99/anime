@@ -8,6 +8,7 @@ import {
   RankingBox, TabList, Tab, RankingList, RankingItem,
   RankBadge, CoverThumb, RankingInfo, AnimeTitle, AnimeMeta
 } from "./AnimeRankingWidget.styled";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   user: User;
@@ -20,22 +21,12 @@ export default function AnimeRankingWidget({
   userAnimeIds,
   onToggleAnimeList,
 }: Props) {
+  const { t } = useTranslation();
+
   const [popular, setPopular] = useState<AnimeRankingItem[]>([]);
   const [upcoming, setUpcoming] = useState<AnimeRankingItem[]>([]);
   const [tab, setTab] = useState<"popular" | "upcoming">("popular");
   const [selectedAnime, setSelectedAnime] = useState<AnimeItem | null>(null);
-
-  useEffect(() => {
-    getPopularAnimeRanking(5).then(res => {
-      console.log("🔥 인기 애니:", res);
-      setPopular(res);
-    });
-
-    getUpcomingAnimeRanking(5).then(res => {
-      console.log("⏳ 기대작 애니:", res);  // ← 이거 추가
-      setUpcoming(res);
-    });
-  }, []);
 
   useEffect(() => {
     getPopularAnimeRanking(5).then(setPopular);
@@ -52,8 +43,12 @@ export default function AnimeRankingWidget({
   return (
     <RankingBox>
       <TabList>
-        <Tab active={tab === "popular"} onClick={() => setTab("popular")}>인기 애니</Tab>
-        <Tab active={tab === "upcoming"} onClick={() => setTab("upcoming")}>기대작</Tab>
+        <Tab active={tab === "popular"} onClick={() => setTab("popular")}>
+          {t("anime.tab_popular")}
+        </Tab>
+        <Tab active={tab === "upcoming"} onClick={() => setTab("upcoming")}>
+          {t("anime.tab_upcoming")}
+        </Tab>
       </TabList>
       <RankingList>
         {list.map((anime, idx) => (

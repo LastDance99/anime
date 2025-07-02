@@ -12,7 +12,7 @@ import {
   Comments,
   Title,
 } from "./BoardList.styled";
-
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ko";
@@ -29,23 +29,24 @@ type BoardListProps = {
 };
 
 const BoardList: React.FC<BoardListProps> = ({ list, page, pageSize, onItemClick }) => {
+  const { t } = useTranslation();
 
   const BOARD_TYPE_KR: Record<string, string> = {
-    post: "게시글",
-    gallery: "갤러리",
+    post: t("board.type_post"),
+    gallery: t("board.type_gallery"),
   };
 
   return (
     <Table>
       <Thead>
         <TheadTr>
-          <Th style={{ width: columnWidths[0] }}>번호</Th>
-          <Th style={{ width: columnWidths[1] }}>이미지</Th>
-          <Th style={{ width: columnWidths[2] }}>제목</Th>
-          <Th style={{ width: columnWidths[3] }}>이름</Th>
-          <Th style={{ width: columnWidths[4] }}>날짜</Th>
-          <Th style={{ width: columnWidths[5] }}>조회수</Th>
-          <Th style={{ width: columnWidths[6] }}>추천</Th>
+          <Th style={{ width: columnWidths[0] }}>{t("board.number")}</Th>
+          <Th style={{ width: columnWidths[1] }}>{t("board.image")}</Th>
+          <Th style={{ width: columnWidths[2] }}>{t("board.title")}</Th>
+          <Th style={{ width: columnWidths[3] }}>{t("board.author")}</Th>
+          <Th style={{ width: columnWidths[4] }}>{t("board.date")}</Th>
+          <Th style={{ width: columnWidths[5] }}>{t("board.views")}</Th>
+          <Th style={{ width: columnWidths[6] }}>{t("board.likes")}</Th>
         </TheadTr>
       </Thead>
       <Tbody>
@@ -80,7 +81,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, page, pageSize, onItemClick
                     color: "#999",
                   }}
                 >
-                  이미지 없음
+                  {t("board.no_image")}
                 </div>
               )}
             </Td>

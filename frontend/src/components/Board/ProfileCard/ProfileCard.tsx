@@ -18,6 +18,7 @@ import { logout } from "../../../api/auth";
 import { getFullImageUrl } from "../../../utils/getFullImageUrl";
 import { useAuth } from "../../../contexts/AuthContext";
 import { boardsProfileInfo } from "../../../api/board";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   user: User;
@@ -34,19 +35,20 @@ const BoardProfile: React.FC<Props> = ({ user }) => {
   const navigate = useNavigate();
   const profileImage = getFullImageUrl(user.profile_image);
   const { logout: clearAuth } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     boardsProfileInfo().then(setBoardData).catch(console.error);
   }, []);
 
   const handleLogout = async () => {
-    const confirm = window.confirm("정말 로그아웃하시겠습니까?");
+    const confirm = window.confirm(t("profile.confirm_logout"));
     if (!confirm) return;
 
     try {
       await logout();
     } catch (err) {
-      console.warn("서버 로그아웃 실패", err);
+      console.warn(t("profile.logout_failed"), err);
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
@@ -77,26 +79,32 @@ const BoardProfile: React.FC<Props> = ({ user }) => {
         <FontBox>
           <Name>{user.nickname}</Name>
           <Email>{user.email}</Email>
-          <Font>포인트: {user.point ?? 0}</Font>
+          <Font>
+            {t("profile.point", { point: user.point ?? 0 })}
+          </Font>
         </FontBox>
-        <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
+        <LogoutButton onClick={handleLogout}>{t("profile.logout")}</LogoutButton>
       </TopBox>
+
       <BottomBox>
-        <FontBox style={{ borderRight: "1px solid #FFB6C1", width: "40%" }}>
+        <FontBox style={{ borderRight: "1px solid #FFB6C1", width: "60%" }}>
           <FontRow>
-            <Font>출석일:</Font>
-            {boardData.attendance_count}일
+            <Font>{t("profile.attendance")}:</Font>
+            {boardData.attendance_count}
+            {/* {t("profile.unit_day")} */}
           </FontRow>
           <FontRow>
-            <Font>내가 쓴 게시글:</Font>
-            {boardData.post_count}개
+            <Font>{t("profile.my_posts")}:</Font>
+            {boardData.post_count}
+            {/* {t("profile.unit_count")} */}
           </FontRow>
           <FontRow>
-            <Font>내가 쓴 댓글:</Font>
-            {boardData.comment_count}개
+            <Font>{t("profile.my_comments")}:</Font>
+            {boardData.comment_count}
+            {/* {t("profile.unit_count")} */}
           </FontRow>
         </FontBox>
-        <CustomButton onClick={handleClick}>글쓰기</CustomButton>
+        <CustomButton onClick={handleClick}>{t("profile.write")}</CustomButton>
       </BottomBox>
     </Card>
   );

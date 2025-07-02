@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import AccountSettings from "../../components/Settings/AccountSettings/AccountSettings";
 import ImageSettings from "../../components/Settings/ImageSettings/ImageSettings";
 import {
@@ -37,11 +38,12 @@ export default function SettingsPage({
   setBgFile,
   setRoomFile,
 }: SettingsPageProps) {
+  const { t } = useTranslation();
   const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
 
   const handleTryClose = () => {
     if (hasChanges) {
-      const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
+      const confirmed = window.confirm(t("settings.unsavedConfirm"));
       if (!confirmed) return;
     }
     onClose();
@@ -49,7 +51,7 @@ export default function SettingsPage({
 
   return (
     <Wrapper onClick={(e) => e.stopPropagation()}>
-      <Title>설정</Title>
+      <Title>{t("settings.title")}</Title>
       <AccountSettings
         user={tempUser}
         setUser={setTempUser}
@@ -66,8 +68,8 @@ export default function SettingsPage({
         setRoomFile={setRoomFile}
       />
       <BottomBar>
-        <ActionButton onClick={onSave}>저장</ActionButton>
-        <ActionButton onClick={onClose}>닫기</ActionButton>
+        <ActionButton onClick={onSave}>{t("common.save")}</ActionButton>
+        <ActionButton onClick={handleTryClose}>{t("common.close")}</ActionButton>
       </BottomBar>
     </Wrapper>
   );

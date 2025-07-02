@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { confirmPasswordReset } from '../api/auth';
+import { useTranslation } from 'react-i18next';
 
 export default function ResetConfirmPage() {
+  const { t } = useTranslation();
   const { uid, token } = useParams<{ uid: string; token: string }>();
   const [newPassword, setNewPassword] = useState('');
   const [success, setSuccess] = useState(false);
@@ -14,24 +16,24 @@ export default function ResetConfirmPage() {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      alert("비밀번호 재설정에 실패했습니다.");
+      alert(t('auth.resetPassword.fail'));
     }
   };
 
   return (
     <div>
-      <h3>새 비밀번호 설정</h3>
+      <h3>{t('auth.resetPassword.title')}</h3>
       {success ? (
-        <p>비밀번호가 성공적으로 변경되었습니다. 로그인 페이지로 이동합니다.</p>
+        <p>{t('auth.resetPassword.success')}</p>
       ) : (
         <>
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="새 비밀번호"
+            placeholder={t('auth.resetPassword.newPasswordPlaceholder')}
           />
-          <button onClick={handleSubmit}>비밀번호 변경</button>
+          <button onClick={handleSubmit}>{t('auth.resetPassword.submit')}</button>
         </>
       )}
     </div>

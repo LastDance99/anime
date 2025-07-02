@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { changePassword } from "../../api/auth";
+import { useTranslation } from "react-i18next";
 
 type Props = {
-  currentPassword: string;
-  onSave: (newPassword: string) => void;
+  onSave?: (newPassword: string) => void;
   onClose: () => void;
 };
 
 export default function PasswordModal({ onClose }: Props) {
+  const { t } = useTranslation();
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [nextConfirm, setNextConfirm] = useState("");
@@ -18,7 +19,7 @@ export default function PasswordModal({ onClose }: Props) {
   const handleSave = async () => {
     setError(null);
     if (!current || !next || !nextConfirm) {
-      setError("모든 항목을 입력해주세요.");
+      setError(t("password_modal.error_required"));
       return;
     }
 
@@ -33,15 +34,15 @@ export default function PasswordModal({ onClose }: Props) {
     } catch (err: any) {
       const data = err.response?.data;
       if (data?.current_password) {
-        setError(`현재 비밀번호 오류: ${data.current_password}`);
+        setError(t("password_modal.error_current", { msg: data.current_password }));
       } else if (data?.new_password) {
-        setError(`새 비밀번호 오류: ${data.new_password}`);
+        setError(t("password_modal.error_new", { msg: data.new_password }));
       } else if (data?.new_password2) {
-        setError(`비밀번호 확인 오류: ${data.new_password2}`);
+        setError(t("password_modal.error_confirm", { msg: data.new_password2 }));
       } else if (data?.non_field_errors) {
         setError(data.non_field_errors.join(" "));
       } else {
-        setError("비밀번호 변경에 실패했습니다.");
+        setError(t("password_modal.error_general"));
       }
     }
   };
@@ -49,35 +50,23 @@ export default function PasswordModal({ onClose }: Props) {
   return (
     <Overlay>
       <ModalBox onClick={(e) => e.stopPropagation()}>
-        <h3>비밀번호 변경</h3>
+        <h3>{t("password_modal.title")}</h3>
 
-        <Label>현재 비밀번호</Label>
-        <Input
-          type="password"
-          value={current}
-          onChange={(e) => setCurrent(e.target.value)}
-        />
+        <Label>{t("password_modal.current")}</Label>
+        <Input type="password" value={current} onChange={(e) => setCurrent(e.target.value)} />
 
-        <Label>새 비밀번호</Label>
-        <Input
-          type="password"
-          value={next}
-          onChange={(e) => setNext(e.target.value)}
-        />
+        <Label>{t("password_modal.new")}</Label>
+        <Input type="password" value={next} onChange={(e) => setNext(e.target.value)} />
 
-        <Label>새 비밀번호 확인</Label>
-        <Input
-          type="password"
-          value={nextConfirm}
-          onChange={(e) => setNextConfirm(e.target.value)}
-        />
+        <Label>{t("password_modal.confirm")}</Label>
+        <Input type="password" value={nextConfirm} onChange={(e) => setNextConfirm(e.target.value)} />
 
         {error && <Warning>{error}</Warning>}
-        {success && <Success>비밀번호가 변경되었습니다.</Success>}
+        {success && <Success>{t("password_modal.success")}</Success>}
 
         <ButtonGroup>
-          <Button onClick={onClose}>취소</Button>
-          <Button onClick={handleSave}>저장</Button>
+          <Button onClick={onClose}>{t("common.cancel")}</Button>
+          <Button onClick={handleSave}>{t("common.save")}</Button>
         </ButtonGroup>
       </ModalBox>
     </Overlay>

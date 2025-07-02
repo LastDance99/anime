@@ -19,37 +19,36 @@ import SortDropdown from "../../components/SortDropdown/SortDropdown";
 import SearchInput from "../../components/SearchInput/SearchInput";
 import WriteButton from "../../components/WriteButton/WriteButton";
 import DetailModal from "../../components/Board/DetailModal/DetailModal";
-import BoardSideWidget from "../../components/Board/BoardSideWidget"
+import BoardSideWidget from "../../components/Board/BoardSideWidget";
 import { useNavigate } from "react-router-dom";
 import { getBoardPosts } from "../../api/board";
 import { getMyProfile } from "../../api/profile";
 import type { BoardItem } from "../../types/board";
 import type { User } from "../../types/user";
+import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 50;
 
-const SORT_OPTIONS = [
-  { label: "최신순", value: "latest" },
-  { label: "오래된순", value: "oldest" },
-  { label: "추천순", value: "likes" },
-];
-
-type TabType = "all" | "post" | "gallery" | "thirty" | "ten";
-
 const BoardPage: React.FC = () => {
+  const { t } = useTranslation();
   const [boardList, setBoardList] = useState<BoardItem[]>([]);
-  const [user, setUser] = useState<User | null>(null); // ✅ 훅은 여기
+  const [user, setUser] = useState<User | null>(null);
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("latest");
-  const [selectedTab, setSelectedTab] = useState<TabType>("all");
+  const [selectedTab, setSelectedTab] = useState<"all" | "post" | "gallery" | "thirty" | "ten">("all");
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<"post" | "gallery" | null>(null);
   const [totalCount, setTotalCount] = useState(0);
 
   const navigate = useNavigate();
 
-  // ✅ 로그인 유저 정보 가져오기
+  const SORT_OPTIONS = [
+    { label: t("board.sort_latest"), value: "latest" },
+    { label: t("board.sort_oldest"), value: "oldest" },
+    { label: t("board.sort_likes"), value: "likes" },
+  ];
+
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -62,7 +61,6 @@ const BoardPage: React.FC = () => {
     fetchUser();
   }, []);
 
-  // 게시글 불러오기
   useEffect(() => {
     async function fetchPosts() {
       const queryType =
@@ -74,8 +72,6 @@ const BoardPage: React.FC = () => {
           ? "like10"
           : "all";
 
-      console.log("🔥 fetchPosts 호출됨. type:", queryType);
-
       try {
         const data = await getBoardPosts({
           page,
@@ -84,7 +80,6 @@ const BoardPage: React.FC = () => {
           type: queryType,
         });
 
-        console.log("📦 받아온 게시글:", data.results ?? data);
         setBoardList(data.results ?? data);
         setTotalCount(data.count ?? data.length);
       } catch (err) {
@@ -106,16 +101,12 @@ const BoardPage: React.FC = () => {
     setSelectedType(type);
   };
 
-  const handleWrite = () => {
-    navigate(`/board/write?type=${selectedTab === "gallery" ? "gallery" : "post"}`);
-  };
-
   return (
     <Section>
       <Container>
         <Wrapper>
           <BoardSectionBox>
-            <BoardHeader>전체 게시판</BoardHeader>
+            <BoardHeader>{t("board.all_board")}</BoardHeader>
             <BoardSection>
               <TabSortWrapper>
                 <BoardTabs selected={selectedTab} onChange={setSelectedTab} />
@@ -138,7 +129,7 @@ const BoardPage: React.FC = () => {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   onSearch={handleSearch}
-                  placeholder="검색어를 입력하세요"
+                  placeholder={t("board.search_placeholder")}
                 />
               </PageSearchWrapper>
             </BoardSection>
@@ -148,7 +139,7 @@ const BoardPage: React.FC = () => {
             {user ? (
               <BoardProfile user={user} />
             ) : (
-              <div>유저 정보를 불러오는 중...</div>
+              <div>{t("board.loading_user")}</div>
             )}
 
             <BoardSideWidget />
@@ -165,10 +156,7 @@ const BoardPage: React.FC = () => {
             setSelectedType(null);
           }}
           onDeleteSuccess={(deletedId) => {
-            // 삭제된 글을 리스트에서 제거
             setBoardList((prev) => prev.filter((post) => post.id !== deletedId));
-
-            // 모달 닫기
             setSelectedPostId(null);
             setSelectedType(null);
           }}

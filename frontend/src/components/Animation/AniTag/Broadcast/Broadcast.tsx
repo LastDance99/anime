@@ -1,18 +1,26 @@
 import React from "react";
-import { BroadcastSection, BroadcastTitle, BroadcastButtonList, BroadcastButton } from "./Broadcast.styled";
+import {
+  BroadcastSection,
+  BroadcastTitle,
+  BroadcastButtonList,
+  BroadcastButton,
+} from "./Broadcast.styled";
+import { useTranslation } from "react-i18next";
 
 interface BroadcastProps {
   value: string;
   onChange: (value: string) => void;
-  options: string[]; // ✨ ← 하드코딩 NO, 서버에서 받은 옵션!
+  options: string[];
 }
 
 export default function Broadcast({ value, onChange, options }: BroadcastProps) {
+  const { t } = useTranslation();
+
   if (!options || options.length === 0) return null;
 
   return (
     <BroadcastSection>
-      <BroadcastTitle>방영</BroadcastTitle>
+      <BroadcastTitle>{t("anime.broadcast")}</BroadcastTitle>
       <BroadcastButtonList>
         {options.map(b => (
           <BroadcastButton

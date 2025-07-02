@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, Cell,
+} from "recharts";
 import { getGenreStats } from "../../../api/profile";
+import { useTranslation } from "react-i18next";
 
-// 👇 파스텔톤 색상 (직접 원하는 색상 배열로 바꿔도 좋아요)
 const PASTEL_COLORS = [
-  "#ffd6e0", // 연핑크
-  "#cdeaff", // 연하늘
-  "#fff6ad", // 연노랑
-  "#bdf6d7", // 민트
-  "#fbe4ff", // 연보라
-  "#ffe3d3", // 피치
-  "#ffe7fa", // 핑크베이지
+  "#ffd6e0", "#cdeaff", "#fff6ad",
+  "#bdf6d7", "#fbe4ff", "#ffe3d3", "#ffe7fa"
 ];
 
-const FONT_CUTE = "'Cafe24Ssurround', 'Jua', 'GmarketSansMedium', 'sans-serif'"; // 폰트는 사이트에 맞게
+const FONT_CUTE = "'Cafe24Ssurround', 'Jua', 'GmarketSansMedium', 'sans-serif'";
 
-type GenreStat = {
-  genre: string;
-  count: number;
-};
+type GenreStat = { genre: string; count: number; };
 
 type Props = {
   userId: number;
@@ -29,6 +24,7 @@ type Props = {
 const GenreStatsChart: React.FC<Props> = ({ userId, limit = 5 }) => {
   const [genres, setGenres] = useState<GenreStat[]>([]);
   const [total, setTotal] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,9 +42,9 @@ const GenreStatsChart: React.FC<Props> = ({ userId, limit = 5 }) => {
 
   return (
     <Wrapper>
-      <Title>내가 가장 많이 추가한 장르</Title>
+      <Title>{t("profile.genre_stats.title")}</Title>
       {genres.length === 0 ? (
-        <NoData>데이터 없음</NoData>
+        <NoData>{t("profile.genre_stats.no_data")}</NoData>
       ) : (
         <ChartBox>
           <ResponsiveContainer width="100%" height={220}>
@@ -74,30 +70,25 @@ const GenreStatsChart: React.FC<Props> = ({ userId, limit = 5 }) => {
                   color: "#7d5fff",
                 }}
                 cursor={{ fill: "#ffd6e035" }}
-                formatter={(
-                  value: any,
-                  name: any,
-                  entry: any,
-                  index: number
-                ) => {
-                  // 전체 합계는 useMemo 등으로 미리 계산해둘 수도 있음
-                  const total = genres.reduce((a, c) => a + c.count, 0);
+                formatter={(value: any) => {
                   const percent =
                     total && typeof value === "number"
                       ? Math.round((value / total) * 100)
                       : 0;
-                  return [`${value}개 (${percent}%)`, "횟수"];
+                  return [`${value}${t("common.count_unit")} (${percent}%)`, t("common.times")];
                 }}
-                labelFormatter={(label: string) => `장르: ${label}`}
+                labelFormatter={(label: string) =>
+                  `${t("profile.genre_stats.tooltip_genre")}: ${label}`
+                }
               />
               <Bar
                 dataKey="count"
-                name="횟수"
+                name={t("common.times")}
                 radius={[12, 12, 12, 12]}
                 barSize={32}
                 label={false}
               >
-                {genres.map((entry, i) => (
+                {genres.map((_, i) => (
                   <Cell
                     key={`cell-${i}`}
                     fill={PASTEL_COLORS[i % PASTEL_COLORS.length]}
@@ -116,6 +107,7 @@ const GenreStatsChart: React.FC<Props> = ({ userId, limit = 5 }) => {
 
 export default GenreStatsChart;
 
+// --- styled-components ---
 const Wrapper = styled.div`
   margin-top: 32px;
   background: #fffafd;

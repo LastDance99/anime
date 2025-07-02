@@ -11,6 +11,7 @@ import {
 } from "./ImageSettings.styled";
 import ImageUploadButton from "./ImageUploadButton";
 import type { TempUser } from "../../../types/user";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   user: TempUser;
@@ -36,13 +37,14 @@ export default function ImageSettings({
   const [roomImg, setRoomImg] = useState<string>(
     typeof user.myroom_image === "string" ? user.myroom_image : ""
   );
+  const { t } = useTranslation();
 
   const handleUpload = (
     type: "profile" | "background" | "myroom",
     setter: React.Dispatch<React.SetStateAction<string>>
   ) => (file: File) => {
     const url = URL.createObjectURL(file);
-    setter(url); // 미리보기용
+    setter(url);
 
     if (type === "profile") setProfileFile(file);
     if (type === "background") setBgFile(file);
@@ -79,31 +81,37 @@ export default function ImageSettings({
       <ImageRow>
         {/* 프로필 이미지 */}
         <ImageBox>
-          <ImageLabel>프로필</ImageLabel>
+          <ImageLabel>{t("image_settings.profile")}</ImageLabel>
           <StyledImage src={profileImg} alt="프로필 이미지" shape="circle" />
           <ButtonGroup>
             <ImageUploadButton onChange={handleUpload("profile", setProfileImg)} />
-            <ActionButton onClick={handleDelete("profile", setProfileImg)}>삭제</ActionButton>
+            <ActionButton onClick={handleDelete("profile", setProfileImg)}>
+              {t("image_settings.delete")}
+            </ActionButton>
           </ButtonGroup>
         </ImageBox>
 
         {/* 배경 이미지 */}
         <ImageBox>
-          <ImageLabel>배경 이미지</ImageLabel>
+          <ImageLabel>{t("image_settings.background")}</ImageLabel>
           <StyledImage src={bgImg} alt="배경 이미지" shape="rect" />
           <ButtonGroup>
             <ImageUploadButton onChange={handleUpload("background", setBgImg)} />
-            <ActionButton onClick={handleDelete("background", setBgImg)}>삭제</ActionButton>
+            <ActionButton onClick={handleDelete("background", setBgImg)}>
+              {t("image_settings.delete")}
+            </ActionButton>
           </ButtonGroup>
         </ImageBox>
 
         {/* 마이룸 이미지 */}
         <ImageBox>
-          <ImageLabel>마이룸</ImageLabel>
+          <ImageLabel>{t("image_settings.myroom")}</ImageLabel>
           <StyledImage src={roomImg} alt="마이룸 이미지" shape="square" />
           <ButtonGroup>
             <ImageUploadButton onChange={handleUpload("myroom", setRoomImg)} />
-            <ActionButton onClick={handleDelete("myroom", setRoomImg)}>삭제</ActionButton>
+            <ActionButton onClick={handleDelete("myroom", setRoomImg)}>
+              {t("image_settings.delete")}
+            </ActionButton>
           </ButtonGroup>
         </ImageBox>
       </ImageRow>

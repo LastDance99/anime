@@ -23,14 +23,9 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Star as StarFull, StarHalf, ThumbsUp } from "lucide-react";
 import { likeAnimeReview } from "../../../api/anime";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
-
-const SORT_OPTIONS = [
-  { label: "최신순", value: "latest" },
-  { label: "오래된순", value: "oldest" },
-  { label: "따봉순", value: "like" },
-];
 
 function renderStars(score: number) {
   return Array.from({ length: 5 }).map((_, i) => {
@@ -52,10 +47,7 @@ function getLikesFromReviews(reviews: AnimeReview[]) {
     if (review && typeof review.id === "number") {
       obj[review.id] = {
         count: review.like_count ?? 0,
-        liked:
-          review.liked_by_user ?? // POST 응답용
-          review.is_liked_by_me ?? // GET 응답용
-          false,
+        liked: review.liked_by_user ?? review.is_liked_by_me ?? false,
       };
     }
   });
@@ -91,9 +83,16 @@ export default function ReviewList({
   setEditedRating,
   onDelete,
 }: Props) {
+  const { t } = useTranslation();
   const [sortType, setSortType] = useState<"latest" | "oldest" | "like">("latest");
   const [animatedRating, setAnimatedRating] = useState(editedRating);
   const [likes, setLikes] = useState(() => getLikesFromReviews(reviews));
+
+  const SORT_OPTIONS = [
+    { label: t("review.sort_latest"), value: "latest" },
+    { label: t("review.sort_oldest"), value: "oldest" },
+    { label: t("review.sort_like"), value: "like" },
+  ];
 
   useEffect(() => {
     setLikes(getLikesFromReviews(reviews));
@@ -130,7 +129,6 @@ export default function ReviewList({
       }));
     } catch (err: any) {
       console.error("🛑 likeAnimeReview error:", err.response?.data || err.message);
-      throw err;
     }
   };
 
@@ -154,7 +152,9 @@ export default function ReviewList({
     <>
       <ReviewTopBar>
         <ReviewCount>
-          리뷰 <b>({reviews.length === 0 ? "---" : reviews.length})</b>
+          {reviews.length === 0
+            ? t("review.count_empty")
+            : t("review.count", { count: reviews.length })}
         </ReviewCount>
         <SortSelectBox>
           <SortSelect value={sortType} onChange={e => setSortType(e.target.value as any)}>
@@ -166,7 +166,7 @@ export default function ReviewList({
       </ReviewTopBar>
 
       {sortedReviews.length === 0 ? (
-        <List style={{ padding: "32px 0", color: "#aaa" }}>아직 등록된 리뷰가 없습니다.</List>
+        <List style={{ padding: "32px 0", color: "#aaa" }}>{t("review.empty")}</List>
       ) : (
         <List>
           {sortedReviews.map((r) => {
@@ -179,20 +179,18 @@ export default function ReviewList({
                 <ReviewRow>
                   {r.user?.profile_image && <ReviewerImg src={r.user.profile_image} alt="유저" />}
                   <ReviewerInfo>
-                    <ReviewerName>{r.user?.nickname || "알 수 없음"}</ReviewerName>
+                    <ReviewerName>{r.user?.nickname || t("common.unknown")}</ReviewerName>
                     <RatingStars>{renderStars(r.rating)}</RatingStars>
                     <ReviewTime>{dayjs(r.created_at).fromNow()}</ReviewTime>
                     {isMyReview && !isEditing && (
                       <>
-                        <EditBtn onClick={() => onEditStart(r)}>수정</EditBtn>
-                        <DeleteBtn
-                          onClick={() => {
-                            if (window.confirm("삭제하시겠습니까?")) {
-                              onDelete(r.id);
-                            }
-                          }}
-                        >
-                          삭제
+                        <EditBtn onClick={() => onEditStart(r)}>{t("common.edit")}</EditBtn>
+                        <DeleteBtn onClick={() => {
+                          if (window.confirm(t("review.confirm_delete"))) {
+                            onDelete(r.id);
+                          }
+                        }}>
+                          {t("common.delete")}
                         </DeleteBtn>
                       </>
                     )}
@@ -208,7 +206,7 @@ export default function ReviewList({
                       style={{ width: "100%", margin: "6px 0", borderRadius: 6, border: "1px solid #F8A0BC", padding: 8, resize: "vertical" }}
                     />
                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                      <span style={{ fontSize: 14 }}>수정할 별점:</span>
+                      <span style={{ fontSize: 14 }}>{t("review.edit_rating")}</span>
                       <span style={{ fontWeight: 600, fontSize: 15, marginRight: 6 }}>{animatedRating.toFixed(1)}</span>
                       <RatingStars>
                         {[1, 2, 3, 4, 5].map(i => {
@@ -239,22 +237,22 @@ export default function ReviewList({
                       <EditBtn
                         as="button"
                         onClick={() => {
-                          if (window.confirm("수정하시겠습니까?")) {
+                          if (window.confirm(t("review.confirm_edit"))) {
                             onEditSubmit(r.id);
                           }
                         }}
                       >
-                        완료
+                        {t("common.done")}
                       </EditBtn>
                       <DeleteBtn 
-                      as="button"
+                        as="button"
                         onClick={() => {
-                          if (window.confirm("취소하시겠습니까?")) {
-                            onEditSubmit(r.id);
+                          if (window.confirm(t("review.confirm_cancel"))) {
+                            onEditCancel();
                           }
                         }}
                       >
-                        취소
+                        {t("common.cancel")}
                       </DeleteBtn>
                     </div>
                   </>
@@ -269,7 +267,7 @@ export default function ReviewList({
                       cursor: isMyReview ? "not-allowed" : "pointer",
                       opacity: isMyReview ? 0.4 : 1,
                     }}
-                    title={isMyReview ? "자신의 리뷰에는 좋아요를 누를 수 없습니다" : "이 리뷰를 추천합니다"}
+                    title={isMyReview ? t("review.like_disabled") : t("review.like_hint")}
                   >
                     <ThumbsUp
                       size={16}

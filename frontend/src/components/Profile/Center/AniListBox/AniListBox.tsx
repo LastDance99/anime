@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   AniListSectionWrapper,
   AniListHeader,
@@ -10,14 +11,18 @@ import {
 import type { AnimeItem } from "../../../../types/anime";
 
 export default function AniListBox({ animeList }: { animeList: AnimeItem[] }) {
+  const { t } = useTranslation();
+
   return (
     <AniListSectionWrapper>
       <AniListHeader>
-        <AniListTitle>최애 애니</AniListTitle>
+        <AniListTitle>{t("anime.favorite_title")}</AniListTitle>
       </AniListHeader>
       <CardBox>
         {animeList.length === 0 ? (
-          <div style={{ padding: "8px", color: "#999" }}>등록된 애니가 없습니다.</div>
+          <div style={{ padding: "8px", color: "#999" }}>
+            {t("anime.no_anime")}
+          </div>
         ) : (
           animeList.map((item) => (
             <AniCard key={item.anime_id}>

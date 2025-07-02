@@ -4,6 +4,7 @@ import styled from "styled-components";
 import Calendar from "react-calendar";
 import dayjs from "dayjs";
 import "react-calendar/dist/Calendar.css";
+import { useTranslation } from "react-i18next";
 
 const Board = styled.div`
   padding: 24px;
@@ -77,6 +78,7 @@ export default function AttendanceBoard({ userId }: Props) {
   const [dates, setDates] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
   const [last, setLast] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     getUserAttendance(userId).then(({ dates, total_attendance, last_attendance }) => {
@@ -88,10 +90,10 @@ export default function AttendanceBoard({ userId }: Props) {
 
   return (
     <Board>
-      <Title>📅 출석부</Title>
+      <Title>📅 {t("attendance.title")}</Title>
       <Stats>
-        <StatBox>총 출석일: {total}일</StatBox>
-        <StatBox>마지막 출석: {last || "없음"}</StatBox>
+        <StatBox>{t("attendance.total")}: {total}{t("attendance.day_suffix")}</StatBox>
+        <StatBox>{t("attendance.last")}: {last || t("attendance.none")}</StatBox>
       </Stats>
       <Calendar
         tileContent={({ date, view }) => {

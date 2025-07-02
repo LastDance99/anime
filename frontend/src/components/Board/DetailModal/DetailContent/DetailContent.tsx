@@ -28,6 +28,7 @@ import {
 } from "./DetailContent.styled";
 import { ThumbsUp } from "lucide-react";
 import DOMPurify from "dompurify";
+import { useTranslation } from "react-i18next";
 
 export default function DetailContent({
   id,
@@ -42,13 +43,13 @@ export default function DetailContent({
 
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchData();
   }, [id]);
 
   const fetchData = async () => {
-    console.log("📥 getBoardPostDetail 호출!", id);
     try {
       const data = await getBoardPostDetail(id);
       setItem(data);
@@ -65,10 +66,10 @@ export default function DetailContent({
     }
   }, [item]);
 
-  if (!item) return <div>게시글을 불러올 수 없습니다.</div>;
+  if (!item) return <div>{t("board.detail.load_fail")}</div>;
 
   const isGallery = item.board_type === "gallery";
-  const authorNickname = item.author_nickname ?? "알 수 없음";
+  const authorNickname = item.author_nickname ?? t("board.detail.unknown_author");
   const profileImage = getFullImageUrl(item.author_profile_image);
   const isAuthor = currentUser?.id === item.author.id;
   const authorId = item.author.id;
@@ -105,48 +106,31 @@ export default function DetailContent({
     }
   };
 
-  const handleEdit = () => {
-    navigate(`/board/edit/${id}`);
-  };
+  const handleEdit = () => navigate(`/board/edit/${id}`);
 
   const handleDelete = async () => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    if (!window.confirm(t("board.detail.confirm_delete"))) return;
     try {
       await deleteBoardPost(id);
-      alert("삭제되었습니다.");
-
-      if (onDeleteSuccess) {
-        onDeleteSuccess(id);
-      }
+      alert(t("board.detail.deleted"));
+      onDeleteSuccess?.(id);
     } catch (err) {
       console.error("삭제 실패", err);
-      alert("삭제에 실패했습니다.");
+      alert(t("board.detail.delete_fail"));
     }
   };
 
-  const handleProfileClick = () => {
-    navigate(`/profile/${authorId}`);
-    // if (window.confirm(`${authorNickname}님의 프로필로 이동하시겠습니까?`)) {
-      
-    // }
-  };
+  const handleProfileClick = () => navigate(`/profile/${authorId}`);
 
   const handleMoreClick = () => {
     const target = isGallery ? "mygallery" : "myboard";
-    // if (
-    //   window.confirm(
-    //     `${authorNickname}님의 다른 ${isGallery ? "갤러리" : "게시글"}을 보시겠습니까?`
-    //   )
-    // )
-    {
-      navigate(`/profile/${authorId}/${target}`);
-    }
+    navigate(`/profile/${authorId}/${target}`);
   };
 
   return (
     <Wrapper>
       <CategoryText $type={isGallery ? "gallery" : "board"}>
-        {isGallery ? "갤러리" : "게시글"}
+        {isGallery ? t("board.detail.gallery") : t("board.detail.post")}
       </CategoryText>
       <TitleText>{item.title}</TitleText>
 
@@ -169,37 +153,13 @@ export default function DetailContent({
             </Nickname>
             {isAuthor && (
               <>
-                <button
-                  onClick={handleEdit}
-                  style={{
-                    fontSize: "12px",
-                    padding: "2px 6px",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                    background: "#f4f4f4",
-                    cursor: "pointer",
-                  }}
-                >
-                  수정
-                </button>
-                <button
-                  onClick={handleDelete}
-                  style={{
-                    fontSize: "12px",
-                    padding: "2px 6px",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                    background: "#fdf0f0",
-                    cursor: "pointer",
-                  }}
-                >
-                  삭제
-                </button>
+                <button onClick={handleEdit}>{t("board.detail.edit")}</button>
+                <button onClick={handleDelete}>{t("board.detail.delete")}</button>
               </>
             )}
           </div>
           <Meta>
-            작성일 {item.created_at} · 조회수 {item.views}
+            {t("board.detail.date")} {item.created_at} · {t("board.detail.views")} {item.views}
           </Meta>
         </UserInfo>
       </UserRow>
@@ -227,21 +187,22 @@ export default function DetailContent({
 
       <FooterRow>
         <MoreLink onClick={handleMoreClick}>
-          {authorNickname}님의 다른 {isGallery ? "갤러리" : "게시글"} &gt;
+          {t("board.detail.more_posts", {
+            nickname: authorNickname,
+            type: isGallery ? t("board.detail.gallery") : t("board.detail.post"),
+          })}
         </MoreLink>
         <IconButtons>
           <IconBtn
             $liked={liked ?? false}
             onClick={handleLike}
-            aria-label="좋아요"
+            aria-label={t("board.detail.like")}
             role="button"
             as="button"
             disabled={isAuthor || liked === null}
             style={{
               opacity: isAuthor || liked === null ? 0.5 : 1,
               cursor: isAuthor || liked === null ? "not-allowed" : "pointer",
-              fontSize: "14px",
-              padding: "4px 6px",
             }}
           >
             <ThumbsUp size={16} />

@@ -4,7 +4,8 @@ export const InfoSectionWrapper = styled.section`
   display: flex;
   background: #FCEEF5;
   width: 100%;
-  height: 240px;
+  height: 100%;
+  max-height: 300px;
   border-radius: 0;
   padding: 32px 32px 32px 32px;
   box-sizing: border-box;
@@ -36,6 +37,8 @@ export const Title = styled.div`
   font-weight: ${({ theme }) => theme.Weights.bold};
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: 8px;
+  
+
 `;
 
 export const MetaRow = styled.div`

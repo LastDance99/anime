@@ -96,13 +96,13 @@ export const ChatInputBox = styled.form`
   width: 95%;
   min-height: 90px;
   max-height: 200px;
-  margin: 20px auto;
+  margin: 10px auto;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  background: ${({ theme }) => theme.colors.subcolor};
+  background: ${({ theme }) => theme.colors.background};
   border: 1px solid ${({ theme }) => theme.colors.primary};
-  border-radius: 40px;
+  border-radius: 20px;
   padding: 18px 22px 14px 22px;
   box-sizing: border-box;
   gap: 4px;
@@ -163,5 +163,97 @@ export const SendIconButton = styled(AddIconButton)`
 
 export const ResetButton = styled(AddIconButton)`
   margin: 0 8px;
-  color: ${({ theme }) => theme.colors.bordermain}; // 또는 다른 구분 색상
+  color: ${({ theme }) => theme.colors.bordermain};
+`;
+
+
+export const DropdownMenu = styled.div`
+  position: absolute;
+  bottom: 48px;
+  left: 20px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  z-index: 99;
+  overflow: hidden;
+`;
+
+export const DropdownItem = styled.button`
+  width: 160px;
+  padding: 10px 16px;
+  background: white;
+  border: none;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.subcolor};
+  }
+`;
+
+export const ToolOverlay = styled.div`
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 340px;
+  background: ${({ theme }) => theme.colors.background};
+  border: 1px solid ${({ theme }) => theme.colors.primary};
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    font-weight: ${({ theme }) => theme.Weights.medium};
+    color: ${({ theme }) => theme.colors.text};
+  }
+`;
+
+export const ToolOverlayInput = styled.textarea`
+  width: 100%;
+  min-height: 60px;
+  resize: none;
+  border: 1px solid ${({ theme }) => theme.colors.bordermain};
+  border-radius: 8px;
+  padding: 10px;
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-family: ${({ theme }) => theme.fonts.main};
+  color: ${({ theme }) => theme.colors.text};
+  background: white;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.primary};
+  }
+`;
+
+export const ToolOverlayActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  button {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:first-of-type {
+      background: ${({ theme }) => theme.colors.subcolor};
+      color: ${({ theme }) => theme.colors.text};
+    }
+
+    &:last-of-type {
+      background: ${({ theme }) => theme.colors.primary};
+      color: white;
+    }
+  }
 `;

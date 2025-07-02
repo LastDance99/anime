@@ -1,12 +1,16 @@
 // EditBoardPage.tsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 import { getBoardPostDetail } from "../api/board";
 import WriteForm from "./WriteModal/WriteModal";
+import type { BoardItem } from "../types/board";
 
 export default function EditBoardPage() {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState<BoardItem | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (id) {
@@ -14,5 +18,5 @@ export default function EditBoardPage() {
     }
   }, [id]);
 
-  return post ? <WriteForm mode="edit" post={post} /> : <div>불러오는 중...</div>;
+  return post ? <WriteForm mode="edit" post={post} /> : <div>{t("common.loading")}</div>;
 }

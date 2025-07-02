@@ -1,35 +1,29 @@
-// components/Profile/Center/StatsBox/StatsBox.tsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { StatsRow, StatBox, StatNumber, StatLabel } from "./StatsBox.styled";
 
-export default function StatsBox({
-  totalAnime,
-  avgScore,
-  // heartCount,
-  attendance,
-}: {
+interface Props {
   totalAnime: number;
   avgScore: number;
-  // heartCount: number;
   attendance: number;
-}) {
+}
+
+export default function StatsBox({ totalAnime, avgScore, attendance }: Props) {
+  const { t } = useTranslation();
+
   return (
     <StatsRow>
       <StatBox>
         <StatNumber>{totalAnime}</StatNumber>
-        <StatLabel>애니리스트</StatLabel>
+        <StatLabel>{t("profile.stats.anime_list")}</StatLabel>
       </StatBox>
       <StatBox>
         <StatNumber>{avgScore}</StatNumber>
-        <StatLabel>평균 점수</StatLabel>
+        <StatLabel>{t("profile.stats.avg_score")}</StatLabel>
       </StatBox>
-      {/* <StatBox>
-        <StatNumber>{heartCount}</StatNumber>
-        <StatLabel>받은 하트 수</StatLabel>
-      </StatBox> */}
       <StatBox>
         <StatNumber>{attendance}</StatNumber>
-        <StatLabel>출석일</StatLabel>
+        <StatLabel>{t("profile.stats.attendance")}</StatLabel>
       </StatBox>
     </StatsRow>
   );

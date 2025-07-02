@@ -8,6 +8,7 @@ import {
   HeaderCol,
   ListCountText,
 } from "./MyAniList.styled";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   list: UserAnimeItem[];
@@ -17,7 +18,7 @@ type Props = {
   onAdd?: (anime: UserAnimeItem) => void;
   onRemove?: (anime: UserAnimeItem) => void;
   onToggleFavorite?: (anime: UserAnimeItem) => void;
-  isMyPage: boolean; // ✅ 추가!
+  isMyPage: boolean;
 };
 
 export default function MyAniList({
@@ -28,21 +29,29 @@ export default function MyAniList({
   onAdd,
   onRemove,
   onToggleFavorite,
-  isMyPage, // ✅ props로 받음
+  isMyPage,
 }: Props) {
-  if (!list.length) return <div>등록된 애니가 없습니다.</div>;
+  const { t } = useTranslation();
+
+  if (!list.length) return <div>{t("mylist.empty")}</div>;
 
   return (
     <ListWrapper>
       <ListCountText>
-        총 <span>{totalCount}</span>개의 애니
+        {t("mylist.total", { count: totalCount })}
       </ListCountText>
 
       <ListHeader>
         <HeaderCol style={{ minWidth: 60 }} />
-        <HeaderCol style={{ minWidth: 500, textAlign: "left" }}>제목</HeaderCol>
-        <HeaderCol style={{ minWidth: 180, textAlign: "left", paddingLeft: 60, }}>장르</HeaderCol>
-        <HeaderCol style={{ minWidth: 36, textAlign: "left", marginRight: 10 }}>내 점수</HeaderCol>
+        <HeaderCol style={{ minWidth: 500, textAlign: "left" }}>
+          {t("mylist.title")}
+        </HeaderCol>
+        <HeaderCol style={{ minWidth: 180, textAlign: "left", paddingLeft: 60 }}>
+          {t("mylist.genre")}
+        </HeaderCol>
+        <HeaderCol style={{ minWidth: 36, textAlign: "left", marginRight: 10 }}>
+          {t("mylist.my_rating")}
+        </HeaderCol>
       </ListHeader>
 
       <AniListContainer>
@@ -56,9 +65,11 @@ export default function MyAniList({
             "/images/no_poster.png";
 
           const genres: string[] =
-            Array.isArray(item.genre_kor) ? item.genre_kor :
-            Array.isArray(item.genres) ? item.genres :
-            [];
+            Array.isArray(item.genre_kor)
+              ? item.genre_kor
+              : Array.isArray(item.genres)
+              ? item.genres
+              : [];
 
           const isAdded = myAnimeList?.some((a) => a.id === item.id) ?? false;
 
@@ -71,9 +82,9 @@ export default function MyAniList({
               rating={item.rating}
               myRating={item.my_rating}
               isAdded={isAdded}
-              onAdd={isMyPage ? (() => onAdd?.(item)) : undefined}
-              onRemove={isMyPage ? (() => onRemove?.(item)) : undefined}
-              onToggleFavorite={isMyPage ? (() => onToggleFavorite?.(item)) : undefined}
+              onAdd={isMyPage ? () => onAdd?.(item) : undefined}
+              onRemove={isMyPage ? () => onRemove?.(item) : undefined}
+              onToggleFavorite={isMyPage ? () => onToggleFavorite?.(item) : undefined}
               onClick={() => onAnimeClick?.(item)}
               isFavorite={item.is_favorite}
               canEdit={isMyPage}

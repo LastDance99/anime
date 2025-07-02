@@ -13,9 +13,10 @@ import {
 } from "./InfoSection.styled";
 import DescMoreModal from "./DescMoreModal/DescMoreModal";
 import type { AnimeItem } from "../../../types/anime";
+import { useTranslation } from "react-i18next";
 
-// ✅ 1번 방법: 값이 nan, NaN, undefined, null, 빈문자열이면 fallback 사용
-function valid(value: any, fallback = "데이터가 없습니다") {
+// ✅ fallback 메시지를 다국어로 처리
+function valid(value: any, fallback: string) {
   if (
     value === undefined ||
     value === null ||
@@ -41,18 +42,18 @@ export default function InfoSection({
   isAdded = false,
   onDelete,
 }: Props) {
+  const { t } = useTranslation();
   const [showMore, setShowMore] = useState(false);
 
-  // ✅ 아래 모든 변수 선언에 valid 함수 적용!
-  const title = valid(anime.title, "제목 없음");
+  const title = valid(anime.title, t("anime.no_title"));
   const genres: string[] = Array.isArray(anime.genres) ? anime.genres : [];
-  const year = valid(anime.start_date ? anime.start_date.slice(0, 4) : null, "연도 정보 없음");
-  const posterUrl = valid(anime.cover_image_xl, ""); // 이미지는 fallback 이미지를 직접 넣어도 됨
+  const year = valid(anime.start_date ? anime.start_date.slice(0, 4) : null, t("anime.no_year"));
+  const posterUrl = valid(anime.cover_image_xl, "");
   const original = valid(anime.source, "--");
   const episodes = valid(anime.episodes, "--");
   const format = valid(anime.format, "--");
   const avgRating = valid(anime.average_rating, "--");
-  const description = valid(anime.description, "설명 없음");
+  const description = valid(anime.description, t("anime.no_description"));
   const status = valid(anime.status, "--");
   const duration = valid(anime.duration, "--");
   const season = valid(anime.season, "--");
@@ -62,8 +63,8 @@ export default function InfoSection({
         .filter((s: any) => s.node?.isAnimationStudio)
         .map((s: any) => valid(s.node.name, ""))
         .filter((name: string) => name !== "")
-        .join(", ") || "제작사 정보 없음"
-    : "제작사 정보 없음";
+        .join(", ") || t("anime.no_studio")
+    : t("anime.no_studio");
 
   const MAX_LEN = 80;
   const plainDesc = description.replace(/<[^>]+>/g, "");
@@ -75,7 +76,7 @@ export default function InfoSection({
   };
 
   const handleDelete = () => {
-    if (window.confirm("정말 삭제하시겠습니까?")) {
+    if (window.confirm(t("anime.confirm_delete"))) {
       onDelete?.();
     }
   };
@@ -87,28 +88,30 @@ export default function InfoSection({
           <span>★ {avgRating}</span>
         </ScoreBadge>
         <Title>{title}</Title>
-        <MetaRow style={{ marginBottom: "2px",  }}>
-          <span>원작: {original}</span>
+        <MetaRow>
+          <span>{t("anime.original")}: {original}</span>
           <span>/</span>
-          <span>{genres.length > 0 ? genres.join(", ") : "장르 정보 없음"}</span>
+          <span>{genres.length > 0 ? genres.join(", ") : t("anime.no_genre")}</span>
           <span>/</span>
-          <span>유형: {format}</span>
+          <span>{t("anime.format")}: {format}</span>
           <span>/</span>
-          <span>{year}년 {season}</span>
+          <span>{year}{t("anime.unit.year")} {season}</span>
         </MetaRow>
-        <MetaRow style={{ marginBottom: "8px",  }}>
-          <span>{episodes}화</span>
+        <MetaRow>
+          <span>{episodes}{t("anime.unit.episode")}</span>
           <span>/</span>
-          <span>{duration}분</span>
+          <span>{duration}{t("anime.unit.minute")}</span>
           <span>/</span>
-          <span>제작 스튜디오: {animationStudios}</span>
+          <span>{t("anime.studio")}: {animationStudios}</span>
           <span>/</span>
           <span>{status}</span>
         </MetaRow>
         <Desc>
           <span dangerouslySetInnerHTML={{ __html: displayedDesc }} />
           {showEllipsis && (
-            <MoreButton onClick={() => setShowMore(true)}>더보기</MoreButton>
+            <MoreButton onClick={() => setShowMore(true)}>
+              {t("common.more")}
+            </MoreButton>
           )}
         </Desc>
         {showMore && (
@@ -118,10 +121,12 @@ export default function InfoSection({
           />
         )}
         {onDelete ? (
-          <AddButton onClick={handleDelete}>리스트에서 삭제</AddButton>
+          <AddButton onClick={handleDelete}>
+            {t("anime.remove_from_list")}
+          </AddButton>
         ) : (
           <AddButton onClick={handleToggleList}>
-            {isAdded ? "리스트에서 제거" : "리스트에 추가"}
+            {isAdded ? t("anime.remove_from_list") : t("anime.add_to_list")}
           </AddButton>
         )}
       </InfoLeft>

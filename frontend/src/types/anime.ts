@@ -61,6 +61,9 @@ export interface AnimeItem {
 
   // 최애의 애니
   is_favorite: boolean;
+
+  // 캐릭터 목록(이미지)
+  characters?: string[];
 }
 
 export interface AnimeFilter {

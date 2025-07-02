@@ -9,6 +9,7 @@ import {
   SortOption,
 } from "./AniListFilter.styled";
 import { ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface SortOptionType {
   label: string;
@@ -17,7 +18,7 @@ interface SortOptionType {
 
 interface Props {
   total: number;
-  sort: string; // label
+  sort: string;
   sortOptions: SortOptionType[];
   onSortChange: (value: string) => void;
   isFiltered: boolean;
@@ -31,13 +32,13 @@ export default function AniListFilter({
   isFiltered,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <FilterWrapper>
-      {/* 🔹 필터가 적용되고 결과가 있을 때만 표시 */}
       {isFiltered && total > 0 && (
         <TotalText>
-          총 <b>{total}</b>개의 작품이 검색되었어요!
+          {t("anime.total_result", { count: total })}
         </TotalText>
       )}
       <SortBox onClick={() => setOpen((v) => !v)}>

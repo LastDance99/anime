@@ -8,6 +8,7 @@ import Broadcast from "./Broadcast/Broadcast";
 import type { AnimeFilter } from "../../../types/anime";
 import { getAnimeFilterMeta } from "../../../api/anime";
 import { FilterSidebarContainer } from "./FilterSidebar.styled";
+import { useTranslation } from "react-i18next";
 
 interface FilterSidebarProps {
   filters: AnimeFilter;
@@ -15,7 +16,8 @@ interface FilterSidebarProps {
 }
 
 export default function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
-  // 필터 옵션을 받아올 state
+  const { t } = useTranslation();
+
   const [meta, setMeta] = useState<null | {
     genres: string[];
     years: (string | number)[];
@@ -28,15 +30,13 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
       .then(data => {
         console.log("필터 옵션:", data);
 
-        // 계절 nan 제거
         const filteredSeasons = (data.seasons || []).filter(
           (s: string | null | undefined) => s && s.toLowerCase() !== "nan"
         );
 
-        // 년도 2010년 이하 묶기
         const rawYears = (data.years || []) as (number | string)[];
-        const yearsAbove2010 = rawYears.filter((y: number | string) => typeof y === "number" && y > 2010);
-        const hasBelow2010 = rawYears.some((y: number | string) => typeof y === "number" && y <= 2010);
+        const yearsAbove2010 = rawYears.filter((y) => typeof y === "number" && y > 2010);
+        const hasBelow2010 = rawYears.some((y) => typeof y === "number" && y <= 2010);
         const processedYears = hasBelow2010 ? [...yearsAbove2010, "2010년 이하"] : yearsAbove2010;
 
         setMeta({
@@ -57,7 +57,7 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
       });
   }, []);
 
-  if (!meta) return <div>필터 옵션 로딩중...</div>;
+  if (!meta) return <div>{t("anime.filter_loading")}</div>;
 
   return (
     <FilterSidebarContainer>

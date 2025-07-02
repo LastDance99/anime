@@ -7,7 +7,7 @@ type Props = {
   type: 'post' | 'gallery';
   id: number;
   onClose: () => void;
-  onDeleteSuccess?: (deletedId: number) => void; // ✅ 추가
+  onDeleteSuccess?: (deletedId: number) => void;
 };
 
 export default function DetailModal({ type, id, onClose, onDeleteSuccess }: Props) {

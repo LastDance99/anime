@@ -1,12 +1,14 @@
 import React, { useRef } from "react";
 import { UploadButton } from "./ImageUploadButton.styled";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   onChange: (file: File) => void;
   label?: string;
 };
 
-export default function ImageUploadButton({ onChange, label = "사진 변경" }: Props) {
+export default function ImageUploadButton({ onChange, label }: Props) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleClick = () => {
@@ -17,14 +19,15 @@ export default function ImageUploadButton({ onChange, label = "사진 변경" }:
     const file = e.target.files?.[0];
     if (file) {
       onChange(file);
-      // 👉 같은 파일 다시 선택해도 이벤트 발생하도록 리셋
       e.target.value = "";
     }
   };
 
   return (
     <>
-      <UploadButton onClick={handleClick}>{label}</UploadButton>
+      <UploadButton onClick={handleClick}>
+        {label || t("image_settings.upload")}
+      </UploadButton>
       <input
         type="file"
         accept="image/*"

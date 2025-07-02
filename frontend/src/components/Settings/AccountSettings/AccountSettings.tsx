@@ -11,6 +11,7 @@ import ChangeButton from "../ChangeButton/ChangeButton";
 import type { TempUser } from "../../../types/user";
 import NicknameModal from "../NicknameModal";
 import PasswordModal from "../PasswordModal";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   user: TempUser;
@@ -27,6 +28,7 @@ export default function AccountSettings({
   onClose,
   onChangeNickname,
 }: Props) {
+  const { t } = useTranslation();
   const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
   const [pwModalOpen, setPwModalOpen] = useState(false);
 
@@ -57,20 +59,20 @@ export default function AccountSettings({
 
   return (
     <Section>
-      <SubTitle>계정</SubTitle>
+      <SubTitle>{t("account.title")}</SubTitle>
 
       <Row>
-        <Label>이메일</Label>
+        <Label>{t("account.email")}</Label>
         <Text>{user.email}</Text>
       </Row>
 
       <Row>
-        <Label>비밀번호</Label>
+        <Label>{t("account.password")}</Label>
         <Text>********</Text>
-        <ChangeButton label="비밀번호 변경" onClick={openPwModal} />
+        <ChangeButton label={t("account.change_password")} onClick={openPwModal} />
         {pwModalOpen && (
           <PasswordModal
-            currentPassword={user.password}
+            // currentPassword={user.password}
             onSave={handlePasswordSave}
             onClose={closePwModal}
           />
@@ -78,9 +80,9 @@ export default function AccountSettings({
       </Row>
 
       <Row>
-        <Label>닉네임</Label>
+        <Label>{t("account.nickname")}</Label>
         <Text>{user.nickname}</Text>
-        <ChangeButton label="닉네임 변경" onClick={openNicknameModal} />
+        <ChangeButton label={t("account.change_nickname")} onClick={openNicknameModal} />
         {nicknameModalOpen && (
           <NicknameModal
             currentNickname={user.nickname}
@@ -94,15 +96,16 @@ export default function AccountSettings({
       </Row>
 
       <Row>
-        <Label>언어</Label>
+        <Label>{t("account.language")}</Label>
         <LangSelect
           value={user.language}
           onChange={(e) =>
-            setUser({ ...user, language: e.target.value as "ko" | "en" })
+            setUser({ ...user, language: e.target.value as "ko" | "en" | "es" })
           }
         >
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
+          <option value="ko">{t("language.ko")}</option>
+          <option value="en">{t("language.en")}</option>
+          <option value="es">{t("language.es")}</option>
         </LangSelect>
       </Row>
     </Section>

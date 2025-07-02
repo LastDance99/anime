@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import FilterSidebar from "../../components/Animation/AniTag/FilterSidebar";
 import AniList from "../../components/Animation/AniList/AniList";
 import AnimeProfile from "../../components/Animation/ProfileCard/ProfileCard";
@@ -13,7 +14,6 @@ import {
 import { getMyProfile, getUserContent } from "../../api/profile";
 import type { AnimeItem, AnimeFilter } from "../../types/anime";
 import type { User } from "../../types/user";
-// import LoadingSpinner from "../../components/Common/LoadingSpinner";
 import {
   Section,
   Container,
@@ -25,11 +25,6 @@ import {
 } from "./AnimationPage.styled";
 
 const LIMIT = 50;
-const SORT_OPTIONS = [
-  { label: "인기순", value: "popular" },
-  { label: "최신순", value: "latest" },
-  { label: "평점순", value: "rating" },
-];
 
 const buildAnimeParams = (
   filters: AnimeFilter,
@@ -43,7 +38,9 @@ const buildAnimeParams = (
   else if (sort === "rating") ordering = "-rating";
   else ordering = "-start_year";
 
-  const yearParam = filters.year === "2010년 이하" || filters.year === "" ? undefined : filters.year;
+  const yearParam =
+    filters.year === "" ? undefined :
+    filters.year === "2010년 이하" ? "2010-" : filters.year;
 
   return {
     ...(filters.genre?.length ? { genres: filters.genre.join(",") } : {}),
@@ -58,6 +55,14 @@ const buildAnimeParams = (
 };
 
 export default function AniMain() {
+  const { t } = useTranslation();
+
+  const SORT_OPTIONS = useMemo(() => [
+    { label: t("anime.sort.like"), value: "popular" },
+    { label: t("anime.sort.latest"), value: "latest" },
+    { label: t("anime.sort.score"), value: "rating" }
+  ], [t]);
+
   const [filters, setFilters] = useState<AnimeFilter>({
     genre: [],
     season: "",
@@ -149,7 +154,11 @@ export default function AniMain() {
         const data = await searchAnime(params);
         const results = Array.isArray(data.results) ? data.results : [];
 
-        setAnimeList(prev => offset === 0 ? results : [...prev, ...results]);
+        setAnimeList(prev => {
+          const existingIds = new Set(prev.map((anime: AnimeItem) => anime.id));
+          const uniqueResults = results.filter((anime: AnimeItem) => !existingIds.has(anime.id));
+          return offset === 0 ? results : [...prev, ...uniqueResults];
+        });
         setTotalCount(data.count || results.length);
       } catch (e) {
         console.error("애니 목록 가져오기 실패", e);
@@ -201,13 +210,13 @@ export default function AniMain() {
       <Container>
         <Wrapper>
           <AnimeSectionBox>
-            <AnimeHeader>애니메이션 목록</AnimeHeader>
+            <AnimeHeader>{t("anime.list_title")}</AnimeHeader>
             <AnimeListBox ref={scrollRef}>
               <FilterSidebar filters={filters} setFilters={setFilters} />
               <AniList
                 list={processedAnimeList}
                 total={totalCount}
-                sort={SORT_OPTIONS.find(opt => opt.value === sort)?.label || "인기순"}
+                sort={SORT_OPTIONS.find(opt => opt.value === sort)?.label || t("anime.sort.like")}
                 sortOptions={SORT_OPTIONS}
                 onSortChange={setSort}
                 scrollRef={scrollRef}

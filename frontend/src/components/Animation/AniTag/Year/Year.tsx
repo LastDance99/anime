@@ -7,6 +7,7 @@ import {
   YearToggleButton,
   ToggleLine
 } from "./Year.styled";
+import { useTranslation } from "react-i18next";
 
 interface YearProps {
   value: string | number;
@@ -15,13 +16,14 @@ interface YearProps {
 }
 
 export default function Year({ value, onChange, options }: YearProps) {
+  const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
   const VISIBLE_COUNT = 8;
   const visibleYears = showAll ? options : options.slice(0, VISIBLE_COUNT);
 
   return (
     <YearSection>
-      <YearTitle>년도</YearTitle>
+      <YearTitle>{t("anime.year")}</YearTitle>
       <YearButtonList>
         {visibleYears.map(y => (
           <YearButton
@@ -36,7 +38,7 @@ export default function Year({ value, onChange, options }: YearProps) {
       {options.length > VISIBLE_COUNT && (
         <YearToggleButton
           onClick={() => setShowAll(v => !v)}
-          aria-label={showAll ? "접기" : "더보기"}
+          aria-label={t(showAll ? "anime.collapse" : "anime.expand")}
         >
           <ToggleLine className="toggle-line" />
           {showAll ? (

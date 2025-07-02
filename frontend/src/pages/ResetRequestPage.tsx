@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { requestPasswordReset } from '../api/auth';
+import { useTranslation } from 'react-i18next';
 
 export default function ResetRequestPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
 
@@ -10,23 +12,23 @@ export default function ResetRequestPage() {
       await requestPasswordReset({ email });
       setSent(true);
     } catch (err) {
-      alert("해당 이메일로 등록된 유저가 없습니다.");
+      alert(t('auth.resetRequest.fail'));
     }
   };
 
   return (
     <div>
-      <h3>비밀번호 재설정</h3>
+      <h3>{t('auth.resetRequest.title')}</h3>
       {sent ? (
-        <p>이메일로 재설정 링크가 전송되었습니다.</p>
+        <p>{t('auth.resetRequest.success')}</p>
       ) : (
         <>
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="이메일 주소"
+            placeholder={t('auth.resetRequest.emailPlaceholder')}
           />
-          <button onClick={handleSubmit}>링크 보내기</button>
+          <button onClick={handleSubmit}>{t('auth.resetRequest.submit')}</button>
         </>
       )}
     </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { useTranslation } from "react-i18next";
 dayjs.extend(relativeTime);
 
 import type { BoardComment } from "../../../../types/comment";
@@ -10,7 +11,7 @@ import {
 } from "./CommentListBox.styled";
 
 // 답글(2뎁스) 렌더링
-function RenderReplies(replies: BoardComment[]) {
+function RenderReplies(replies: BoardComment[], t: any) {
   return (
     <ReplyList>
       {replies.map((r) => (
@@ -24,7 +25,7 @@ function RenderReplies(replies: BoardComment[]) {
             <Text
               className={r.is_deleted ? "deleted" : ""}
               dangerouslySetInnerHTML={{
-                __html: r.is_deleted ? "(삭제됨)" : r.content,
+                __html: r.is_deleted ? t("comment.deleted") : r.content,
               }}
             />
             <CommentMeta>
@@ -40,15 +41,18 @@ function RenderReplies(replies: BoardComment[]) {
 type Props = { comments: BoardComment[] };
 
 export default function CommentListBox({ comments }: Props) {
+  const { t } = useTranslation();
+
   if (comments.length === 0) {
     return (
       <ListBox>
         <div style={{ padding: "28px", color: "#bbb", textAlign: "center" }}>
-          아직 작성된 댓글이 없습니다.
+          {t("comment.no_comments")}
         </div>
       </ListBox>
     );
   }
+
   return (
     <ListBox>
       {comments.map((c) => (
@@ -62,13 +66,13 @@ export default function CommentListBox({ comments }: Props) {
             <Text
               className={c.is_deleted ? "deleted" : ""}
               dangerouslySetInnerHTML={{
-                __html: c.is_deleted ? "(삭제됨)" : c.content,
+                __html: c.is_deleted ? t("comment.deleted") : c.content,
               }}
             />
             <CommentMeta>
-              좋아요 {c.like_count}개 | {dayjs(c.created_at).fromNow()}
+              {t("comment.like_count", { count: c.like_count })} | {dayjs(c.created_at).fromNow()}
             </CommentMeta>
-            {c.replies.length > 0 && RenderReplies(c.replies)}
+            {c.replies.length > 0 && RenderReplies(c.replies, t)}
           </CommentContent>
         </CommentItem>
       ))}

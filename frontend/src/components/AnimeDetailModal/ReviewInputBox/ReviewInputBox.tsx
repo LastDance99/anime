@@ -4,6 +4,7 @@ import {
   StyledTextarea,
   SubmitButton,
 } from "./ReviewInputBox.styled";
+import { useTranslation } from "react-i18next";
 
 interface ReviewInputBoxProps {
   value: string;
@@ -18,8 +19,10 @@ export default function ReviewInputBox({
   onChange,
   onSubmit,
   disabled = false,
-  placeholder = "이 작품에 대한 평가를 남겨보세요!",
+  placeholder,
 }: ReviewInputBoxProps) {
+  const { t } = useTranslation();
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -47,16 +50,16 @@ export default function ReviewInputBox({
         onChange={onChange}
         maxLength={500}
         rows={2}
-        placeholder={placeholder}
+        placeholder={placeholder || t("review.input_placeholder")}
         disabled={disabled}
         onKeyDown={handleKeyDown}
       />
       <SubmitButton
         onClick={handleClickSubmit}
         disabled={disabled || value.trim().length === 0}
-        aria-label="리뷰 등록"
+        aria-label={t("review.submit_label")}
       >
-        등록
+        {t("review.submit")}
       </SubmitButton>
     </InputBox>
   );

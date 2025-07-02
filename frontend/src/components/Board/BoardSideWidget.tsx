@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { getBoardNotices, getBoardPopular, getBoardRecommend } from "../../api/board";
+import { useTranslation } from "react-i18next";
+import {
+  getBoardNotices,
+  getBoardPopular,
+  getBoardRecommend,
+} from "../../api/board";
 import DetailModal from "./DetailModal/DetailModal";
 
 import {
@@ -40,6 +45,7 @@ export interface BoardItem {
 }
 
 export default function BoardSideWidget() {
+  const { t } = useTranslation();
   const [notices, setNotices] = useState<BoardItem[]>([]);
   const [popular, setPopular] = useState<BoardItem[]>([]);
   const [recommend, setRecommend] = useState<BoardItem[]>([]);
@@ -63,6 +69,7 @@ export default function BoardSideWidget() {
     setSelectedPostId(post.id);
     setSelectedType(getTypeFromPost(post));
   };
+
   const handleCloseModal = () => {
     setSelectedPostId(null);
     setSelectedType(null);
@@ -70,10 +77,10 @@ export default function BoardSideWidget() {
 
   return (
     <SideWidgetBox>
-      <WidgetTitle>공지사항</WidgetTitle>
+      <WidgetTitle>{t("board.notice")}</WidgetTitle>
       <WidgetSection>
         <List>
-          {notices.map(post => (
+          {notices.map((post) => (
             <ListItem key={post.id}>
               <PostButton onClick={() => handleOpenModal(post)}>
                 {post.title}
@@ -84,14 +91,16 @@ export default function BoardSideWidget() {
       </WidgetSection>
       <WidgetDivider />
 
-      <WidgetSectionTitle>오늘의 인기글</WidgetSectionTitle>
+      <WidgetSectionTitle>{t("board.popular_today")}</WidgetSectionTitle>
       <WidgetSection>
         <List>
-          {popular.map(post => (
+          {popular.map((post) => (
             <ListItem key={post.id}>
               <PostButton onClick={() => handleOpenModal(post)}>
                 {post.title}
-                <PostMeta>({post.like_count}👍/{post.comment_count}💬)</PostMeta>
+                <PostMeta>
+                  ({post.like_count}👍 / {post.comment_count}💬)
+                </PostMeta>
               </PostButton>
             </ListItem>
           ))}
@@ -99,10 +108,10 @@ export default function BoardSideWidget() {
       </WidgetSection>
       <WidgetDivider />
 
-      <WidgetSectionTitle>추천글</WidgetSectionTitle>
+      <WidgetSectionTitle>{t("board.recommend")}</WidgetSectionTitle>
       <WidgetSection>
         <List>
-          {recommend.map(post => (
+          {recommend.map((post) => (
             <ListItem key={post.id}>
               <PostButton onClick={() => handleOpenModal(post)}>
                 {post.title}
@@ -111,6 +120,7 @@ export default function BoardSideWidget() {
           ))}
         </List>
       </WidgetSection>
+
       {selectedPostId && selectedType && (
         <DetailModal
           type={selectedType}

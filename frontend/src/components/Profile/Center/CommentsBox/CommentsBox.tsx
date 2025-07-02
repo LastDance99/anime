@@ -19,10 +19,11 @@ import type { ProfileComment } from "../../../../types/user";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { addUserComment, deleteUserComment } from "../../../../api/profile";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   comments: ProfileComment[];
-  userId: number; // 댓글이 달린 프로필의 주인 ID
+  userId: number;
   onRefresh?: () => void;
   isMyPage: boolean;
 }
@@ -32,6 +33,7 @@ export default function ProfileComments({ comments, userId, onRefresh, isMyPage 
   const [showInput, setShowInput] = useState(false);
   const [input, setInput] = useState("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +50,7 @@ export default function ProfileComments({ comments, userId, onRefresh, isMyPage 
 
   const handleDelete = async (commentId: number) => {
     if (!currentUser) return;
-    const ok = window.confirm("댓글을 삭제하시겠습니까?");
+    const ok = window.confirm(t("comment.delete_confirm"));
     if (!ok) return;
 
     try {
@@ -59,7 +61,6 @@ export default function ProfileComments({ comments, userId, onRefresh, isMyPage 
     }
   };
 
-  // id 기반 프로필 이동
   const goToProfile = (authorId?: number) => {
     if (authorId) {
       navigate(`/profile/${authorId}`);
@@ -69,11 +70,11 @@ export default function ProfileComments({ comments, userId, onRefresh, isMyPage 
   return (
     <CommentsBox>
       <CommentsTitleRow>
-        <CommentsTitle>Comments</CommentsTitle>
+        <CommentsTitle>{t("comment.title")}</CommentsTitle>
         {currentUser && (
           <CommentAddButton
             onClick={() => setShowInput(v => !v)}
-            aria-label={showInput ? "입력창 닫기" : "댓글 작성"}
+            aria-label={showInput ? t("comment.close_input") : t("comment.add_comment")}
           >
             {showInput ? "−" : "+"}
           </CommentAddButton>
@@ -84,7 +85,7 @@ export default function ProfileComments({ comments, userId, onRefresh, isMyPage 
         <form style={{ width: "100%" }} onSubmit={handleCommentSubmit}>
           <ChatInputWrapper>
             <ChatInput
-              placeholder="댓글을 입력해 주세요"
+              placeholder={t("comment.input_placeholder")}
               value={input}
               onChange={e => setInput(e.target.value)}
               autoFocus
@@ -112,12 +113,14 @@ export default function ProfileComments({ comments, userId, onRefresh, isMyPage 
                     style={{ cursor: "pointer", textDecoration: "underline" }}
                     onClick={() => goToProfile(comment.author?.id)}
                   >
-                    {comment.author?.nickname || "알 수 없음"}
+                    {comment.author?.nickname || t("comment.unknown")}
                   </ChatNickname>
                   <ChatText>{comment.content}</ChatText>
                 </ChatTextBlock>
                 {canDelete && (
-                  <DeleteButton onClick={() => handleDelete(comment.id)}>삭제</DeleteButton>
+                  <DeleteButton onClick={() => handleDelete(comment.id)}>
+                    {t("comment.delete")}
+                  </DeleteButton>
                 )}
               </ChatItem>
             );

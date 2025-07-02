@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useParams, Outlet } from "react-router-dom";
+import { useParams, Outlet, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import ProfileHeader from "../components/Profile/ProfileHeader/ProfileHeader";
 import ProfileSection from "../components/Profile/ProfileSection/ProfileSection";
 import NavTabBar from "../components/Profile/NavTabBar/NavTabBar";
@@ -10,6 +11,9 @@ import { getUserProfile, getUserComments, getFavoriteAnimes } from "../api/profi
 
 export default function ProfileLayout() {
   const { userId } = useParams<{ userId: string }>();
+  const location = useLocation();
+  const { t } = useTranslation();
+
   const [user, setUser] = useState<User | null>(null);
   const [comments, setComments] = useState<ProfileComment[]>([]);
   const [userAnimeList, setUserAnimeList] = useState<UserAnimeItem[]>([]);
@@ -17,11 +21,10 @@ export default function ProfileLayout() {
   const [showHeader, setShowHeader] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const lastScroll = useRef(window.scrollY);
+  const prevPathRef = useRef<string>("");
 
-  // ★ openSettings, setOpenSettings 여기서 관리!
   const [openSettings, setOpenSettings] = useState(false);
 
-  // fetchAll: 프로필 전체 강제 새로고침 함수
   const fetchAll = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
@@ -45,7 +48,23 @@ export default function ProfileLayout() {
     }
   }, [userId]);
 
-  // 스크롤 이벤트
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  useEffect(() => {
+    const basePath = `/profile/${userId}`;
+    const isNowOverview = location.pathname === basePath;
+    const wasOverview = prevPathRef.current === basePath;
+
+    if (!wasOverview && isNowOverview) {
+      console.log("📦 개요 탭으로 전환됨 → fetchAll()");
+      fetchAll();
+    }
+
+    prevPathRef.current = location.pathname;
+  }, [location.pathname, fetchAll, userId]);
+
   useEffect(() => {
     const handleScroll = () => {
       const curr = window.scrollY;
@@ -62,22 +81,30 @@ export default function ProfileLayout() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // userId 변경/첫 진입시 전체 refetch
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
-
-  if (loading) return <div>불러오는 중...</div>;
-  if (!user) return <div>유저를 찾을 수 없습니다.</div>;
+  if (loading) return <div>{t("common.loading")}</div>;
+  if (!user) return <div>{t("profile.not_found")}</div>;
 
   return (
     <>
-      {/* “설정” 버튼에 트리거 함수만 넘김 */}
-      <ProfileHeader show={showHeader} isScrolled={isScrolled} user={user} setUser={setUser} onOpenSettings={() => setOpenSettings(true)} />
+      <ProfileHeader
+        show={showHeader}
+        isScrolled={isScrolled}
+        user={user}
+        setUser={setUser}
+        onOpenSettings={() => setOpenSettings(true)}
+      />
       <ProfileSection user={user} />
       <NavTabBar user={user} />
-      {/* openSettings, setOpenSettings, fetchAll 전부 context로 내림 */}
-      <Outlet context={{ user, comments, userAnimeList, fetchAll, openSettings, setOpenSettings }} />
+      <Outlet
+        context={{
+          user,
+          comments,
+          userAnimeList,
+          fetchAll,
+          openSettings,
+          setOpenSettings,
+        }}
+      />
     </>
   );
 }

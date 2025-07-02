@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "react-i18next";
+
 import {
   HeaderWrapper,
   HeaderInner,
@@ -11,6 +13,7 @@ import {
 
 export default function Header({ show = true }) {
   const { currentUser } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <HeaderWrapper $show={show}>
@@ -20,11 +23,15 @@ export default function Header({ show = true }) {
           <NavList>
             {currentUser && (
               <NavItem as={Link} to={`/profile/${currentUser.id}`}>
-                프로필
+                {t("header.profile")}
               </NavItem>
             )}
-            <NavItem as={Link} to="/board">전체 게시판</NavItem>
-            <NavItem as={Link} to="/anime">애니</NavItem>
+            <NavItem as={Link} to="/board">
+              {t("header.board")}
+            </NavItem>
+            <NavItem as={Link} to="/anime">
+              {t("header.anime")}
+            </NavItem>
           </NavList>
         </Nav>
       </HeaderInner>

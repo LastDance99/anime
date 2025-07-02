@@ -6,15 +6,15 @@ import {
   getUserSettings,
   updateAccount,
   updateLanguage,
-  deleteImage,
   updateImage,
 } from "../../api/settings";
 import { checkNickname } from "../../api/auth";
-import axios from "../../lib/axios";
 import NicknameModal from "./NicknameModal";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 // TempUser 타입 정의
-type TempUser = Omit<User, 'profile_image' | 'background_image' | 'myroom_image'> & {
+type TempUser = Omit<User, "profile_image" | "background_image" | "myroom_image"> & {
   profile_image: string | File | null;
   background_image: string | File | null;
   myroom_image: string | File | null;
@@ -36,6 +36,8 @@ type SettingsModalProps = {
 };
 
 export default function SettingsModal({ user, setUser, onClose, onSaved }: SettingsModalProps) {
+  const { t } = useTranslation();
+
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [isNicknameModalOpen, setNicknameModalOpen] = useState(false);
   const [tempUser, setTempUser] = useState<TempUser>(convertUserToTempUser(user));
@@ -47,14 +49,12 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    // 이미지도 값이 달라졌는지 직접 비교!
     const changed =
       user.nickname !== tempUser.nickname ||
       user.language !== tempUser.language ||
       profileFile !== null ||
       bgFile !== null ||
       roomFile !== null ||
-      // 이미지 비교: File이거나, string이거나, null이거나
       (typeof user.profile_image === "string"
         ? user.profile_image !== (typeof tempUser.profile_image === "string" ? tempUser.profile_image : null)
         : user.profile_image !== tempUser.profile_image) ||
@@ -74,15 +74,15 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
         const data = await getUserSettings();
         setTempUser(convertUserToTempUser(data));
       } catch (err) {
-        console.error("설정 로드 실패", err);
+        console.error(t("settings.loadError"), err);
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [t]);
 
   const handleSave = async () => {
-    const confirmed = window.confirm("설정을 저장하시겠습니까?");
+    const confirmed = window.confirm(t("settings.confirmSave"));
     if (!confirmed) return;
 
     try {
@@ -90,25 +90,20 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
         await updateAccount({ nickname: tempUser.nickname });
       }
 
-      if (user.language !== tempUser.language) {
-        await updateLanguage({ language: tempUser.language });
+      if (
+        user.language !== tempUser.language &&
+        ["ko", "en", "es"].includes(tempUser.language ?? "")
+      ) {
+        await updateLanguage({
+          language: tempUser.language as "ko" | "en" | "es",
+        });
+        i18n.changeLanguage(tempUser.language as "ko" | "en" | "es");
       }
 
       const formData = new FormData();
       if (profileFile) formData.append("profile_image", profileFile);
       if (bgFile) formData.append("background_image", bgFile);
       if (roomFile) formData.append("myroom_image", roomFile);
-
-      // ✅ 디버깅: FormData 내용 출력
-      for (let [key, value] of formData.entries()) {
-        console.log(`[FormData] ${key}:`, value);
-        console.log(` - is File:`, value instanceof File);
-        if (value instanceof File) {
-          console.log(` - name: ${value.name}`);
-          console.log(` - type: ${value.type}`);
-          console.log(` - size: ${value.size}`);
-        }
-      }
 
       if (formData.has("profile_image") || formData.has("background_image") || formData.has("myroom_image")) {
         await updateImage(formData);
@@ -117,26 +112,22 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
       setUser(tempUser as User);
       setJustSaved(true);
       onClose();
-      if (onSaved) {
-        console.log("🟣 onSaved 호출!!");
-        onSaved();
-      }
+      if (onSaved) onSaved();
     } catch (err: any) {
-      console.error("설정 저장 실패:", err);
+      console.error(t("settings.saveError"), err);
       if (err.response) {
-        console.error("응답 오류:", err.response.data);
         alert(err.response.data.detail || JSON.stringify(err.response.data));
       } else if (err.request) {
-        alert("서버로부터 응답이 없습니다.");
+        alert(t("settings.noResponse"));
       } else {
-        alert("알 수 없는 오류가 발생했습니다.");
+        alert(t("settings.unknownError"));
       }
     }
   };
 
   const handleTryClose = () => {
     if (hasChanges && !justSaved) {
-      const confirmed = window.confirm("저장하지 않은 변경사항이 있습니다. 닫으시겠습니까?");
+      const confirmed = window.confirm(t("settings.unsavedChanges"));
       if (!confirmed) return;
     }
     onClose();
@@ -149,7 +140,7 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
       setTempUser((prev) => ({ ...prev, nickname: newNickname }));
       setNicknameModalOpen(false);
     } catch (err: any) {
-      const msg = err.response?.data?.nickname?.[0] || err.response?.data?.detail || "닉네임 확인 실패";
+      const msg = err.response?.data?.nickname?.[0] || err.response?.data?.detail || t("settings.nicknameCheckFail");
       alert(msg);
     }
   };
