@@ -1,11 +1,14 @@
+import os
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from openai import OpenAI
 from django_redis import get_redis_connection
 from .utils import (
     is_smalltalk_llm, is_smalltalk, smalltalk_answer, is_policy_question_llm, 
     policy_rag_answer, classify_question_type, extract_title_from_question,
-    search_excel_candidates, search_web, ask_gpt_full_context_v2,
+    search_excel_candidates, search_web, ask_gpt_full_context_v2, recommend_anime_by_userlist,
 )
 
 REDIS_CHAT_PREFIX = "animebot_chat:"
@@ -102,3 +105,44 @@ class AnimeBotChatClearAPIView(APIView):
         user_id = request.user.id
         clear_dialog_context(user_id)
         return Response({"message": "대화내역 초기화됨"}, status=200)
+    
+class AnimeRecoAPIView(APIView):
+    def post(self, request):
+        # 프론트에서 유저 애니 리스트와 언어를 받음
+        user_anime_titles = request.data.get("anime_titles", [])  # ["도쿄구울", ...]
+        user_language = request.data.get("language", "ko")
+        top_k = int(request.data.get("top_k", 10))
+
+        result = recommend_anime_by_userlist(
+            user_anime_titles=user_anime_titles,
+            user_language=user_language,
+            top_k=top_k,
+            with_detail=True,
+        )
+        return Response(result)
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+class AnimeBotImageGenerateAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        prompt = request.data.get("prompt", "").strip()
+        usage_type = request.data.get("usage_type", "")
+
+        if usage_type not in ["comment", "reply"]:
+            return Response({"error": "AI 짤 생성은 댓글/대댓글에서만 가능합니다."}, status=400)
+        if not prompt:
+            return Response({"error": "프롬프트가 없습니다."}, status=400)
+
+        try:
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                n=1,
+                size="1024x1024"
+            )
+            image_url = response.data[0].url
+            return Response({"image_url": image_url}, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

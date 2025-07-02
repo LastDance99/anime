@@ -18,6 +18,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 EXCEL_PATH = os.path.join(BASE_DIR, 'anime_fianl_true.xlsx')
 FAISS_PATH = os.path.join(BASE_DIR, 'anime_faiss_index')
 
+# 추천용 벡터DB 로드 (최상단 import 근처에 위치)
+RECO_FAISS_PATH = os.path.join(BASE_DIR, 'anime_reco_faiss_index')
+reco_embedding = OpenAIEmbeddings()
+reco_vectordb = FAISS.load_local(
+    RECO_FAISS_PATH, 
+    embeddings=reco_embedding, 
+    allow_dangerous_deserialization=True
+)
+
 # 데이터셋 및 벡터 DB 준비
 df = pd.read_excel(EXCEL_PATH)
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
@@ -382,3 +391,155 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
     clean_answer = remove_undefined_items(raw_answer)
     clean_answer = remove_placeholder_titles(clean_answer)
     return clean_answer
+
+# ───────────── 추천 함수
+import ast
+import json
+
+def parse_to_list(val):
+    """문자열로 넘어온 리스트도 안전하게 파싱 (JSON/파이썬식/빈값 다 대응)"""
+    if isinstance(val, list):
+        return val
+    if val is None or val == "":
+        return []
+    if isinstance(val, str):
+        val = val.strip()
+        if val.startswith("[") and val.endswith("]"):
+            try:
+                return ast.literal_eval(val)
+            except Exception:
+                try:
+                    return json.loads(val)
+                except Exception:
+                    return []
+        elif "," in val:
+            return [v.strip() for v in val.split(",") if v.strip()]
+        else:
+            return [val]
+    return []
+
+def get_multilang(meta, field, lang="ko", fallback_order=None):
+    """
+    meta: dict
+    field: "title", "description", "genres"
+    lang: 요청 언어 ("ko"|"en"|"es")
+    fallback_order: 우선순위, 예) ["ko", "en", "es"]
+    """
+    fallback_order = fallback_order or ["ko", "en", "es"]
+    order = [lang] + [l for l in fallback_order if l != lang]
+    # 타이틀은 특이하게 처리: ko/romaji/es만 사용
+    if field == "title":
+        if lang == "ko":
+            return meta["title_ko"]
+        elif lang == "es":
+            return meta["title_es"]
+        else:
+            return meta["title_romaji"]  # 영어는 romaji
+    for l in order:
+        key = f"{field}_{l}"
+        if key in meta and meta[key]:
+            v = meta[key]
+            return parse_to_list(v) if field == "genres" else v
+    return [] if field == "genres" else ""
+
+def recommend_anime_by_userlist(
+    user_anime_titles, user_language="ko", top_k=3, with_detail=True,
+    exclude_tags=None, exclude_genres=None
+):
+    exclude_tags = exclude_tags or []
+    exclude_genres = exclude_genres or []
+
+    print(f"\n[추천] 유저가 본 애니: {user_anime_titles}")
+    print(f"[추천] 요청 언어: {user_language} / top_k: {top_k}")
+
+    user_features = []
+    user_genres_counter = {}
+    user_tags_counter = {}
+
+    for title in user_anime_titles:
+        docs = reco_vectordb.similarity_search(title, k=1)
+        if docs:
+            meta = docs[0].metadata
+            user_features.append(docs[0].page_content)
+            genres = parse_to_list(meta.get("genres_en", []))  # 장르 통계는 영어 기준
+            tags = parse_to_list(meta.get("tags", []))
+            print(f" - '{title}' -> genres: {genres} / tags: {tags}")
+            for g in genres:
+                user_genres_counter[g] = user_genres_counter.get(g, 0) + 1
+            for t in tags:
+                user_tags_counter[t] = user_tags_counter.get(t, 0) + 1
+
+    if not user_features:
+        print("[추천] 유저 애니 벡터 추출 실패")
+        return []
+
+    top_user_genres = set(sorted(user_genres_counter, key=user_genres_counter.get, reverse=True)[:5])
+    top_user_tags = set(sorted(user_tags_counter, key=user_tags_counter.get, reverse=True)[:7])
+    print(f"[추천] top_user_genres: {top_user_genres} / top_user_tags: {top_user_tags}")
+
+    query = " ".join(user_features)
+    candidates = reco_vectordb.similarity_search(query, k=top_k + 50)
+    print(f"[추천] 후보 작품 수: {len(candidates)}")
+
+    already_seen = set([t.strip().lower() for t in user_anime_titles])
+    result = []
+
+    filtered_candidates = []
+    for doc in candidates:
+        meta = doc.metadata
+        titles = [
+            meta.get("title_ko", ""), meta.get("title_romaji", ""),
+            meta.get("title_native", ""), meta.get("title_es", "")
+        ]
+        if any(t.strip().lower() in already_seen for t in titles if t):
+            continue
+
+        genres = set(parse_to_list(meta.get("genres_en", [])))
+        tags = set(parse_to_list(meta.get("tags", [])))
+
+        if exclude_genres and any(x in genres for x in exclude_genres):
+            continue
+        if exclude_tags and any(x in tags for x in exclude_tags):
+            continue
+
+        genre_match = len(top_user_genres & genres)
+        tag_match = len(top_user_tags & tags)
+        if genre_match == 0 and tag_match == 0:
+            continue
+
+        score = 1.0 + 0.7 * genre_match + 0.5 * tag_match
+        filtered_candidates.append((score, meta))
+
+    print(f"[추천] 필터 후 후보: {len(filtered_candidates)}")
+
+    filtered_candidates.sort(key=lambda x: -x[0])
+
+    for score, meta in filtered_candidates:
+        # 타이틀/설명/장르: 다국어 자동 fallback
+        title = get_multilang(meta, "title", user_language)
+        description = get_multilang(meta, "description", user_language)
+        genres = get_multilang(meta, "genres", user_language)
+        cover = meta.get("cover_image_l", meta.get("cover_image", "")) or ""
+        year = meta.get("start_year", None)
+        format_ = meta.get("format", "")
+        studio_objs = parse_to_list(meta.get("studios", []))
+        studio_names = [s['node']['name'] for s in studio_objs if isinstance(s, dict) and 'node' in s and 'name' in s['node']]
+
+        if with_detail:
+            result.append({
+                "title": title,
+                "description": description,
+                "cover_image": cover,
+                "year": year,
+                "genres": genres,
+                "studios": studio_names,
+                "format": format_,
+                "reco_score": round(score, 4)
+            })
+        else:
+            result.append(title)
+        if len(result) >= top_k:
+            break
+
+    print(f"[추천] 최종 추천 result: {result[:3]} ... [총 {len(result)}개]")
+    return result

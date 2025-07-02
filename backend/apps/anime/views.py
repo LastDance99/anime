@@ -62,7 +62,23 @@ class AnimeSearchView(APIView):
             for genre in genres.split(','):
                 animes = animes.filter(**{f"{genre_field}__contains": [genre]})
         if year:
-            animes = animes.filter(start_year=year)
+            if str(year).endswith("-"):
+                try:
+                    year_limit = int(year.rstrip("-"))
+                    animes = animes.filter(start_year__lte=year_limit)
+                except ValueError:
+                    pass
+            elif "-" in year:
+                try:
+                    start, end = map(int, year.split("-"))
+                    animes = animes.filter(start_year__gte=start, start_year__lte=end)
+                except ValueError:
+                    pass
+            else:
+                try:
+                    animes = animes.filter(start_year=int(year))
+                except ValueError:
+                    pass
         if status:
             animes = animes.filter(**{f"status_{lang}": status})
         if season:

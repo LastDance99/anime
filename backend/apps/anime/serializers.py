@@ -46,7 +46,7 @@ class AnimeDetailSerializer(serializers.ModelSerializer):
         model = Anime
         fields = [
             "id", "title", "cover_image_xl", "banner_image", "start_date", "season", "status",
-            "duration", "episodes", "format", "description", "genres", "studios",
+            "duration", "episodes", "format", "description", "genres", "studios", "characters",
             "source", "average_rating", "user_rating", "user_has_in_animelist", "total_animelist_users"
         ]
 

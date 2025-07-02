@@ -13,7 +13,12 @@ df = pd.read_excel('anime_fianl_true.xlsx')
 def parse_json_list(x):
     if pd.isna(x) or x in ['', 'nan', None]:
         return []
+    # 혹시 이미 리스트 타입이면 그대로 반환
+    if isinstance(x, list):
+        return x
     try:
+        # 홑따옴표 → 쌍따옴표 변환 (json.loads 호환)
+        x = x.replace("'", '"')
         value = json.loads(x)
         if not isinstance(value, list):
             return []

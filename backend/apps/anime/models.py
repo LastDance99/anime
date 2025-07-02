@@ -42,14 +42,14 @@ class Anime(models.Model):
     cover_image_m = models.URLField()
     banner_image = models.URLField(null=True, blank=True)
 
-    genres_ko = models.JSONField()
-    genres_en = models.JSONField()
-    genres_es = models.JSONField()
-    studios = models.JSONField()
+    genres_ko = models.JSONField(default=list, blank=True)
+    genres_en = models.JSONField(default=list, blank=True)
+    genres_es = models.JSONField(default=list, blank=True)
+    studios = models.JSONField(default=list, blank=True)
     
-    tags = models.JSONField()
-    characters = models.JSONField()
-    staff = models.JSONField()
+    tags = models.JSONField(default=list, blank=True)
+    characters = models.JSONField(default=list, blank=True)
+    staff = models.JSONField(default=list, blank=True)
 
     def __str__(self):
         return self.title_ko
