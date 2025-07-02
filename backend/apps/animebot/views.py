@@ -7,6 +7,9 @@ from .utils import (
     policy_rag_answer, classify_question_type, extract_title_from_question,
     search_excel_candidates, search_web, ask_gpt_full_context_v2,
 )
+from dotenv import load_dotenv
+import openai
+import os
 
 REDIS_CHAT_PREFIX = "animebot_chat:"
 
@@ -101,3 +104,27 @@ class AnimeBotChatClearAPIView(APIView):
         user_id = request.user.id
         clear_dialog_context(user_id)
         return Response({"message": "대화내역 초기화됨"}, status=200)
+
+
+
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+class AnimeBotImageGenerateAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        prompt = request.data.get("prompt", "").strip()
+        if not prompt:
+            return Response({"error": "프롬프트가 없습니다."}, status=400)
+
+        try:
+            response = openai.Image.create(
+                prompt=prompt,
+                n=1,
+                size="1024x1024",
+            )
+            image_url = response["data"][0]["url"]
+            return Response({"image_url": image_url}, status=200)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
