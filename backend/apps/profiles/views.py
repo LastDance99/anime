@@ -26,6 +26,9 @@ from .serializers import (
     GallerySummarySerializer,
     MyAnimeListItemSerializer,
 )
+from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+from openai import OpenAI
 
 User = get_user_model()
 
@@ -385,7 +388,4 @@ class ProfileContentListView(ListAPIView):
 
         # 아무 타입도 아니면 빈 쿼리셋
         return BoardPost.objects.none()
-    
-
-
 

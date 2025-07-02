@@ -13,11 +13,11 @@ import os
 
 
 from pathlib import Path
-from dotenv import load_dotenv
 from corsheaders.defaults import default_headers
 
-load_dotenv()
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -128,6 +128,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
+        #'OPTIONS': {
+            'client_encoding': 'UTF8',
+        #}
     }
 }
 
@@ -274,3 +277,4 @@ STORAGES = {
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
