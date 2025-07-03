@@ -117,12 +117,12 @@ interface GetUserContentParams {
   type: "post" | "gallery" | "anime";
   page?: number;
   q?: string;
-  order?: string;
+  ordering?: string;
   // 애니메이션 전용 필터
   year?: string;
   genres?: string;
   season?: string;
-  format?: string;
+  media_format?: string;
   source?: string;
   status?: string;
   page_size?: number;
@@ -130,8 +130,8 @@ interface GetUserContentParams {
 
 export const getUserContent = async (params: GetUserContentParams) => {
   const {
-    userId, type, page, q, order,
-    year, genres, season, format, source,
+    userId, type, page, q, ordering,
+    year, genres, season, media_format, source,
     status, 
   } = params;
 
@@ -139,11 +139,11 @@ export const getUserContent = async (params: GetUserContentParams) => {
   query.append("type", type);
   if (page) query.append("page", String(page));
   if (q) query.append("q", q);
-  if (order) query.append("order", order);
+  if (ordering) query.append("ordering", ordering);
   if (year) query.append("year", year);
   if (genres) query.append("genres", genres);
   if (season) query.append("season", season);
-  if (format) query.append("format", format);
+  if (media_format) query.append("media_format", media_format);
   if (source) query.append("source", source);
   if (status) query.append("status", status);
 

@@ -17,7 +17,7 @@ export interface User {
   commentCount?: number;
   attendance?: number;
   activity?: Activity[];
-  password: string; // 임시로 넣어둔 것
+  is_staff: boolean;
 }
 
 export interface ProfileComment {

@@ -8,6 +8,7 @@ import type { User } from "../types/user";
 import type { ProfileComment } from "../types/user";
 import type { UserAnimeItem } from "../types/anime";
 import { getUserProfile, getUserComments, getFavoriteAnimes } from "../api/profile";
+import SettingsModal from "../components/Settings/SettingsModal";
 
 export default function ProfileLayout() {
   const { userId } = useParams<{ userId: string }>();
@@ -98,6 +99,7 @@ export default function ProfileLayout() {
       <Outlet
         context={{
           user,
+          setUser,
           comments,
           userAnimeList,
           fetchAll,
@@ -105,6 +107,17 @@ export default function ProfileLayout() {
           setOpenSettings,
         }}
       />
+      {openSettings && user && (
+        <SettingsModal
+          user={user}
+          setUser={setUser} // ✅ 추가
+          onClose={() => setOpenSettings(false)}
+          onSaved={(updatedUser) => {
+            setUser(updatedUser);
+            fetchAll();
+          }}
+        />
+      )}
     </>
   );
 }

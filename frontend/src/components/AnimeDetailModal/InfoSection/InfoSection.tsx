@@ -15,7 +15,6 @@ import DescMoreModal from "./DescMoreModal/DescMoreModal";
 import type { AnimeItem } from "../../../types/anime";
 import { useTranslation } from "react-i18next";
 
-// ✅ fallback 메시지를 다국어로 처리
 function valid(value: any, fallback: string) {
   if (
     value === undefined ||
@@ -89,7 +88,7 @@ export default function InfoSection({
         </ScoreBadge>
         <Title>{title}</Title>
         <MetaRow>
-          <span>{t("anime.original")}: {original}</span>
+          <span>{t("anime.source")}: {original}</span>
           <span>/</span>
           <span>{genres.length > 0 ? genres.join(", ") : t("anime.no_genre")}</span>
           <span>/</span>
@@ -110,7 +109,7 @@ export default function InfoSection({
           <span dangerouslySetInnerHTML={{ __html: displayedDesc }} />
           {showEllipsis && (
             <MoreButton onClick={() => setShowMore(true)}>
-              {t("common.more")}
+              {t("anime.expand")}
             </MoreButton>
           )}
         </Desc>
@@ -122,11 +121,11 @@ export default function InfoSection({
         )}
         {onDelete ? (
           <AddButton onClick={handleDelete}>
-            {t("anime.remove_from_list")}
+            {t("anime.remove_list")}
           </AddButton>
         ) : (
           <AddButton onClick={handleToggleList}>
-            {isAdded ? t("anime.remove_from_list") : t("anime.add_to_list")}
+            {isAdded ? t("anime.remove_list") : t("anime.add_list")}
           </AddButton>
         )}
       </InfoLeft>

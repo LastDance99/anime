@@ -80,7 +80,9 @@ export default function MyAniList({
               title={item.title}
               genres={genres}
               rating={item.rating}
-              myRating={item.my_rating}
+              myRating={typeof item.my_rating === "number" ? item.my_rating
+                : typeof item.rating === "number" ? item.rating
+                : undefined}
               isAdded={isAdded}
               onAdd={isMyPage ? () => onAdd?.(item) : undefined}
               onRemove={isMyPage ? () => onRemove?.(item) : undefined}

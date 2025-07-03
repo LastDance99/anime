@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef  } from "react";
 import styled from "styled-components";
 import SettingsPage from "../../pages/SettingsPage/SettingsPage";
 import type { User } from "../../types/user";
@@ -13,14 +13,12 @@ import NicknameModal from "./NicknameModal";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 
-// TempUser 타입 정의
 type TempUser = Omit<User, "profile_image" | "background_image" | "myroom_image"> & {
   profile_image: string | File | null;
   background_image: string | File | null;
   myroom_image: string | File | null;
 };
 
-// 변환 함수
 const convertUserToTempUser = (user: User): TempUser => ({
   ...user,
   profile_image: user.profile_image ?? null,
@@ -32,10 +30,15 @@ type SettingsModalProps = {
   user: User;
   setUser: (user: User) => void;
   onClose: () => void;
-  onSaved?: () => void;
+  onSaved?: (updatedUser: User) => void;
 };
 
-export default function SettingsModal({ user, setUser, onClose, onSaved }: SettingsModalProps) {
+export default function SettingsModal({
+  user,
+  setUser,
+  onClose,
+  onSaved,
+}: SettingsModalProps) {
   const { t } = useTranslation();
 
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
@@ -54,17 +57,7 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
       user.language !== tempUser.language ||
       profileFile !== null ||
       bgFile !== null ||
-      roomFile !== null ||
-      (typeof user.profile_image === "string"
-        ? user.profile_image !== (typeof tempUser.profile_image === "string" ? tempUser.profile_image : null)
-        : user.profile_image !== tempUser.profile_image) ||
-      (typeof user.background_image === "string"
-        ? user.background_image !== (typeof tempUser.background_image === "string" ? tempUser.background_image : null)
-        : user.background_image !== tempUser.background_image) ||
-      (typeof user.myroom_image === "string"
-        ? user.myroom_image !== (typeof tempUser.myroom_image === "string" ? tempUser.myroom_image : null)
-        : user.myroom_image !== tempUser.myroom_image);
-
+      roomFile !== null;
     setHasChanges(changed);
   }, [user, tempUser, profileFile, bgFile, roomFile]);
 
@@ -105,14 +98,18 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
       if (bgFile) formData.append("background_image", bgFile);
       if (roomFile) formData.append("myroom_image", roomFile);
 
-      if (formData.has("profile_image") || formData.has("background_image") || formData.has("myroom_image")) {
+      if (
+        formData.has("profile_image") ||
+        formData.has("background_image") ||
+        formData.has("myroom_image")
+      ) {
         await updateImage(formData);
       }
 
-      setUser(tempUser as User);
+      setUser(tempUser as User); // 현재 상태 반영
+      if (onSaved) onSaved(tempUser as User); // ✅ 변경된 부분: 상위 Layout에게 전달
       setJustSaved(true);
       onClose();
-      if (onSaved) onSaved();
     } catch (err: any) {
       console.error(t("settings.saveError"), err);
       if (err.response) {
@@ -125,8 +122,19 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
     }
   };
 
+  const hasChangesRef = useRef(hasChanges);
+  useEffect(() => {
+    hasChangesRef.current = hasChanges;
+  }, [hasChanges]);
+
+  const justSavedRef = useRef(justSaved);
+  useEffect(() => {
+    justSavedRef.current = justSaved;
+  }, [justSaved]);
+
   const handleTryClose = () => {
-    if (hasChanges && !justSaved) {
+    // 항상 최신 값을 사용!
+    if (hasChangesRef.current && !justSavedRef.current) {
       const confirmed = window.confirm(t("settings.unsavedChanges"));
       if (!confirmed) return;
     }
@@ -140,7 +148,10 @@ export default function SettingsModal({ user, setUser, onClose, onSaved }: Setti
       setTempUser((prev) => ({ ...prev, nickname: newNickname }));
       setNicknameModalOpen(false);
     } catch (err: any) {
-      const msg = err.response?.data?.nickname?.[0] || err.response?.data?.detail || t("settings.nicknameCheckFail");
+      const msg =
+        err.response?.data?.nickname?.[0] ||
+        err.response?.data?.detail ||
+        t("settings.nicknameCheckFail");
       alert(msg);
     }
   };

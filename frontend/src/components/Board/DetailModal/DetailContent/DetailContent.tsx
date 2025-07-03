@@ -25,37 +25,58 @@ import {
   IconButtons,
   IconBtn,
   HtmlContent,
+  NoticeBadge,
 } from "./DetailContent.styled";
 import { ThumbsUp } from "lucide-react";
 import DOMPurify from "dompurify";
 import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ko";
+import "dayjs/locale/en";
+import "dayjs/locale/es";
+
+dayjs.extend(relativeTime);
+
+type Props = {
+  id: number;
+  onDeleteSuccess?: (deletedId: number) => void;
+  onIsNotice?: (isNotice: boolean) => void;
+};
 
 export default function DetailContent({
   id,
   onDeleteSuccess,
-}: {
-  id: number;
-  onDeleteSuccess?: (deletedId: number) => void;
-}) {
+  onIsNotice,
+}: Props) {
   const [item, setItem] = useState<BoardItem | null>(null);
   const [liked, setLiked] = useState<boolean | null>(null);
   const [likeCount, setLikeCount] = useState<number | null>(null);
 
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // 언어에 맞게 dayjs locale 적용
+  useEffect(() => {
+    dayjs.locale(i18n.language);
+  }, [i18n.language]);
 
   useEffect(() => {
     fetchData();
+    return () => onIsNotice?.(false);
+    // eslint-disable-next-line
   }, [id]);
 
   const fetchData = async () => {
     try {
       const data = await getBoardPostDetail(id);
       setItem(data);
+      onIsNotice?.(!!data.is_notice);
     } catch (err) {
       console.error("게시글 상세 조회 실패", err);
       setItem(null);
+      onIsNotice?.(false);
     }
   };
 
@@ -68,6 +89,7 @@ export default function DetailContent({
 
   if (!item) return <div>{t("board.detail.load_fail")}</div>;
 
+  const isNotice = item.is_notice;
   const isGallery = item.board_type === "gallery";
   const authorNickname = item.author_nickname ?? t("board.detail.unknown_author");
   const profileImage = getFullImageUrl(item.author_profile_image);
@@ -75,7 +97,7 @@ export default function DetailContent({
   const authorId = item.author.id;
 
   const handleLike = async () => {
-    if (isAuthor || liked === null || likeCount === null) return;
+    if (isAuthor || liked === null || likeCount === null || isNotice) return;
 
     const prevLiked = liked;
     const prevCount = likeCount;
@@ -128,11 +150,24 @@ export default function DetailContent({
   };
 
   return (
-    <Wrapper>
-      <CategoryText $type={isGallery ? "gallery" : "board"}>
-        {isGallery ? t("board.detail.gallery") : t("board.detail.post")}
+    <Wrapper $isNotice={isNotice}>
+      <CategoryText $type={isNotice ? "notice" : isGallery ? "gallery" : "board"}>
+        {isNotice
+          ? t("board.detail.notice") // 예: "공지"
+          : isGallery
+          ? t("board.detail.gallery") // 예: "갤러리"
+          : t("board.detail.post") // 예: "게시글"
+        }
       </CategoryText>
-      <TitleText>{item.title}</TitleText>
+
+      <TitleText>
+        {isNotice && (
+          <NoticeBadge>
+            {t("board.detail.notice")}
+          </NoticeBadge>
+        )}
+        {item.title}
+      </TitleText>
 
       <UserRow>
         <Profile
@@ -159,7 +194,7 @@ export default function DetailContent({
             )}
           </div>
           <Meta>
-            {t("board.detail.date")} {item.created_at} · {t("board.detail.views")} {item.views}
+            {t("board.detail.date")} {dayjs(item.created_at).fromNow()} · {t("board.detail.view_count")} {item.views}
           </Meta>
         </UserInfo>
       </UserRow>
@@ -187,7 +222,7 @@ export default function DetailContent({
 
       <FooterRow>
         <MoreLink onClick={handleMoreClick}>
-          {t("board.detail.more_posts", {
+          {t("board.detail.more", {
             nickname: authorNickname,
             type: isGallery ? t("board.detail.gallery") : t("board.detail.post"),
           })}
@@ -199,10 +234,10 @@ export default function DetailContent({
             aria-label={t("board.detail.like")}
             role="button"
             as="button"
-            disabled={isAuthor || liked === null}
+            disabled={isAuthor || liked === null || isNotice}
             style={{
-              opacity: isAuthor || liked === null ? 0.5 : 1,
-              cursor: isAuthor || liked === null ? "not-allowed" : "pointer",
+              opacity: isAuthor || liked === null || isNotice ? 0.5 : 1,
+              cursor: isAuthor || liked === null || isNotice ? "not-allowed" : "pointer",
             }}
           >
             <ThumbsUp size={16} />

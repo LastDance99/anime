@@ -11,7 +11,7 @@ type Props = {
   onChange: (v: string) => void;
   options: OptionType[];
   label?: string;
-  labelKey?: string; // optional: 다국어 키
+  labelKey?: string;
 };
 
 export default function FormatSelect({ value, onChange, options, label, labelKey }: Props) {

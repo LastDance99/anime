@@ -24,4 +24,7 @@ export interface BoardItem {
   // 나중에 프로필 이미지도 쓰고 싶으면 아래 필드 추가
   is_liked?: boolean;
   // author_profile_image?: string;
+
+  // 공지글 수정 관련
+  is_notice: boolean;
 }

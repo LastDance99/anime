@@ -108,14 +108,6 @@ export default function ProfilePage() {
           <GenreStatsChart userId={user.id} />
         </Sidebar>
       </MainBox>
-      {openSettings && (
-        <SettingsModal
-          user={user}
-          setUser={() => {}}
-          onClose={() => setOpenSettings(false)}
-          onSaved={fetchAll}
-        />
-      )}
     </Container>
   );
 }

@@ -55,7 +55,7 @@ const GenreStatsChart: React.FC<Props> = ({ userId, limit = 5 }) => {
             >
               <XAxis
                 dataKey="genre"
-                tick={{ fontSize: 16, fontFamily: FONT_CUTE, fill: "#a5a5a5" }}
+                tick={{ fontSize: 12, fontFamily: FONT_CUTE, fill: "#a5a5a5" }}
                 axisLine={false}
                 tickLine={false}
               />

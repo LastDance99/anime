@@ -50,7 +50,7 @@ const MyBoardPage: React.FC = () => {
         userId: user.id,
         type: "post",
         q: keyword,
-        order: sort,
+        ordering: sort,
         page,
       });
       setList(res.results);

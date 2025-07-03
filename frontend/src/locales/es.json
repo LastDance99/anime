@@ -128,6 +128,7 @@
     "studio_none": "Sin información del estudio",
     "desc_none": "Sin descripción",
     "source": "Fuente",
+    "format": "formato",
     "studio": "Estudio",
     "year_suffix": "",
     "episode_suffix": " episodios",
@@ -249,6 +250,7 @@
   },
   "board": {
     "detail": {
+      "notice": "Aviso",
       "post": "Publicación",
       "gallery": "Galería",
       "edit": "Editar",
@@ -263,6 +265,27 @@
       "like_tooltip": "Me gusta",
       "like_disabled": "No puedes dar me gusta a tu propia publicación"
     },
+    "write": {
+      "type_post": "Publicación",
+      "type_gallery": "Galería",
+      "type_notice": "Aviso",
+      "label_type": "Tipo de tablero",
+      "label_title": "Título",
+      "label_content": "Contenido",
+      "placeholder_title": "Ingrese el título",
+      "placeholder_content": "Ingrese el contenido",
+      "button_submit": "Enviar",
+      "button_edit": "Actualizar",
+      "alert_required": "Por favor, ingrese el título y el contenido.",
+      "alert_gallery_image": "Las publicaciones de galería deben incluir al menos una imagen.",
+      "success_create": "¡La publicación ha sido creada!",
+      "success_edit": "La publicación ha sido actualizada.",
+      "fail": "Error al guardar la publicación.",
+      "alert_image_upload_fail": "Error al subir la imagen",
+      "alert_image_upload_error": "Se produjo un error al subir la imagen.",
+      "alert_invalid_youtube": "Enlace de YouTube no válido."
+    },
+    "notice_no_comment": "No se permiten comentarios en los avisos.",
     "number": "N°",
     "image": "Imagen",
     "title": "Título",
@@ -284,6 +307,7 @@
     "loading_user": "Cargando información del usuario...",
     "create.post": "Crear publicación",
     "create.gallery": "Crear galería",
+    "create.notice": "notificación",
     "edit.post": "Editar publicación",
     "edit.gallery": "Editar galería",
     "loadError": "No se pudo cargar la publicación."
@@ -324,7 +348,10 @@
     "add_comment": "Añadir comentario",
     "close_input": "Cerrar entrada",
     "delete_confirm": "¿Está seguro de que desea eliminar este comentario?",
-    "unknown": "Desconocido"
+    "unknown": "Desconocido",
+    "image_uploading": "Subiendo imagen...",
+    "image_upload_fail": "⚠️ Error al subir imagen",
+    "upload_image": "Adjuntar imagen"
   },
   "header": {
     "profile": "Perfil",
@@ -332,7 +359,7 @@
     "anime": "Anime"
   },
   "activity": {
-    "commented_on": "Comentó en \"{{title}}\".",
+    "commented_on": "Comentó en: ",
     "no_comments": "No hay comentarios.",
     "title": "Mi actividad",
     "no_more": "No hay más actividad",
@@ -433,6 +460,7 @@
     "fail": "No se encontró ningún usuario con ese correo electrónico."
   },
   "chat": {
+    "welcome": "¡Hola! ¿En qué puedo ayudarte?",
     "loading": "🤖 Generando respuesta...",
     "no_answer": "⚠️ No hay respuesta",
     "server_error": "⚠️ Error del servidor",
@@ -448,6 +476,11 @@
     "submit": "Enviar",
     "input_placeholder": "Escribe un mensaje...",
     "image_tool": "🖼️ Generar imagen",
-    "recommend_tool": "🎯 Recomendar anime"
+    "genre": "Género",
+    "studio": "Estudio",
+    "recommend_reason": "Razón de recomendación",
+    "recommend_tool": "🎯 Recomendar anime",
+    "generate_image": "🤖 Generar imagen AI",
+    "preview_close": "Cerrar vista previa"
   }
 }

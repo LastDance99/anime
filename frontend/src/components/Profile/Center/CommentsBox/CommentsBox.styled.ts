@@ -92,6 +92,8 @@ export const ChatTextBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
+  width: 100%;
+  max-width: 260px;
 `;
 
 export const ChatNickname = styled.div`
@@ -135,7 +137,8 @@ export const DeleteButton = styled.button`
   border: none;
   color: ${({ theme }) => theme.colors.subtext};
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  margin-left: 8px;
+  width: 100%;
+  max-width: 40px;
   cursor: pointer;
 
   &:hover {

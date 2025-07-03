@@ -32,7 +32,7 @@ export const Title = styled.div`
 export const Genre = styled.div`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.subtext};
-  min-width: 180px;
+  width: 180px;
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   transition: color 0.18s;
   white-space: nowrap;

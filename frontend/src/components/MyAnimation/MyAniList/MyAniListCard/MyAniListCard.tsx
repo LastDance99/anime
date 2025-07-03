@@ -68,7 +68,7 @@ export default function MyAniListCard({
       <Title>{title}</Title>
       <Genre>{(genres ?? []).join(", ")}</Genre>
       <Score>
-        {myRating !== undefined ? myRating.toFixed(1) : "-"}
+        {typeof myRating === "number" && !isNaN(myRating) ? myRating.toFixed(1) : "-"}
         {isFavorite && <CornerStar />}
       </Score>
 

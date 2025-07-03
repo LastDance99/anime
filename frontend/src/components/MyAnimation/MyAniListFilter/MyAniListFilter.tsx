@@ -24,7 +24,7 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
   }>(null);
 
   useEffect(() => {
-    getAnimeFilterMeta("ko")
+    getAnimeFilterMeta()
       .then(data => {
         setMeta({
           genres: data.genres || [],
@@ -94,7 +94,7 @@ export default function MyAniListFilter({ filters, setFilters }: Props) {
             { value: "favorite", label: t("filter.sort.favorite") },
             { value: "latest", label: t("filter.sort.latest") },
             { value: "oldest", label: t("filter.sort.oldest") },
-            { value: "score", label: t("filter.sort.score") },
+            { value: "rating", label: t("filter.sort.score") },
           ]}
           label={t("filter.sort.label")}
         />

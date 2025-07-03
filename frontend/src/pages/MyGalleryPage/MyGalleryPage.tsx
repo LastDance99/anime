@@ -48,7 +48,7 @@ const MyGalleryPage: React.FC = () => {
         userId: user.id,
         type: "gallery",
         q: keyword,
-        order: sort,
+        ordering: sort,
         page,
       });
       setList(res.results);

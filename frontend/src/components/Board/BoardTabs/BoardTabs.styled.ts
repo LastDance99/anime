@@ -3,35 +3,37 @@ import { ThumbsUp } from "lucide-react";
 
 export const TabBar = styled.div`
   display: flex;
+  gap: 0;
 `;
 
 export const Tab = styled.button<{ selected: boolean }>`
-  width: 76px;
-  height: 30px;
+  min-width: 62px;
+  max-width: 140px;
+  height: 34px;
+  padding: 0 10px;
   text-align: center;
-  line-height: 30px;
-  padding: 0;
   border: 1px solid ${({ theme }) => theme.colors.bordermain};
   background: ${({ selected, theme }) =>
     selected ? theme.colors.bordermain : theme.colors.secondary};
   color: ${({ selected, theme }) =>
     selected ? theme.colors.text : theme.colors.subtext};
-  font-size: ${({ theme }) => theme.fontSizes.sm}; // 12px
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   font-weight: ${({ theme }) => theme.Weights.light};
   cursor: pointer;
   transition: background 0.15s;
 
+  display: -webkit-box;
+  -webkit-line-clamp: 2;          // 두 줄까지 허용 + ... 처리
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+
   &:hover {
     background: ${({ theme }) => theme.colors.bordermain};
     color: ${({ theme }) => theme.colors.text};
-  }
-
-  &:nth-child(1),
-  &:nth-child(2),
-  &:nth-child(3),
-  &:nth-child(4) {
-    border-right: none;
   }
 `;
 

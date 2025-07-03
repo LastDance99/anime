@@ -58,15 +58,24 @@ export const PostButton = styled.button`
   padding: 7px 10px 7px 10px;
   border-radius: 10px;
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
-  font-size: ${({ theme }) => theme.fontSizes.sm};   // 더 작게!
-  font-weight: ${({ theme }) => theme.Weights.normal}; // 400, 얇게
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: ${({ theme }) => theme.Weights.normal};
   color: ${({ theme }) => theme.colors.text};
-  transition: background 0.15s, color 0.15s, font-weight 0.15s;
   cursor: pointer;
+
+  /* 추가 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   &:hover {
     background: ${({ theme }) => theme.colors.secondary};
     color: ${({ theme }) => theme.colors.primary};
-    font-family: ${({ theme }) => theme.fonts.cafe24}; // hover만 살짝 볼드
+    font-family: ${({ theme }) => theme.fonts.cafe24};
     font-weight: ${({ theme }) => theme.Weights.medium};
   }
   &:active {

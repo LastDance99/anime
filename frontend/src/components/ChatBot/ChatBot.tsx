@@ -13,16 +13,16 @@ import {
   ResetButton,
   DropdownMenu,
   DropdownItem,
-  ToolOverlay,
-  ToolOverlayInput,
-  ToolOverlayActions,
+  // ToolOverlay,
+  // ToolOverlayInput,
+  // ToolOverlayActions,
 } from "./ChatBot.styled";
 import { Plus, Play, RotateCw } from "lucide-react";
 import {
   chatWithBot,
   clearChatContext,
   getAnimeRecommendation,
-  generateImage,
+  // generateImage,
 } from "../../api/core";
 import { getUserContent } from "../../api/profile";
 import { useAuth } from "../../contexts/AuthContext";
@@ -36,19 +36,24 @@ const RecommendCard = ({
   year,
   format,
   studios,
-}: any) => (
+  recommend_reason,
+  t,
+}: any & { t: (key: string) => string }) => (
   <div style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12, marginBottom: 12 }}>
     <img src={cover_image} alt={title} style={{ width: "100%", borderRadius: 8, marginBottom: 8 }} />
     <h4 style={{ margin: "4px 0" }}>{title}</h4>
     <p style={{ fontSize: 14, margin: "6px 0", color: "#555" }} dangerouslySetInnerHTML={{ __html: description }} />
     <p style={{ fontSize: 13, margin: "4px 0", color: "#888" }}>
-      📅 <strong>{year ?? "?"}</strong> | 🏷️ {format ?? "형식 없음"}
+      📅 <strong>{year ?? "?"}</strong> | 🏷️ {format ?? t("chat.no_format")}
     </p>
     <p style={{ fontSize: 13, margin: "4px 0", color: "#888" }}>
-      🎬 스튜디오: {studios?.length ? studios.join(", ") : "정보 없음"}
+      🎬 {t("chat.studio")}: {studios?.length ? studios.join(", ") : t("chat.no_info")}
     </p>
     <p style={{ fontSize: 13, margin: "4px 0", color: "#888" }}>
-      🎭 장르: {genres?.length ? genres.join(", ") : "정보 없음"}
+      🎭 {t("chat.genre")}: {genres?.length ? genres.join(", ") : t("chat.no_info")}
+    </p>
+    <p style={{ marginTop: 6, color: "#448" }}>
+      <b>{t("chat.recommend_reason")}:</b> {recommend_reason}
     </p>
   </div>
 );
@@ -66,25 +71,29 @@ type ChatMessage = {
   results?: any[];
 };
 
-const initialMessages: ChatMessage[] = [
-  { id: 1, text: "ㅎㅇ", isUser: false },
-];
+
 
 export default function ChatBot({ visible }: Props) {
   const { currentUser } = useAuth();
-  const { t } = useTranslation();
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [dialogContext, setDialogContext] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showToolMenu, setShowToolMenu] = useState(false);
-  const [activeTool, setActiveTool] = useState<null | "image">(null);
-  const [toolInput, setToolInput] = useState("");
+  const [activeTool, setActiveTool] = useState<null>(null); // 이미지 기능 제거
+  const [toolInput, setToolInput] = useState(""); // 이미지 기능 제거
   const chatAreaRef = useRef<HTMLDivElement>(null);
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value);
+
+  useEffect(() => {
+    setMessages([{ id: 1, text: t("chat.welcome"), isUser: false }]);
+  }, [t]);
 
   const handleSend = async (e?: FormEvent) => {
     if (e) e.preventDefault();
@@ -105,7 +114,7 @@ export default function ChatBot({ visible }: Props) {
     setIsLoading(true);
 
     try {
-      const res = await chatWithBot({ question: input, dialog_context: dialogContext });
+      const res = await chatWithBot({ question: input, dialog_context: dialogContext, language: i18n.language, });
       const { final_answer, mode, cover_image } = res.data;
 
       const botMessage: ChatMessage = {
@@ -148,57 +157,38 @@ export default function ChatBot({ visible }: Props) {
     try {
       const content = await getUserContent({ userId: currentUser.id, type: "anime", page_size: 999 });
       const animeTitles = content.results.map((item: any) => item.title).filter(Boolean);
-      const res = await getAnimeRecommendation({ anime_titles: animeTitles });
-      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id).concat({
-        id: Date.now() + 1,
-        isUser: false,
-        mode: "recommend",
-        results: res,
-        text: res.message ?? t("chat.recommend_done"),
-      }));
-    } catch {
-      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id).concat({
-        id: Date.now() + 3,
-        text: t("chat.recommend_fail"),
-        isUser: false,
-      }));
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const handleToolSubmit = async () => {
-    const loadingMessage: ChatMessage = {
-      id: Date.now(),
-      text: t("chat.image_loading"),
-      isUser: false,
-    };
-    setMessages((prev) => [...prev, loadingMessage]);
-    setToolInput("");
-    setActiveTool(null);
-    setIsLoading(true);
+      const lang = i18n.language; // 현재 언어
 
-    try {
-      const res = await generateImage(toolInput);
-      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id).concat({
-        id: Date.now() + 1,
-        isUser: false,
-        imageUrl: res.image_url,
-        text: t("chat.image_done"),
-      }));
+      const res = await getAnimeRecommendation({
+        anime_titles: animeTitles,
+        language: lang,
+      });
+
+      setMessages((prev) =>
+        prev.filter((m) => m.id !== loadingMessage.id).concat({
+          id: Date.now() + 1,
+          isUser: false,
+          mode: "recommend",
+          results: res,
+          text: res.message ?? t("chat.recommend_done"),
+        })
+      );
     } catch {
-      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id).concat({
-        id: Date.now() + 2,
-        text: t("chat.image_fail"),
-        isUser: false,
-      }));
+      setMessages((prev) =>
+        prev.filter((m) => m.id !== loadingMessage.id).concat({
+          id: Date.now() + 3,
+          text: t("chat.recommend_fail"),
+          isUser: false,
+        })
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleReset = async () => {
-    setMessages(initialMessages);
+    setMessages([{ id: Date.now(), text: t("chat.welcome"), isUser: false }]);
     setDialogContext([]);
     setInput("");
     try {
@@ -225,14 +215,16 @@ export default function ChatBot({ visible }: Props) {
                   style={{ whiteSpace: "pre-wrap" }}
                 />
               )}
-              {msg.mode === "recommend" && msg.results?.map((r) => (
-                <RecommendCard key={r.title} {...r} />
-              ))}
+              {msg.mode === "recommend" &&
+                msg.results?.map((r) => (
+                  <RecommendCard key={r.title} {...r} t={t} />
+                ))}
             </ChatBubble>
           </BubbleRow>
         ))}
       </ChatArea>
 
+      {/* 이미지 생성 툴 비활성화
       {activeTool === "image" && (
         <ToolOverlay>
           <label>{t("chat.image_tool_title")}</label>
@@ -247,6 +239,7 @@ export default function ChatBot({ visible }: Props) {
           </ToolOverlayActions>
         </ToolOverlay>
       )}
+      */}
 
       <ChatInputBox onSubmit={handleSend}>
         <ChatInputArea
@@ -271,7 +264,7 @@ export default function ChatBot({ visible }: Props) {
 
       {showToolMenu && (
         <DropdownMenu>
-          <DropdownItem onClick={() => { setActiveTool("image"); setShowToolMenu(false); }}>{t("chat.image_tool")}</DropdownItem>
+          {/* <DropdownItem onClick={() => { setActiveTool("image"); setShowToolMenu(false); }}>{t("chat.image_tool")}</DropdownItem> */}
           <DropdownItem onClick={() => { setShowToolMenu(false); handleRecommend(); }}>{t("chat.recommend_tool")}</DropdownItem>
         </DropdownMenu>
       )}

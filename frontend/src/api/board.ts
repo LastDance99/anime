@@ -75,10 +75,10 @@ export const addBoardComment = async (
 export const toggleCommentLike = async (commentId: number) => {
   try {
     const res = await axios.post(`/api/boards/comments/${commentId}/like/`);
-    return { liked: true }; // 성공시
+    return { liked: true };
   } catch (err: any) {
     if (err.response?.status === 400) {
-      return { liked: false }; // 이미 눌렀음
+      return { liked: false };
     }
     throw err;
   }

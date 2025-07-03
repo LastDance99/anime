@@ -7,9 +7,9 @@ export const CommentContainer = styled(motion.div)`
   background: ${({ theme }) => theme.colors.secondary};
   padding: 12px 18px;
   border-top: 1px solid ${({ theme }) => theme.colors.secondary};
-  // overflow: hidden; // 이거 중요
   box-sizing: border-box;
 `;
+
 export const PostCommentCard = styled(motion.div).withConfig({
   shouldForwardProp: (prop) => isPropValid(prop) && prop !== "$type",
 })<{ $type?: string }>`
@@ -17,12 +17,19 @@ export const PostCommentCard = styled(motion.div).withConfig({
   min-height: 80px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;     /* center → flex-start */
   border-radius: 10px;
   background: ${({ theme }) => theme.colors.secondary};
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   color: ${({ theme }) => theme.colors.text};
+  padding: 14px 18px;
+  box-sizing: border-box;
+
+  /* === 핵심 수정 === */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
 `;
 
 export const WrapperBox = styled.div`
@@ -76,11 +83,16 @@ export const StatItem = styled.span`
 
 export const FlexBox = styled.div`
   width: 100%;
-  min-width: 320px;
+  min-width: 0;   /* 추가! */
   display: flex;
   flex-direction: column;
   padding: 10px 0 10px 10px;
   gap: 8px;
+
+  /* === 핵심 수정 === */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
 `;
 
 export const TopBox = styled.div`
@@ -99,7 +111,7 @@ export const Thumbnail = styled.img`
 export const CommentListContainer = styled.div`
   margin-top: 12px;
   padding: 0 16px 12px 16px;
-
+  overflow: hidden;  
   ul {
     padding-left: 20px;
     margin-top: 8px;
@@ -123,11 +135,32 @@ export const PostTimeText = styled.span`
 export const SideInfoBox = styled.div`
   width: 100%;
   min-width: 60px;
-  max-width: 80px;
+  max-width: 100px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-end;
   height: 80%;
   padding-right: 10px;
+
+  /* === 핵심 수정 === */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
+`;
+
+export const CommentText = styled.div`
+  img {
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 8px;
+    display: block;
+  }
+
+  /* === 텍스트 줄바꿈 추가 (혹시 댓글에 텍스트도 있을 때 대비) */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
 `;

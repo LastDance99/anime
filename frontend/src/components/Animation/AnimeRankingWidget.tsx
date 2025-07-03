@@ -21,7 +21,7 @@ export default function AnimeRankingWidget({
   userAnimeIds,
   onToggleAnimeList,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [popular, setPopular] = useState<AnimeRankingItem[]>([]);
   const [upcoming, setUpcoming] = useState<AnimeRankingItem[]>([]);
@@ -29,12 +29,13 @@ export default function AnimeRankingWidget({
   const [selectedAnime, setSelectedAnime] = useState<AnimeItem | null>(null);
 
   useEffect(() => {
-    getPopularAnimeRanking(5).then(setPopular);
-    getUpcomingAnimeRanking(5).then(setUpcoming);
-  }, []);
+    // 언어 바뀔 때마다 랭킹 새로 불러오기
+    getPopularAnimeRanking(5, i18n.language).then(setPopular);
+    getUpcomingAnimeRanking(5, i18n.language).then(setUpcoming);
+  }, [i18n.language]);
 
   const handleAnimeClick = async (anime: AnimeRankingItem) => {
-    const detail = await getAnimeDetail(anime.id);
+    const detail = await getAnimeDetail(anime.id, i18n.language);
     setSelectedAnime({ ...detail, isAdded: userAnimeIds.includes(detail.id) });
   };
 

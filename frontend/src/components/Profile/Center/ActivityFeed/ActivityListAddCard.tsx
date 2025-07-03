@@ -1,5 +1,5 @@
 import React from "react";
-import { BaseCard, AnimeImg, TimeText } from "./ActivityListReviewCard.styled";
+import { BaseCard, AnimeImg, TimeText, SideInfoBox, AniTitle, Title } from "./ActivityListReviewCard.styled";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
@@ -19,13 +19,15 @@ export default function ActivityListAddCard({
   return (
     <BaseCard $type="list_add">
       <AnimeImg src={anime_img} alt={anime_title} />
-      <span>
-        <b style={{ color: "#B79E12" }}>{anime_title}</b>{" "}
+      <AniTitle>
+        <Title style={{ color: "#B79E12" }}>{anime_title}</Title>{" "}
         {t("activity.list_added_prefix")}{" "}
         <b style={{ color: "#2196f3" }}>{t("activity.list_added_action")}</b>
         {t("activity.list_added_suffix")}
-      </span>
-      <TimeText>{dayjs(created_at).fromNow()}</TimeText>
+      </AniTitle>
+      <SideInfoBox>
+        <TimeText>{dayjs(created_at).fromNow()}</TimeText>
+      </SideInfoBox>
     </BaseCard>
   );
 }

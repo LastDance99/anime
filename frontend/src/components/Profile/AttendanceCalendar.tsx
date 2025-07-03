@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { getUserAttendance } from "../../api/profile";
 import styled from "styled-components";
-import Calendar from "react-calendar";
 import dayjs from "dayjs";
 import "react-calendar/dist/Calendar.css";
 import { useTranslation } from "react-i18next";
+import { Calendar } from "react-calendar";
+import 'dayjs/locale/ko';
+import 'dayjs/locale/en';
+import 'dayjs/locale/es';
 
 const Board = styled.div`
   padding: 24px;
@@ -13,31 +16,16 @@ const Board = styled.div`
   border-radius: 16px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
 
+  min-width: 0;
+  width: 100%;
+
   .react-calendar {
     border: none;
     background: transparent;
     font-family: ${({ theme }) => theme.fonts.main};
     color: ${({ theme }) => theme.colors.text};
-  }
-
-  .react-calendar__tile--now {
-    background: ${({ theme }) => theme.colors.secondary};
-    color: white;
-    border-radius: 8px;
-  }
-
-  .react-calendar__tile.marked {
-    background: ${({ theme }) => theme.colors.primary};
-    color: white;
-    border-radius: 50%;
-    font-weight: bold;
-    transition: background 0.2s ease;
-  }
-
-  .react-calendar__tile.marked:hover {
-    opacity: 0.9;
-    filter: brightness(1.05);
-    cursor: default;
+    min-width: 0;
+    width: 100%;
   }
 `;
 
@@ -46,12 +34,19 @@ const Title = styled.h3`
   font-family: ${({ theme }) => theme.fonts.cuteBold};
   margin-bottom: 16px;
   color: ${({ theme }) => theme.colors.text};
+
+  /* === 핵심 수정 === */
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 `;
 
 const Stats = styled.div`
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
+  flex-wrap: wrap;      /* 추가! 2줄 이상 허용 */
+  min-width: 0;
 `;
 
 const StatBox = styled.div`
@@ -61,6 +56,14 @@ const StatBox = styled.div`
   border-radius: 12px;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   border: 1px solid ${({ theme }) => theme.colors.bordermain};
+  min-width: 80px;
+  max-width: 240px;
+  width: fit-content;
+
+  /* === 핵심 수정 === */
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 `;
 
 const CheckMark = styled.div`
@@ -78,7 +81,7 @@ export default function AttendanceBoard({ userId }: Props) {
   const [dates, setDates] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
   const [last, setLast] = useState<string | null>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     getUserAttendance(userId).then(({ dates, total_attendance, last_attendance }) => {
@@ -88,6 +91,10 @@ export default function AttendanceBoard({ userId }: Props) {
     });
   }, [userId]);
 
+  useEffect(() => {
+    dayjs.locale(i18n.language);
+  }, [i18n.language]);
+
   return (
     <Board>
       <Title>📅 {t("attendance.title")}</Title>
@@ -96,6 +103,8 @@ export default function AttendanceBoard({ userId }: Props) {
         <StatBox>{t("attendance.last")}: {last || t("attendance.none")}</StatBox>
       </Stats>
       <Calendar
+        locale={i18n.language}
+        formatDay={(locale, date) => String(date.getDate())}
         tileContent={({ date, view }) => {
           if (view === "month") {
             const dateStr = dayjs(date).format("YYYY-MM-DD");

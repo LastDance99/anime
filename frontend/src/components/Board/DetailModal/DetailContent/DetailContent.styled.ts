@@ -1,6 +1,8 @@
 import styled from "styled-components";
 
-export const Wrapper = styled.div`
+export const Wrapper = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "$isNotice",
+})<{ $isNotice?: boolean }>`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -8,12 +10,22 @@ export const Wrapper = styled.div`
   gap: 16px;
 `;
 
-export const CategoryText = styled.div<{ $type?: "board" | "gallery" }>`
+export const CategoryText = styled.div<{ $type?: "board" | "gallery" | "notice"}>`
   display: inline-block;
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-weight: ${({ theme }) => theme.Weights.medium};
   color: ${({ $type }) =>
-    $type === "gallery" ? "#de3e5b" : "#2071b2"};
+    $type === "gallery"
+      ? "#de3e5b"
+      : $type === "notice"
+      ? "#ff8000"
+      : "#2071b2"
+  };
+  font-weight: ${({ $type, theme }) =>
+    $type === "notice"
+      ? theme.Weights.bold
+      : theme.Weights.medium
+  };
   letter-spacing: 0.05em;
 `;
 
@@ -139,4 +151,15 @@ export const HtmlContent = styled.div`
     margin: 24px auto;
     border-radius: 12px;
   }
+`;
+
+export const NoticeBadge = styled.span`
+  color: #ff5722;
+  font-weight: 700;
+  background: #fff0e0;
+  border-radius: 6px;
+  font-size: 18px;
+  padding: 2px 10px;
+  margin-right: 12px;
+  letter-spacing: -1px;
 `;

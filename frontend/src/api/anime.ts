@@ -1,17 +1,20 @@
 import axios from '../lib/axios';
+import i18n from "i18next";
 
 export const searchAnime = async (params: any) => {
   const res = await axios.get('/api/anime/search/', { params });
   return res.data;
 };
 
-export const getAnimeFilterMeta = async (lang = "ko") => {
+
+export const getAnimeFilterMeta = async () => {
+  const lang = i18n.language || "ko";
   const res = await axios.get('/api/anime/filters/', { params: { lang } });
   return res.data;
 };
 
-export const getAnimeDetail = async (animeId: number) => {
-  const res = await axios.get(`/api/anime/${animeId}/`);
+export const getAnimeDetail = async (animeId: number, lang = i18n.language || "ko") => {
+  const res = await axios.get(`/api/anime/${animeId}/`, { params: { lang } });
   return res.data;
 };
 
@@ -50,7 +53,7 @@ export const likeAnimeReview = async (animeId: number, reviewId: number) => {
     };
   } catch (err: any) {
     console.error("🛑 likeAnimeReview error:", err.response?.data || err.message);
-    throw err; // 에러를 다시 던져서 상위에서 처리되도록 유지
+    throw err;
   }
 };
 
@@ -89,13 +92,13 @@ export interface AnimeRankingItem {
   // 필요한 경우 다른 필드도 추가
 }
 
-export const getPopularAnimeRanking = async (limit = 10, lang = "ko"): Promise<AnimeRankingItem[]> => {
+export const getPopularAnimeRanking = async (limit = 10, lang = i18n.language || "ko"): Promise<AnimeRankingItem[]> => {
   const res = await axios.get(`/api/anime/rankings/popular/?limit=${limit}&lang=${lang}`);
-  // 만약 results로 감싸져 있으면 return res.data.results;
+  console.log("popular 응답", res.data);
   return Array.isArray(res.data) ? res.data : res.data.results;
 };
 
-export const getUpcomingAnimeRanking = async (limit = 10, lang = "ko"): Promise<AnimeRankingItem[]> => {
+export const getUpcomingAnimeRanking = async (limit = 10, lang = i18n.language || "ko"): Promise<AnimeRankingItem[]> => {
   const res = await axios.get(`/api/anime/rankings/upcoming/?limit=${limit}&lang=${lang}`);
   return Array.isArray(res.data) ? res.data : res.data.results;
 };

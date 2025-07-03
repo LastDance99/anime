@@ -44,8 +44,10 @@ export const FontBox = styled.div`
 `;
 
 export const Name = styled.div`
-  font-size: ${({ theme }) => theme.fontSizes.lg}; // 18px
+  font-size: ${({ theme }) => theme.fontSizes.lg};
   font-family: ${({ theme }) => theme.fonts.cafe24};
+  white-space: normal;
+  word-break: break-word;
 `;
 
 export const Email = styled.div`
@@ -61,14 +63,18 @@ export const Font = styled.div`
   font-weight: ${({ theme }) => theme.Weights.light};
 `;
 
+
 export const FontRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   width: 100%;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.text};
   font-family: ${({ theme }) => theme.fonts.cafe24Light};
   font-weight: ${({ theme }) => theme.Weights.light};
+  min-width: 0;
+  word-break: break-word;
 `;
 
 export const LogoutButton = styled.button`

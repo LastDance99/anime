@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { ThumbsUp, MessageCircle } from "lucide-react";
 import {
@@ -14,12 +14,14 @@ import {
   TopBox,
   WrapperBox,
   CommentContainer,
+  CommentText,
 } from "./ActivityPostCommentCard.styled";
 import { getBoardComments } from "../../../../api/board";
 import type { BoardComment } from "../../../../types/comment";
 import CommentListBox from "./CommentListBox";
 import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import DOMPurify from "dompurify";
 
 interface Props {
   post_id: number;
@@ -48,20 +50,6 @@ export default function ActivityCommentCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<BoardComment[]>([]);
   const [loading, setLoading] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    if (isExpanded && contentRef.current) {
-      requestAnimationFrame(() => {
-        if (contentRef.current) {
-          setHeight(contentRef.current.scrollHeight + 24);
-        }
-      });
-    } else {
-      setHeight(0);
-    }
-  }, [isExpanded, comments]);
 
   useEffect(() => {
     dayjs.locale(i18n.language);
@@ -74,13 +62,29 @@ export default function ActivityCommentCard({
         const res = await getBoardComments(post_id, "created");
         setComments(res.results);
       } catch (err) {
-        console.error("\u274C 댓글 로딩 실패:", err);
+        console.error("❌ 댓글 로딩 실패:", err);
       } finally {
         setLoading(false);
       }
     }
     setIsExpanded((prev) => !prev);
   };
+
+  function renderCommentContent(comment: string) {
+    if (/<img[\s\S]*src=/.test(comment)) {
+      return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment) }} />;
+    }
+    if (/^https?:\/\/.*\.(png|jpe?g|gif|webp)$/i.test(comment.trim())) {
+      return (
+        <img
+          src={comment.trim()}
+          alt="첨부 이미지"
+          style={{ maxWidth: 320, borderRadius: 8, marginTop: 8 }}
+        />
+      );
+    }
+    return <div>{comment}</div>;
+  }
 
   return (
     <PostCommentCard $type="comment">
@@ -90,10 +94,10 @@ export default function ActivityCommentCard({
             <ProfileImg src={post_author_profile_image} alt={post_author_nickname} />
             <Nickname>{post_author_nickname}</Nickname>
           </TopBox>
-          <div>
+          <CommentText>
             <b>"{post_title}"</b> {t("activity.commented_on")}<br />
-            {comment}
-          </div>
+            {renderCommentContent(comment)}
+          </CommentText>
           {thumbnail && <Thumbnail src={thumbnail} alt="썸네일" />}
         </FlexBox>
 
@@ -107,30 +111,24 @@ export default function ActivityCommentCard({
       </WrapperBox>
 
       <AnimatePresence>
-        {isExpanded && comments.length > 0 && (
+        {isExpanded && (
           <CommentContainer
             key="comments"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            <div ref={contentRef}>
+            {comments.length > 0 ? (
               <CommentListBox comments={comments} />
-            </div>
-          </CommentContainer>
-        )}
-        {isExpanded && comments.length === 0 && !loading && (
-          <CommentContainer
-            key="empty"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 60 }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <div style={{ padding: "12px 16px", fontSize: 14 }}>
-              {t("activity.no_comments")}
-            </div>
+            ) : (
+              !loading && (
+                <div style={{ padding: "12px 16px", fontSize: 14 }}>
+                  {t("activity.no_comments")}
+                </div>
+              )
+            )}
           </CommentContainer>
         )}
       </AnimatePresence>

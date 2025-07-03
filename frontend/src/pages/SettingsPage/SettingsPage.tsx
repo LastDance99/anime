@@ -56,7 +56,7 @@ export default function SettingsPage({
         user={tempUser}
         setUser={setTempUser}
         setSubModalOpen={setSubModalOpen}
-        onClose={handleTryClose}
+        onClose={onClose}
         onChangeNickname={onChangeNickname}
       />
       <Divider />
@@ -69,7 +69,7 @@ export default function SettingsPage({
       />
       <BottomBar>
         <ActionButton onClick={onSave}>{t("common.save")}</ActionButton>
-        <ActionButton onClick={handleTryClose}>{t("common.close")}</ActionButton>
+        <ActionButton onClick={onClose}>{t("common.close")}</ActionButton>
       </BottomBar>
     </Wrapper>
   );

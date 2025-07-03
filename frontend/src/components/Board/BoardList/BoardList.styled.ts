@@ -60,6 +60,9 @@ export const Category = styled.span<{ $type: string }>`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   line-height: 16px;
   border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const Title = styled.span`

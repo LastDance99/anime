@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { ThumbsUp, MessageCircle } from "lucide-react";
@@ -19,7 +19,7 @@ import {
 import { getBoardComments } from "../../../../api/board";
 import type { BoardComment } from "../../../../types/comment";
 import CommentListBox from "./CommentListBox";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 dayjs.extend(relativeTime);
 
@@ -49,20 +49,6 @@ export default function ActivityPostCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<BoardComment[]>([]);
   const [loading, setLoading] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    if (isExpanded && contentRef.current) {
-      requestAnimationFrame(() => {
-        if (contentRef.current) {
-          setHeight(contentRef.current.scrollHeight + 24);
-        }
-      });
-    } else {
-      setHeight(0);
-    }
-  }, [isExpanded, comments]);
 
   const handleClick = async () => {
     if (!isExpanded && comments.length === 0) {
@@ -76,7 +62,7 @@ export default function ActivityPostCard({
         setLoading(false);
       }
     }
-    setIsExpanded(prev => !prev);
+    setIsExpanded((prev) => !prev);
   };
 
   return (
@@ -102,16 +88,24 @@ export default function ActivityPostCard({
       </WrapperBox>
 
       <AnimatePresence>
-        {isExpanded && comments.length > 0 && (
+        {isExpanded && (
           <CommentContainer
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            key="post-comments"
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div ref={contentRef}>
+            {comments.length > 0 ? (
               <CommentListBox comments={comments} />
-            </div>
+            ) : (
+              !loading && (
+                <div style={{ padding: "12px 16px", fontSize: 14 }}>
+                  댓글이 없습니다.
+                </div>
+              )
+            )}
           </CommentContainer>
         )}
       </AnimatePresence>

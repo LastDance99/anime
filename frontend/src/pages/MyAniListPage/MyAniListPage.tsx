@@ -51,9 +51,9 @@ const MyAniListPage = () => {
         genres: filters.genre,
         season: filters.season,
         status: filters.status,
-        format: filters.format,
+        media_format: filters.format,
         source: filters.original,
-        order: filters.sort,
+        ordering: filters.sort,
         page: pageNum,
       });
       if (reset) {

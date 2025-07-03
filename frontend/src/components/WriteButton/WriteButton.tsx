@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./WriteButton.styled";
 import type { ReactNode, CSSProperties } from "react";
-import { useTranslation } from "react-i18next"; // ✅ i18n 훅 추가
+import { useTranslation } from "react-i18next";
 
 type Props = {
   to?: string;
@@ -17,7 +17,7 @@ const WriteButton: React.FC<Props> = ({
   style,
   onClick,
 }) => {
-  const { t } = useTranslation(); // ✅ 훅 사용
+  const { t } = useTranslation();
 
   return (
     <Link to={to} onClick={onClick}>

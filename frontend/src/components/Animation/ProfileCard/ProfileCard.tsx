@@ -83,15 +83,15 @@ const AnimeProfile: React.FC<Props> = ({ user }) => {
         <FontBox style={{ borderRight: "1px solid #FFB6C1", width: "40%" }}>
           <FontRow>
             <Font>{t("profile.attendance")}:</Font>
-            {animeData.attendance_count}{t("profile.day_unit")}
+            {animeData.attendance_count}
           </FontRow>
           <FontRow>
             <Font>{t("profile.list")}:</Font>
-            {animeData.animelist_count}{t("profile.item_unit")}
+            {animeData.animelist_count}
           </FontRow>
           <FontRow>
             <Font>{t("profile.review")}:</Font>
-            {animeData.review_count}{t("profile.item_unit")}
+            {animeData.review_count}
           </FontRow>
         </FontBox>
         <CustomButton onClick={() => navigate(`/profile/${user.id}/myanilist`)}>

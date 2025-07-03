@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next"; // 추가!
 import { Overlay, ModalBox, Content, Left, Right, Header, CloseButton } from './DetailModal.styled';
 import DetailContent from './DetailContent/DetailContent';
 import CommentBox from './CommentBox/CommentBox';
@@ -11,6 +12,14 @@ type Props = {
 };
 
 export default function DetailModal({ type, id, onClose, onDeleteSuccess }: Props) {
+  const [isNotice, setIsNotice] = useState<boolean | null>(null);
+  const { t } = useTranslation(); // 추가
+
+  // DetailContent에서 is_notice 콜백 전달
+  const handleIsNotice = useCallback((value: boolean) => {
+    setIsNotice(value);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -34,10 +43,22 @@ export default function DetailModal({ type, id, onClose, onDeleteSuccess }: Prop
         </Header>
         <Content>
           <Left>
-            <DetailContent key={id} id={id} onDeleteSuccess={onDeleteSuccess} />
+            {/* onIsNotice 콜백 전달 */}
+            <DetailContent key={id} id={id} onDeleteSuccess={onDeleteSuccess} onIsNotice={handleIsNotice} />
           </Left>
           <Right>
-            <CommentBox contentType={type} contentId={id} />
+            {isNotice === null ? null : isNotice ? (
+              <div style={{
+                padding: "28px 0",
+                color: "#FF5722",
+                fontWeight: 600,
+                textAlign: "center",
+              }}>
+                {t("board.notice_no_comment")}
+              </div>
+            ) : (
+              <CommentBox contentType={type} contentId={id} />
+            )}
           </Right>
         </Content>
       </ModalBox>

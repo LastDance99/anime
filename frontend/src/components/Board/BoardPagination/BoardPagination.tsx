@@ -16,15 +16,14 @@ const BoardPagination: React.FC<BoardPaginationProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  // 페이지 버튼 5개만 보여주기 (ex: 1 2 3 4 5)
-  const maxPage = Math.min(5, totalPage);
+  // 페이지 버튼 최대 5개만 노출
+  const maxPage = 5;
   let start = Math.max(1, page - 2);
   let end = start + maxPage - 1;
   if (end > totalPage) {
     end = totalPage;
     start = Math.max(1, end - maxPage + 1);
   }
-
   const pages = [];
   for (let i = start; i <= end; i++) {
     pages.push(i);

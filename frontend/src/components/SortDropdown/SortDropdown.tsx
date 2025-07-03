@@ -13,7 +13,6 @@ const SortDropdown: React.FC<SortDropdownProps> = ({ options, value, onChange })
         </option>
       ))}
     </Select>
-    <ArrowUpDown size={12} stroke="#222" style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)" }} />
   </Dropdown>
 );
 

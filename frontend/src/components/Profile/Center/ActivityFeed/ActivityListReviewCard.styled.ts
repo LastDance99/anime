@@ -1,5 +1,6 @@
 import styled from "styled-components";
 
+
 export const BaseCard = styled.div<{ $type?: string }>`
   width: 100%;
   min-height: 80px;
@@ -12,14 +13,13 @@ export const BaseCard = styled.div<{ $type?: string }>`
   color: ${({ theme }) => theme.colors.text};
   box-shadow: 0 2px 8px ${({ theme }) => theme.colors.secondary}55;
   position: relative;
-`;
+  padding: 14px 18px;        /* 추가 */
+  box-sizing: border-box;    /* 추가 */
 
-export const ProfileImg = styled.img`
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: ${({ theme }) => theme.colors.subcolor};
+  /* === 핵심 수정 === */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
 `;
 
 export const AnimeImg = styled.img`
@@ -31,11 +31,6 @@ export const AnimeImg = styled.img`
   background: ${({ theme }) => theme.colors.subcolor};
 `;
 
-export const Nickname = styled.span`
-  font-weight: ${({ theme }) => theme.Weights.bold};
-  font-family: ${({ theme }) => theme.fonts.cafe24};
-`;
-
 export const TimeText = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.subtext};
@@ -43,59 +38,45 @@ export const TimeText = styled.span`
   min-width: 50px;
   text-align: right;
   font-family: ${({ theme }) => theme.fonts.main};
-  padding-right: 10px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+`;
+
+export const AniTitle = styled.div`
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.5;
+
+  /* === 핵심 수정 === */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
+`;
+
+export const Title = styled.div`
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: bold;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  white-space: normal;
 `;
 
 export const SideInfoBox = styled.div`
-  width: 100%;
-  min-width: 60px;
-  max-width: 80px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
+  min-width: 40px;
+  max-width: 100px;
+  text-align: center;
+  padding-right: 6px;
   height: 80%;
-  padding-right: 10px;
+
+  /* === 핵심 수정 === */
+  word-break: break-word;
+  white-space: normal;
+  overflow-wrap: anywhere;
 `;
-
-export const Thumbnail = styled.img`
-  width: 160px;
-  height: 160px;
-  object-fit: cover;
-  padding: 6px 0 6px 0;
-`;
-
-export const StatsBox = styled.div`
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.subtext};
-`;
-
-export const StatItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
-`;
-
-export const FlexBox = styled.div`
-  width: 100%;
-  min-width: 320px;
-  display: flex;
-  flex-direction: column;
-  padding: 10px 0 10px 10px;
-  gap: 8px; // 여백 조금 주기
-`;
-
-export const TopBox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
