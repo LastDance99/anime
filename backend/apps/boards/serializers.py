@@ -4,6 +4,7 @@ from .models import BoardPost, BoardComment
 # 게시판 게시글 요약 정보 직렬화 클래스
 class BoardPostSummarySerializer(serializers.ModelSerializer):
     author_nickname = serializers.CharField(source='author.nickname', read_only=True)
+    is_notice = serializers.BooleanField(read_only=True)
     board_type = serializers.CharField(read_only=True)
     thumbnail = serializers.URLField(source='thumbnail_url', read_only=True)
     like_count = serializers.IntegerField(source='likes.count', read_only=True)
@@ -14,6 +15,7 @@ class BoardPostSummarySerializer(serializers.ModelSerializer):
         fields = [
             'id', 
             'title', 
+            'is_notice',
             'board_type', 
             'author_nickname', 
             'thumbnail',
@@ -30,6 +32,7 @@ class BoardPostDetailSerializer(serializers.ModelSerializer):
     like_count = serializers.IntegerField(source='likes.count', read_only=True)
     author_profile_image = serializers.CharField(source='author.profile_image', read_only=True)
     is_liked = serializers.SerializerMethodField()
+    is_notice = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = BoardPost
@@ -43,6 +46,7 @@ class BoardPostDetailSerializer(serializers.ModelSerializer):
             'author_profile_image',
             'like_count', 
             'is_liked', 
+            'is_notice',
             'views', 
             'created_at', 
             'updated_at',

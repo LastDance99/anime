@@ -344,38 +344,40 @@ class ProfileContentListView(ListAPIView):
         lang = self.get_serializer_context().get("lang", "ko")
 
         if content_type == "post":
-            # 게시글 탭
             q = request.GET.get('q', '')
-            order = request.GET.get('order', 'latest')
-            qs = BoardPost.objects.filter(author_id=user_id, board_type="post")
+            ordering = request.GET.get("ordering")
+            if ordering is None:
+                ordering = request.GET.get("order", "latest")
+            qs = BoardPost.objects.filter(author_id=user_id, board_type="post", is_notice=False)
             qs = qs.annotate(
                 like_count=Count('likes', distinct=True),
                 comment_count=Count('comments', distinct=True)
             )
             if q:
                 qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
-            if order == "oldest":
+            if ordering == "oldest":
                 qs = qs.order_by('created_at')
-            elif order == "like":
+            elif ordering == "like":
                 qs = qs.order_by('-like_count', '-created_at')
             else:
                 qs = qs.order_by('-created_at')
             return qs
 
         elif content_type == "gallery":
-            # 갤러리 탭
             q = request.GET.get('q', '')
-            order = request.GET.get('order', 'latest')
-            qs = BoardPost.objects.filter(author_id=user_id, board_type="gallery")
+            ordering = request.GET.get("ordering")
+            if ordering is None:
+                ordering = request.GET.get("order", "latest")
+            qs = BoardPost.objects.filter(author_id=user_id, board_type="gallery", is_notice=False)
             qs = qs.annotate(
                 like_count=Count('likes', distinct=True),
                 comment_count=Count('comments', distinct=True)
             )
             if q:
                 qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
-            if order == "oldest":
+            if ordering == "oldest":
                 qs = qs.order_by('created_at')
-            elif order == "like":
+            elif ordering == "like":
                 qs = qs.order_by('-like_count', '-created_at')
             else:
                 qs = qs.order_by('-created_at')
@@ -389,7 +391,7 @@ class ProfileContentListView(ListAPIView):
             year = request.GET.get("year")
             status = request.GET.get("status")
             season = request.GET.get("season")
-            format_ = request.GET.get("format")
+            media_format = request.GET.get("media_format")
             source = request.GET.get("source")
             ordering = request.GET.get("ordering")
 
@@ -415,8 +417,8 @@ class ProfileContentListView(ListAPIView):
                 qs = qs.filter(**{f"anime__status_{lang}": status})
             if season:
                 qs = qs.filter(**{f"anime__season_{lang}": season})
-            if format_:
-                qs = qs.filter(anime__format=format_)
+            if media_format:
+                qs = qs.filter(anime__format=media_format)
             if source:
                 qs = qs.filter(**{f"anime__source_{lang}": source})
 
@@ -436,10 +438,7 @@ class ProfileContentListView(ListAPIView):
             else:
                 qs = qs.order_by('-created_at')
             return qs
-
+        
         # 아무 타입도 아니면 빈 쿼리셋
         return BoardPost.objects.none()
     
-
-
-

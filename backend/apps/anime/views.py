@@ -4,7 +4,6 @@ from django.db.models import Q, Avg, Count
 from django.db.models.functions import Coalesce
 from .models import Anime, AnimeReview, ReviewLike, AnimeList
 from .serializers import AnimeSimpleSerializer, AnimeDetailSerializer, AnimeReviewSerializer, AnimeReviewCreateSerializer
-from operator import itemgetter
 from rest_framework.generics import get_object_or_404
 from rest_framework import status
 from apps.profiles.models import Attendance
@@ -434,8 +433,14 @@ class PopularAnimeRankingView(ListAPIView):
             )
             .order_by('-popularity_score', '-favorite_count', '-avg_rating')
         )
-        limit = int(self.request.GET.get("limit", 10))
+        limit = int(self.request.query_params.get("limit", 10))
         return queryset[:limit]
+
+    def list(self, request, *args, **kwargs):
+        lang = request.query_params.get("lang", "ko")
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True, context={"lang": lang})
+        return Response(serializer.data)
 
 # 방영예정 인기 애니 (status_ko='방영예정' 또는 status_en='upcoming' 등)
 class UpcomingAnimeRankingAPIView(APIView):

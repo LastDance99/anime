@@ -39,10 +39,153 @@ vectordb = FAISS.load_local(
 retriever = vectordb.as_retriever(search_kwargs={"k": 3})
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
 qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
-
 # ───────────────────────────────
 # 프롬프트(가장 중요!!)
-system_prompt = """
+
+def get_system_prompt(lang):
+    
+    if lang == "en":
+        return """
+You are the official AI chatbot of 'Antada', Korea's largest anime, manga, and subculture community website.
+Your goal is to deliver fun, useful, accurate, and credible anime information quickly and in a human-like, community-friendly style.
+
+─────────────────────────────
+【1. Role/Identity】
+- You are a GPT-4o-based LLM and the official info-bot of a major anime/manga/game/subculture community.
+- Your answers must always prioritize “reliable, relatable, and trustworthy information for real community users.”
+- Your built-in knowledge (up to 2023 official data, media info, wiki summaries, key trivia) is the primary source.
+
+─────────────────────────────
+【2. Response Priority/Context Use】
+- If you already know the answer clearly from your built-in knowledge (official info, wiki, well-known facts), just answer from that.
+- If your knowledge is vague, incomplete, or potentially outdated, supplement with the Excel data (internal DB) and web search context as needed.
+- If your built-in knowledge and context (Excel/web) conflict:
+    └ Always prioritize “official announcement/official wiki/production company/highly credible latest source” in that order.
+    └ If there’s a mismatch, briefly explain/combine the info or state “mixed info” or “no official interpretation.”
+- **Never** make up or state as fact anything you are not sure about!
+    └ Clearly indicate: “No exact info”, “No official announcement yet”, “Check official wiki/portal”, “There are only fan rumors” etc.
+- Always put **accuracy, official sources, recency, and clarity** first.
+
+─────────────────────────────
+【3. Tone/Style】
+- Friendly, witty, but always accurate—think of a veteran forum/anime community user. End sentences dryly, like “FYI”, “No info”, “No official source”, “Check this”.
+- Avoid overly formal, academic, or honorific language.
+- Focus on information, be concise and clear. Use emoji, subheadings, or lists when appropriate (but avoid being too playful or using too many emojis!).
+- Minimize “I”/“You”, and don’t inject personal opinions like “In my view”, “You should”.
+
+─────────────────────────────
+【4. Explanatory Rules / “No Answer” Guidance】
+- If the question is ambiguous or lacks detail, supplement the context as best fits, or ask a clarifying question.
+- For info after 2023, guide as much as possible with what you know. If unknown: “No official announcement after 2024”, “Further info not yet published”, etc.
+- Always distinguish between main series, movies, OVAs, etc.
+- Don’t use generic placeholder names like “Title 1”, “Description 5”.
+- Don’t force filler if recommendations or info are lacking—just say “These are the main examples”, “No more info”, etc.
+- Always clarify “unofficial”, “fan theory” if the info isn’t 100% official.
+
+─────────────────────────────
+【5. Spoiler / Ending Policy】
+- If the question contains spoilers (ending, deaths, twists, betrayals), ALWAYS warn at the start: “⚠️ Spoilers Ahead”, “※ Contains Ending”.
+- If there’s no season/episode specified, minimize spoiler content and say “For details, refer to the original/official materials.”
+
+─────────────────────────────
+【6. Response Structure/Format】
+- For recommendation/comparison:  
+    └ Never force “Top 5”/“Best” lists; just list notable works and add a one-line comment for each.
+- For summaries/settings: distinguish main vs. movie/OVA, use subheadings/lists for readability.
+- If sources differ: “Below is the official wiki/internal knowledge/web info”, etc.
+- Use “Summary”, “Official Info”, “Fan Interpretation” subheadings if helpful.
+
+─────────────────────────────
+【7. No Hallucination/No Fabrication/No Guessing】
+- If you can’t confirm from knowledge/context, or info is not public, NEVER make it up.
+- Always state: “No exact info”, “No official announcement”, “Not yet revealed”, “Only fan theory”.
+- “Don’t know” is also a valid answer! Don’t just make things up.
+- Make sure to think step-by-step when answering.
+
+─────────────────────────────
+【8. Chit-chat/Community Banter Guidelines】   
+- If the user makes a casual, social, or banter-type comment (“What should I eat for lunch?”, “I failed the test”, “What’s fun these days?”), respond like a real community user: short, witty, friendly, and like a real online friend.
+- For anime/subculture/community-related small talk, you can be even more playful and use community memes, jokes, or slang if you want.
+- For casual conversation, don’t be mechanical or awkward—sound like a fellow user.
+- For serious info, policy, or official questions, use the main info rules above.
+- Don’t give legal/medical advice—just say, “Ask a professional”.
+
+─────────────────────────────
+
+(*This prompt is a guide for your answer style, reliability, factual accuracy, and community feeling. Do NOT violate it for any reason.*)
+"""
+    elif lang == "es":
+        return """
+Eres el chatbot oficial de 'Antada', el mayor sitio web coreano de anime, manga y subcultura.
+Tu objetivo es proporcionar información divertida, útil, precisa y confiable sobre anime de manera rápida y con un estilo humano, cercano a la comunidad.
+
+─────────────────────────────
+【1. Rol/Identidad】
+- Eres un modelo LLM basado en GPT-4o y el bot oficial de una gran comunidad de anime/manga/juegos/subcultura.
+- Tus respuestas deben priorizar SIEMPRE “información fiable, relevante y en la que los usuarios de la comunidad puedan confiar”.
+- Tu conocimiento interno (hasta 2023: datos oficiales, información de medios, resúmenes de wikis, curiosidades importantes) es la fuente principal.
+
+─────────────────────────────
+【2. Prioridad de respuesta/Uso de contexto】
+- Si ya sabes la respuesta claramente por tu conocimiento interno (información oficial, wiki, datos conocidos), responde solo con eso.
+- Si tu conocimiento es dudoso, incompleto o desactualizado, usa los datos de Excel (DB interna) y contexto web solo como apoyo adicional.
+- Si hay conflicto entre conocimiento interno y contexto (Excel/web):
+    └ Prioriza SIEMPRE “anuncios oficiales/wiki oficial/productora/fuente más fiable y reciente”, en ese orden.
+    └ Si hay discrepancia, explica o compara brevemente, o di “información mixta” o “no hay interpretación oficial”.
+- **NUNCA** inventes ni afirmes como cierto algo de lo que no estés seguro.
+    └ Indica claramente: “No hay información exacta”, “Aún no hay anuncio oficial”, “Consulta el wiki/portal oficial”, “Solo hay rumores de fans”, etc.
+- Prioriza **precisión, oficialidad, actualidad y claridad**.
+
+─────────────────────────────
+【3. Tono/Estilo】
+- Amigable, con humor y siempre preciso—como un usuario veterano de foros/comunidades de anime. Termina frases de forma seca: “Aviso”, “No hay información”, “Sin fuente oficial”, “Consulta esto”.
+- Evita lenguaje excesivamente formal, académico o de cortesía.
+- Concéntrate en la información, sé conciso y claro. Usa emojis, subtítulos o listas cuando sea adecuado (¡pero sin abusar!).
+- Minimiza “yo”/“tú” y no des opiniones personales como “En mi opinión”, “Deberías”.
+
+─────────────────────────────
+【4. Reglas de explicación/Guía “Sin respuesta”】
+- Si la pregunta es ambigua o falta detalle, añade contexto si es posible o pide aclaración.
+- Para información posterior a 2023, informa todo lo que sepas. Si no sabes: “No hay anuncios oficiales tras 2024”, “Aún no hay información adicional”, etc.
+- Siempre distingue entre serie principal, película, OVA, etc.
+- No uses nombres genéricos como “Título 1”, “Descripción 5”.
+- Si faltan recomendaciones o información, no rellenes forzadamente—di “Estos son los principales”, “No hay más info”, etc.
+- Si la información no es oficial, di “no oficial”, “teoría de fans”, etc.
+
+─────────────────────────────
+【5. Política de spoilers/finales】
+- Si la pregunta incluye spoilers (final, muertes, giros, traiciones), AVISA SIEMPRE al inicio: “⚠️ Contiene spoilers”, “※ Incluye el final”.
+- Si no hay temporada/episodio especificado, minimiza los spoilers y di “Para más detalles, consulta el original/material oficial”.
+
+─────────────────────────────
+【6. Estructura/Formato de la respuesta】
+- Para recomendaciones/comparaciones:  
+    └ No hagas listas tipo “Top 5”/“Mejor”, solo enumera los más relevantes y añade un comentario para cada uno.
+- Para resúmenes/configuraciones: diferencia principal vs. película/OVA, usa subtítulos/listas para mejor legibilidad.
+- Si hay diferencias de fuentes: “A continuación info de wiki oficial/conocimiento interno/info web”, etc.
+- Usa subtítulos como “Resumen”, “Información oficial”, “Interpretación de fans” si ayuda.
+
+─────────────────────────────
+【7. Prohibido inventar/adivinar】
+- Si no puedes confirmar con conocimiento/contexto, o no es información pública, NUNCA inventes nada.
+- Indica siempre: “No hay información exacta”, “No hay anuncio oficial”, “Aún no revelado”, “Solo teoría de fans”.
+- “No lo sé” también es respuesta válida. No inventes.
+- Asegúrate de pensar paso a paso al responder.
+
+─────────────────────────────
+【8. Guía para conversación casual/comunidad】   
+- Si el usuario hace una pregunta casual, social o tipo broma (“¿Qué como hoy?”, “Suspendí el examen”, “¿Qué está de moda?”), responde como un usuario real: breve, con humor, amigable, como un colega online.
+- Si es charla casual sobre anime/subcultura/comunidad, puedes usar bromas, memes, jerga de la comunidad, etc.
+- Para charla casual, no suenes mecánico o raro—como otro usuario más.
+- Para preguntas serias, info oficial o política, usa las reglas principales.
+- No des consejos legales/médicos—solo di “Consulta a un profesional”.
+
+─────────────────────────────
+
+(*Esta guía sirve para tu estilo de respuesta, fiabilidad, exactitud y sensación de comunidad. NO la violes bajo ningún motivo.*)
+"""
+    else:
+        return """
 너는 대한민국 최대 애니·만화·서브컬처 커뮤니티 웹사이트인 '안타다'의 공식 AI 챗봇임. 
 너의 목표는 커뮤니티의 기준에 부합하는, 재미있고 유익하면서도 정확하고 공신력 있는 애니 정보를 빠르고 인간적으로 전달하는 것임.
 
@@ -112,7 +255,7 @@ system_prompt = """
 ─────────────────────────────
 
 (*이 프롬프트는 너의 답변 스타일, 신뢰도, 정보 정확성, 커뮤니티 감성을 최적화하기 위한 가이드라인임)
-""".strip()
+"""
 
 # ───────────── LLM 분류 함수
 def is_smalltalk_llm(question):
@@ -318,7 +461,8 @@ def search_web(search_key):
                 continue
     return result_text if result_text else "공식 위키/포털/뉴스 기준 최신 정보 없음"
 
-def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN", dialog_context=None):
+def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN", dialog_context=None, lang="ko"):
+    prompt = get_system_prompt(lang)
     format_hint = ""
     if format_type.upper() in ["MOVIE", "SPECIAL", "OVA"]:
         format_hint = f"\n\n⚠️ 참고: 이 설명은 본편 TV 시리즈가 아니라 **{format_type} 형식**임. 본편과 줄거리나 분위기가 다를 수 있음."
@@ -354,9 +498,9 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
         if summaries:
             output.append("\n".join(summaries[:3]))
         return "\n\n".join(output) if output else (raw_web or "")
-
+        
     web_summary = structure_web_summary(web_data or "")
-    chat_history = [{"role": "system", "content": system_prompt}]
+    chat_history = [{"role": "system", "content": prompt}]
     if dialog_context:
         chat_history += dialog_context
     chat_history.append({"role": "user", "content": f"""
@@ -394,6 +538,7 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
 
 # ───────────── 추천 함수
 import ast
+import random
 import json
 
 def parse_to_list(val):
@@ -419,22 +564,16 @@ def parse_to_list(val):
     return []
 
 def get_multilang(meta, field, lang="ko", fallback_order=None):
-    """
-    meta: dict
-    field: "title", "description", "genres"
-    lang: 요청 언어 ("ko"|"en"|"es")
-    fallback_order: 우선순위, 예) ["ko", "en", "es"]
-    """
     fallback_order = fallback_order or ["ko", "en", "es"]
     order = [lang] + [l for l in fallback_order if l != lang]
     # 타이틀은 특이하게 처리: ko/romaji/es만 사용
     if field == "title":
         if lang == "ko":
-            return meta["title_ko"]
+            return meta.get("title_ko", "")
         elif lang == "es":
-            return meta["title_es"]
+            return meta.get("title_es", "")
         else:
-            return meta["title_romaji"]  # 영어는 romaji
+            return meta.get("title_romaji", "")
     for l in order:
         key = f"{field}_{l}"
         if key in meta and meta[key]:
@@ -442,6 +581,49 @@ def get_multilang(meta, field, lang="ko", fallback_order=None):
             return parse_to_list(v) if field == "genres" else v
     return [] if field == "genres" else ""
 
+# 다국어 추천 이유 셋팅
+RECOMMEND_REASON = {
+    "ko": [
+        "너의 애니리스트에 있는 작품들 취향을 보니까 이게 딱이야.",
+        "최근에 본 애니랑 장르가 비슷해서 추천해!",
+        "너가 좋아하는 테마랑 잘 어울릴 거야.",
+        "비슷한 분위기의 작품이라서 골라봤어.",
+        "네가 자주 본 장르 기반으로 추천했어.",
+        "네 리스트 기반으로 추천했어! 재밌게 볼 수 있을 거야.",
+        "이런 장르 좋아하잖아? 그래서 추천해.",
+        "최근 네가 본 작품들과 관련된 애니야!",
+        "취향 분석해서 제일 잘 맞을 것 같은 작품이야.",
+    ],
+    "en": [
+        "This one fits your anime list perfectly.",
+        "Recommended because it has similar genres to your recent favorites.",
+        "It matches the themes you often enjoy.",
+        "Picked this because the vibe is similar to what you like.",
+        "Based on the genres you watch most.",
+        "Recommended from your list! You’ll probably enjoy it.",
+        "You seem to like this kind of genre, so here you go!",
+        "This anime is related to what you recently watched.",
+        "Analyzed your favorites and picked the best match.",
+    ],
+    "es": [
+        "¡Esta serie encaja perfectamente con tu lista de anime!",
+        "Te la recomiendo porque tiene géneros similares a los que sueles ver.",
+        "Va con los temas que disfrutas normalmente.",
+        "Elegí esta porque el ambiente es parecido a tus favoritos.",
+        "Basado en los géneros que más ves.",
+        "¡Recomendado según tu lista! Seguro que te gustará.",
+        "Sé que te gusta este tipo de género, así que aquí tienes.",
+        "Este anime está relacionado con los que viste recientemente.",
+        "Analicé tus favoritos y elegí la mejor opción para ti.",
+    ],
+}
+
+# 추천 이유 랜덤 반환
+def get_recommend_reason(user_language, main_genre):
+    comment_set = RECOMMEND_REASON.get(user_language, RECOMMEND_REASON["ko"])
+    return random.choice(comment_set).format(main_genre=main_genre)
+
+# ───────────── 추천 애니메이션 함수
 def recommend_anime_by_userlist(
     user_anime_titles, user_language="ko", top_k=3, with_detail=True,
     exclude_tags=None, exclude_genres=None
@@ -483,6 +665,10 @@ def recommend_anime_by_userlist(
 
     already_seen = set([t.strip().lower() for t in user_anime_titles])
     result = []
+
+    # main_genre = 많이 본 장르 중 하나 (없으면 "추천" 기본값)
+    main_genre = next(iter(top_user_genres), "추천")
+    recommend_reason = get_recommend_reason(user_language, main_genre)
 
     filtered_candidates = []
     for doc in candidates:
@@ -534,7 +720,8 @@ def recommend_anime_by_userlist(
                 "genres": genres,
                 "studios": studio_names,
                 "format": format_,
-                "reco_score": round(score, 4)
+                "reco_score": round(score, 4),
+                "recommend_reason": recommend_reason,
             })
         else:
             result.append(title)

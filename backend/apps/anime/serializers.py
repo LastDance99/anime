@@ -20,8 +20,12 @@ class AnimeSimpleSerializer(serializers.ModelSerializer):
         return self.context.get("lang", "ko")
 
     def get_title(self, obj):
-        lang = self.get_lang()
-        return getattr(obj, f"title_{lang}", obj.title_ko)
+        lang = self.get_lang()[:2]
+        return {
+            "ko": obj.title_ko,
+            "en": getattr(obj, "title_romaji", obj.title_ko),
+            "es": getattr(obj, "title_es", obj.title_ko)
+        }.get(lang, obj.title_ko)
 
     def get_total_animelist_users(self, obj):
         return getattr(obj, "user_count", 0)
