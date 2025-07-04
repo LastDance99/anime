@@ -17,7 +17,7 @@ class UserSettingsSerializer(serializers.ModelSerializer):
             "language",
             "profile_image",
             "background_image",
-            "myroom_image"
+            "myroom_image",
             "nickname_changed_at",
         ]
         read_only_fields = ["email"]
