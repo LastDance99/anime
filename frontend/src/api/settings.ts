@@ -20,7 +20,20 @@ export const updateImage = async (formData: FormData) => {
   return res.data;
 };
 
-export const deleteImage = async () => {
-  const res = await axios.delete('/api/settings/image/delete/');
+export const changePassword = async (data: {
+  current_password: string;
+  new_password: string;
+  new_password2: string;
+}) => {
+  const res = await axios.post("/api/settings/password-change/", data);
+  return res.data;
+};
+
+export const deleteImage = async (
+  target: "profile_image" | "background_image" | "myroom_image"
+) => {
+  const res = await axios.delete('/api/settings/image/delete/', {
+    data: { target },
+  });
   return res.data;
 };

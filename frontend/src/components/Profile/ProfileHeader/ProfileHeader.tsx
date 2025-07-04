@@ -16,6 +16,8 @@ import { logout } from "../../../api/auth";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 
+const MAIN_LOGO_IMG = import.meta.env.VITE_MAIN_LOGO_IMG;
+
 type Props = {
   show?: boolean;
   isScrolled: boolean;
@@ -45,7 +47,7 @@ export default function Header({ show = true, isScrolled, user, setUser, onOpenS
   return (
     <HeaderWrapper $show={show} $scrolled={isScrolled}>
       <HeaderInner>
-        <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        <Logo src={MAIN_LOGO_IMG} alt="AnTada 로고" />
         <Nav>
           <NavList>
             <NavItem as={Link} to={`/profile/${currentUser?.id}`}>

@@ -8,7 +8,7 @@ export const ChatBotWrapper = styled.section<{ $visible: boolean }>`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  /* overflow: hidden; */
   position: fixed;
   bottom: 80px;
   right: 20px;
@@ -39,19 +39,20 @@ export const SidebarIcon = styled.div`
 
 // 대화 영역
 export const ChatArea = styled.div`
-  width: 355px;
-  height: 674px;
-  margin: 20px auto 0 auto;
+  flex: 1;
+  margin-top: 20px;
+  padding: 0 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
+  position: relative;
+  scroll-behavior: smooth;
+
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-family: ${({ theme }) => theme.fonts.main};
   font-weight: ${({ theme }) => theme.Weights.medium};
   color: ${({ theme }) => theme.colors.text};
-  padding-right: 5px;
-  margin-right: 10px;
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -66,6 +67,7 @@ export const ChatArea = styled.div`
 export const BubbleRow = styled.div<{ isUser?: boolean }>`
   display: flex;
   justify-content: ${({ isUser }) => (isUser ? "flex-end" : "flex-start")};
+  scroll-margin-top: 12px;
 `;
 
 export const ChatBubble = styled.div<{ isUser?: boolean }>`
@@ -76,7 +78,7 @@ export const ChatBubble = styled.div<{ isUser?: boolean }>`
   border-radius: 18px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   background: ${({ isUser, theme }) =>
     isUser ? "#B5EAD7" : theme.colors.subcolor};
   border: 1px solid
@@ -87,7 +89,6 @@ export const ChatBubble = styled.div<{ isUser?: boolean }>`
   font-weight: ${({ theme }) => theme.Weights.medium};
   word-break: break-word;
   margin: 4px 0;
-  align-self: ${({ isUser }) => (isUser ? "flex-end" : "flex-start")};
   box-shadow: 0 1px 8px rgba(150, 150, 180, 0.05);
   transition: background 0.2s, border 0.2s;
 `;

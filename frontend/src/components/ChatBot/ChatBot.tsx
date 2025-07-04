@@ -13,50 +13,16 @@ import {
   ResetButton,
   DropdownMenu,
   DropdownItem,
-  // ToolOverlay,
-  // ToolOverlayInput,
-  // ToolOverlayActions,
 } from "./ChatBot.styled";
 import { Plus, Play, RotateCw } from "lucide-react";
 import {
   chatWithBot,
   clearChatContext,
   getAnimeRecommendation,
-  // generateImage,
 } from "../../api/core";
 import { getUserContent } from "../../api/profile";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTranslation } from "react-i18next";
-
-const RecommendCard = ({
-  title,
-  description,
-  cover_image,
-  genres,
-  year,
-  format,
-  studios,
-  recommend_reason,
-  t,
-}: any & { t: (key: string) => string }) => (
-  <div style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12, marginBottom: 12 }}>
-    <img src={cover_image} alt={title} style={{ width: "100%", borderRadius: 8, marginBottom: 8 }} />
-    <h4 style={{ margin: "4px 0" }}>{title}</h4>
-    <p style={{ fontSize: 14, margin: "6px 0", color: "#555" }} dangerouslySetInnerHTML={{ __html: description }} />
-    <p style={{ fontSize: 13, margin: "4px 0", color: "#888" }}>
-      📅 <strong>{year ?? "?"}</strong> | 🏷️ {format ?? t("chat.no_format")}
-    </p>
-    <p style={{ fontSize: 13, margin: "4px 0", color: "#888" }}>
-      🎬 {t("chat.studio")}: {studios?.length ? studios.join(", ") : t("chat.no_info")}
-    </p>
-    <p style={{ fontSize: 13, margin: "4px 0", color: "#888" }}>
-      🎭 {t("chat.genre")}: {genres?.length ? genres.join(", ") : t("chat.no_info")}
-    </p>
-    <p style={{ marginTop: 6, color: "#448" }}>
-      <b>{t("chat.recommend_reason")}:</b> {recommend_reason}
-    </p>
-  </div>
-);
 
 type Props = {
   visible: boolean;
@@ -71,12 +37,13 @@ type ChatMessage = {
   results?: any[];
 };
 
-
+const STORAGE_KEY = "chatbot_messages";
 
 export default function ChatBot({ visible }: Props) {
   const { currentUser } = useAuth();
   const { t, i18n } = useTranslation();
-  const lang = i18n.language;
+  const lang = i18n.language.split("-")[0];
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [dialogContext, setDialogContext] = useState<
     { role: "user" | "assistant"; content: string }[]
@@ -84,16 +51,41 @@ export default function ChatBot({ visible }: Props) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showToolMenu, setShowToolMenu] = useState(false);
-  const [activeTool, setActiveTool] = useState<null>(null); // 이미지 기능 제거
-  const [toolInput, setToolInput] = useState(""); // 이미지 기능 제거
+
   const chatAreaRef = useRef<HTMLDivElement>(null);
-  
+  const userMsgRef = useRef<HTMLDivElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value);
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+    setInput(e.target.value);
 
+  // ✅ 복원: loading 메시지는 복구하지 않음
   useEffect(() => {
-    setMessages([{ id: 1, text: t("chat.welcome"), isUser: false }]);
-  }, [t]);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter(
+            (m: ChatMessage) => m.text !== t("chat.loading") && !(!m.isUser && !m.text)
+          );
+          if (cleaned.length > 0) {
+            setMessages(cleaned);
+            return;
+          }
+        }
+      } catch {}
+    }
+
+    const welcomeText = currentUser?.nickname
+      ? `${t("chat.welcome_first")} ${currentUser.nickname} ${t("chat.welcome_last")}`
+      : t("chat.welcome");
+    setMessages([{ id: 1, text: welcomeText, isUser: false }]);
+  }, [t, currentUser]);
+
+  // ✅ 저장
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
 
   const handleSend = async (e?: FormEvent) => {
     if (e) e.preventDefault();
@@ -109,12 +101,17 @@ export default function ChatBot({ visible }: Props) {
       text: t("chat.loading"),
       isUser: false,
     };
+
     setMessages((prev) => [...prev, userMessage, loadingMessage]);
     setInput("");
     setIsLoading(true);
 
     try {
-      const res = await chatWithBot({ question: input, dialog_context: dialogContext, language: i18n.language, });
+      const res = await chatWithBot({
+        question: input,
+        dialog_context: dialogContext,
+        lang,
+      });
       const { final_answer, mode, cover_image } = res.data;
 
       const botMessage: ChatMessage = {
@@ -125,7 +122,9 @@ export default function ChatBot({ visible }: Props) {
         ...(mode === "info" && cover_image ? { imageUrl: cover_image } : {}),
       };
 
-      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id).concat(botMessage));
+      setMessages((prev) =>
+        prev.filter((m) => m.id !== loadingMessage.id).concat(botMessage)
+      );
       setDialogContext((prev) =>
         [
           ...prev,
@@ -133,12 +132,14 @@ export default function ChatBot({ visible }: Props) {
           { role: "assistant" as const, content: final_answer },
         ].slice(-40)
       );
-    } catch (err) {
-      setMessages((prev) => prev.filter((m) => m.id !== loadingMessage.id).concat({
-        id: Date.now() + 3,
-        text: t("chat.server_error"),
-        isUser: false,
-      }));
+    } catch {
+      setMessages((prev) =>
+        prev.filter((m) => m.id !== loadingMessage.id).concat({
+          id: Date.now() + 3,
+          text: t("chat.server_error"),
+          isUser: false,
+        })
+      );
     } finally {
       setIsLoading(false);
     }
@@ -146,6 +147,7 @@ export default function ChatBot({ visible }: Props) {
 
   const handleRecommend = async () => {
     if (!currentUser?.id) return;
+
     const loadingMessage: ChatMessage = {
       id: Date.now(),
       text: t("chat.recommend_loading"),
@@ -155,10 +157,12 @@ export default function ChatBot({ visible }: Props) {
     setIsLoading(true);
 
     try {
-      const content = await getUserContent({ userId: currentUser.id, type: "anime", page_size: 999 });
+      const content = await getUserContent({
+        userId: currentUser.id,
+        type: "anime",
+        page_size: 999,
+      });
       const animeTitles = content.results.map((item: any) => item.title).filter(Boolean);
-
-      const lang = i18n.language; // 현재 언어
 
       const res = await getAnimeRecommendation({
         anime_titles: animeTitles,
@@ -188,7 +192,12 @@ export default function ChatBot({ visible }: Props) {
   };
 
   const handleReset = async () => {
-    setMessages([{ id: Date.now(), text: t("chat.welcome"), isUser: false }]);
+    const welcomeText = currentUser?.nickname
+      ? `${t("chat.welcome_first")} ${currentUser.nickname} ${t("chat.welcome_last")}`
+      : t("chat.welcome");
+    const welcomeMsg = { id: Date.now(), text: welcomeText, isUser: false };
+    setMessages([welcomeMsg]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([welcomeMsg]));
     setDialogContext([]);
     setInput("");
     try {
@@ -197,60 +206,68 @@ export default function ChatBot({ visible }: Props) {
   };
 
   useEffect(() => {
-    if (chatAreaRef.current) {
-      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
-    }
+    if (!userMsgRef.current) return;
+
+    userMsgRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+      inline: "nearest",
+    });
   }, [messages]);
 
   return (
     <ChatBotWrapper $visible={visible}>
       <ChatArea ref={chatAreaRef}>
-        {messages.map((msg) => (
-          <BubbleRow isUser={msg.isUser} key={msg.id}>
-            <ChatBubble isUser={msg.isUser}>
-              {msg.imageUrl && <img src={msg.imageUrl} alt="img" style={{ width: 150, borderRadius: 8, marginBottom: 8 }} />}
-              {msg.text && (
+        {messages.map((msg) => {
+          const lastUser = [...messages].reverse().find((m) => m.isUser);
+          const isLastUserMsg = msg.isUser && lastUser?.id === msg.id;
+
+          return (
+            <BubbleRow
+              isUser={msg.isUser}
+              key={msg.id}
+              ref={isLastUserMsg ? userMsgRef : null}
+            >
+              <ChatBubble isUser={msg.isUser}>
+                {msg.imageUrl && (
+                  <img
+                    src={msg.imageUrl}
+                    alt="img"
+                    style={{ width: 150, borderRadius: 8, marginBottom: 8 }}
+                  />
+                )}
                 <div
-                  dangerouslySetInnerHTML={{ __html: msg.text }}
+                  dangerouslySetInnerHTML={{ __html: msg.text ?? "" }}
                   style={{ whiteSpace: "pre-wrap" }}
                 />
-              )}
-              {msg.mode === "recommend" &&
-                msg.results?.map((r) => (
-                  <RecommendCard key={r.title} {...r} t={t} />
-                ))}
-            </ChatBubble>
-          </BubbleRow>
-        ))}
+                {msg.mode === "recommend" &&
+                  msg.results?.map((r) => (
+                    <div key={r.title} style={{ marginTop: 8 }}>
+                      {r.title}
+                    </div>
+                  ))}
+              </ChatBubble>
+            </BubbleRow>
+          );
+        })}
       </ChatArea>
-
-      {/* 이미지 생성 툴 비활성화
-      {activeTool === "image" && (
-        <ToolOverlay>
-          <label>{t("chat.image_tool_title")}</label>
-          <ToolOverlayInput
-            value={toolInput}
-            onChange={(e) => setToolInput(e.target.value)}
-            placeholder={t("chat.image_tool_placeholder")}
-          />
-          <ToolOverlayActions>
-            <button onClick={() => setActiveTool(null)}>{t("chat.cancel")}</button>
-            <button onClick={handleToolSubmit}>{t("chat.submit")}</button>
-          </ToolOverlayActions>
-        </ToolOverlay>
-      )}
-      */}
 
       <ChatInputBox onSubmit={handleSend}>
         <ChatInputArea
           value={input}
           onChange={handleInputChange}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) handleSend(e); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) handleSend(e);
+          }}
           placeholder={t("chat.input_placeholder")}
           disabled={isLoading}
         />
         <IconsRow>
-          <AddIconButton type="button" disabled={isLoading} onClick={() => setShowToolMenu((prev) => !prev)}>
+          <AddIconButton
+            type="button"
+            onClick={() => setShowToolMenu((prev) => !prev)}
+            disabled={isLoading}
+          >
             <Plus />
           </AddIconButton>
           <ResetButton type="button" onClick={handleReset}>
@@ -264,8 +281,14 @@ export default function ChatBot({ visible }: Props) {
 
       {showToolMenu && (
         <DropdownMenu>
-          {/* <DropdownItem onClick={() => { setActiveTool("image"); setShowToolMenu(false); }}>{t("chat.image_tool")}</DropdownItem> */}
-          <DropdownItem onClick={() => { setShowToolMenu(false); handleRecommend(); }}>{t("chat.recommend_tool")}</DropdownItem>
+          <DropdownItem
+            onClick={() => {
+              setShowToolMenu(false);
+              handleRecommend();
+            }}
+          >
+            {t("chat.recommend_tool")}
+          </DropdownItem>
         </DropdownMenu>
       )}
     </ChatBotWrapper>

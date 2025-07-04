@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef  } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import SettingsPage from "../../pages/SettingsPage/SettingsPage";
 import type { User } from "../../types/user";
@@ -7,11 +7,15 @@ import {
   updateAccount,
   updateLanguage,
   updateImage,
+  deleteImage,
 } from "../../api/settings";
-import { checkNickname } from "../../api/auth";
 import NicknameModal from "./NicknameModal";
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+
+dayjs.extend(duration);
 
 type TempUser = Omit<User, "profile_image" | "background_image" | "myroom_image"> & {
   profile_image: string | File | null;
@@ -50,22 +54,48 @@ export default function SettingsModal({
   const [bgFile, setBgFile] = useState<File | null>(null);
   const [roomFile, setRoomFile] = useState<File | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
-
-  useEffect(() => {
-    const changed =
-      user.nickname !== tempUser.nickname ||
-      user.language !== tempUser.language ||
-      profileFile !== null ||
-      bgFile !== null ||
-      roomFile !== null;
-    setHasChanges(changed);
-  }, [user, tempUser, profileFile, bgFile, roomFile]);
+  const [timeLeftText, setTimeLeftText] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const data = await getUserSettings();
         setTempUser(convertUserToTempUser(data));
+        setUser(data);
+        if (data.nickname_changed_at) {
+          const next = dayjs(data.nickname_changed_at).add(30, "day");
+          const now = dayjs();
+          const diff = next.diff(now);
+          if (diff > 0) {
+            const d = dayjs.duration(diff);
+            const days = Math.floor(d.asDays());
+            const hours = d.hours();
+            const minutes = d.minutes();
+            const text =
+              days > 0
+                ? t("time.left_full", {
+                    days,
+                    hours,
+                    minutes,
+                    dLabel: t("time.d"),
+                    hLabel: t("time.h"),
+                    mLabel: t("time.m"),
+                  })
+                : hours > 0
+                ? t("time.left_hour_min", {
+                    hours,
+                    minutes,
+                    hLabel: t("time.h"),
+                    mLabel: t("time.m"),
+                  })
+                : t("time.left_min", {
+                    minutes,
+                    mLabel: t("time.m"),
+                  });
+
+            setTimeLeftText(text);
+          }
+        }
       } catch (err) {
         console.error(t("settings.loadError"), err);
       } finally {
@@ -73,6 +103,16 @@ export default function SettingsModal({
       }
     })();
   }, [t]);
+
+  useEffect(() => {
+    const changed =
+      user.nickname !== tempUser.nickname ||
+      user.language !== tempUser.language ||
+      user.profile_image !== tempUser.profile_image ||
+      user.background_image !== tempUser.background_image ||
+      user.myroom_image !== tempUser.myroom_image;
+    setHasChanges(changed);
+  }, [user, tempUser]);
 
   const handleSave = async () => {
     const confirmed = window.confirm(t("settings.confirmSave"));
@@ -82,7 +122,6 @@ export default function SettingsModal({
       if (user.nickname !== tempUser.nickname) {
         await updateAccount({ nickname: tempUser.nickname });
       }
-
       if (
         user.language !== tempUser.language &&
         ["ko", "en", "es"].includes(tempUser.language ?? "")
@@ -92,12 +131,20 @@ export default function SettingsModal({
         });
         i18n.changeLanguage(tempUser.language as "ko" | "en" | "es");
       }
+      if (user.profile_image && tempUser.profile_image === null) {
+        await deleteImage("profile_image");
+      }
+      if (user.background_image && tempUser.background_image === null) {
+        await deleteImage("background_image");
+      }
+      if (user.myroom_image && tempUser.myroom_image === null) {
+        await deleteImage("myroom_image");
+      }
 
       const formData = new FormData();
       if (profileFile) formData.append("profile_image", profileFile);
       if (bgFile) formData.append("background_image", bgFile);
       if (roomFile) formData.append("myroom_image", roomFile);
-
       if (
         formData.has("profile_image") ||
         formData.has("background_image") ||
@@ -106,71 +153,24 @@ export default function SettingsModal({
         await updateImage(formData);
       }
 
-      setUser(tempUser as User); // 현재 상태 반영
-      if (onSaved) onSaved(tempUser as User); // ✅ 변경된 부분: 상위 Layout에게 전달
+      setUser(tempUser as User);
+      if (onSaved) onSaved(tempUser as User);
       setJustSaved(true);
       onClose();
     } catch (err: any) {
       console.error(t("settings.saveError"), err);
-      if (err.response) {
-        alert(err.response.data.detail || JSON.stringify(err.response.data));
-      } else if (err.request) {
-        alert(t("settings.noResponse"));
-      } else {
-        alert(t("settings.unknownError"));
-      }
+      alert(t("settings.unknownError"));
     }
   };
 
-  const hasChangesRef = useRef(hasChanges);
-  useEffect(() => {
-    hasChangesRef.current = hasChanges;
-  }, [hasChanges]);
-
-  const justSavedRef = useRef(justSaved);
-  useEffect(() => {
-    justSavedRef.current = justSaved;
-  }, [justSaved]);
-
   const handleTryClose = () => {
-    // 항상 최신 값을 사용!
-    if (hasChangesRef.current && !justSavedRef.current) {
+    if (hasChanges && !justSaved) {
       const confirmed = window.confirm(t("settings.unsavedChanges"));
       if (!confirmed) return;
     }
+    setTempUser(convertUserToTempUser(user));
     onClose();
   };
-
-  const handleNicknameChange = async (newNickname: string) => {
-    if (newNickname === user.nickname) return;
-    try {
-      await checkNickname(newNickname);
-      setTempUser((prev) => ({ ...prev, nickname: newNickname }));
-      setNicknameModalOpen(false);
-    } catch (err: any) {
-      const msg =
-        err.response?.data?.nickname?.[0] ||
-        err.response?.data?.detail ||
-        t("settings.nicknameCheckFail");
-      alert(msg);
-    }
-  };
-
-  useEffect(() => {
-    if (!isSubModalOpen && justSaved) {
-      setJustSaved(false);
-    }
-  }, [isSubModalOpen, justSaved]);
-
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubModalOpen) {
-        handleTryClose();
-      }
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [hasChanges, onClose, isSubModalOpen, justSaved]);
 
   if (loading) return null;
 
@@ -189,14 +189,19 @@ export default function SettingsModal({
           setProfileFile={setProfileFile}
           setBgFile={setBgFile}
           setRoomFile={setRoomFile}
+          hasChanges={hasChanges}
         />
       </ModalBox>
 
       {isNicknameModalOpen && (
         <NicknameModal
           currentNickname={tempUser.nickname}
-          onSave={handleNicknameChange}
+          onSave={(newNickname) => {
+            setTempUser((prev) => ({ ...prev, nickname: newNickname }));
+            setNicknameModalOpen(false);
+          }}
           onClose={() => setNicknameModalOpen(false)}
+          timeLeftText={timeLeftText}
         />
       )}
     </Overlay>
@@ -222,7 +227,6 @@ const ModalBox = styled.div`
   overflow-y: auto;
   padding: 32px;
   font-family: 'Cafe24Ssurround', 'Quicksand', sans-serif;
-
   scrollbar-width: none;
   -ms-overflow-style: none;
   &::-webkit-scrollbar {

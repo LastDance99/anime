@@ -8,7 +8,7 @@ export const getPresignedUrl = async (data: any) => {
 export const chatWithBot = (payload: {
   question: string;
   dialog_context: { role: string; content: string }[];
-  language: string;
+  lang?: string;
 }) => axios.post("/api/animebot/chat/", payload);
 
 export const clearChatContext = () => axios.post("/api/animebot/chat/clear/");

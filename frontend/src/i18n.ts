@@ -19,6 +19,13 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    detection: {
+      order: ['localStorage', 'cookie', 'navigator'],
+      caches: ['localStorage'],
+    },
+    react: {
+      useSuspense: false,
+    },
   });
 
 export default i18n;

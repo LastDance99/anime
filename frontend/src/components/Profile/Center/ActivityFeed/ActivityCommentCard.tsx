@@ -23,6 +23,8 @@ import { AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
 
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 interface Props {
   post_id: number;
   post_author_nickname: string;
@@ -91,7 +93,10 @@ export default function ActivityCommentCard({
       <WrapperBox onClick={handleClick}>
         <FlexBox>
           <TopBox>
-            <ProfileImg src={post_author_profile_image} alt={post_author_nickname} />
+            <ProfileImg
+              src={post_author_profile_image || DEFAULT_PROFILE_IMG}
+              alt={post_author_nickname}
+            />
             <Nickname>{post_author_nickname}</Nickname>
           </TopBox>
           <CommentText>

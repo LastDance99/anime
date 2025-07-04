@@ -13,6 +13,9 @@ import {
 import type { ProfileCardProps } from "../../../types/user";
 import { getFullImageUrl } from "../../../utils/getFullImageUrl";
 
+const DEFAULT_BG_IMG = import.meta.env.VITE_DEFAULT_BG_IMG;
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
   // 경로 찍어서 꼭 확인!
   console.log("ProfileSection user", user);
@@ -24,7 +27,7 @@ const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
         src={
           user.background_image
             ? getFullImageUrl(user.background_image)
-            : "/images/default-bg.png"
+            : DEFAULT_BG_IMG
         }
         alt="프로필 배경"
       />
@@ -35,7 +38,7 @@ const ProfileSection: React.FC<ProfileCardProps> = ({ user }) => {
               src={
                 user.profile_image
                   ? getFullImageUrl(user.profile_image)
-                  : "/images/default-profile.png"
+                  : DEFAULT_PROFILE_IMG
               }
               alt="프로필"
             />

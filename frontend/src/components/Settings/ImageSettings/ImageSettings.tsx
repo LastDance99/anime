@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Section,
   SubTitle,
@@ -12,6 +12,10 @@ import {
 import ImageUploadButton from "./ImageUploadButton";
 import type { TempUser } from "../../../types/user";
 import { useTranslation } from "react-i18next";
+
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+const DEFAULT_BG_IMG = import.meta.env.VITE_DEFAULT_BG_IMG;
+const DEFAULT_ROOM_IMG = import.meta.env.VITE_DEFAULT_ROOM_IMG;
 
 type Props = {
   user: TempUser;
@@ -39,6 +43,24 @@ export default function ImageSettings({
   );
   const { t } = useTranslation();
 
+  useEffect(() => {
+    if (typeof user.profile_image === "string") {
+      setProfileImg(user.profile_image);
+    }
+  }, [user.profile_image]);
+
+  useEffect(() => {
+    if (typeof user.background_image === "string") {
+      setBgImg(user.background_image);
+    }
+  }, [user.background_image]);
+
+  useEffect(() => {
+    if (typeof user.myroom_image === "string") {
+      setRoomImg(user.myroom_image);
+    }
+  }, [user.myroom_image]);
+
   const handleUpload = (
     type: "profile" | "background" | "myroom",
     setter: React.Dispatch<React.SetStateAction<string>>
@@ -58,11 +80,13 @@ export default function ImageSettings({
     });
   };
 
+  
   const handleDelete = (
     type: "profile" | "background" | "myroom",
     setter: React.Dispatch<React.SetStateAction<string>>
   ) => () => {
     setter("");
+
     if (type === "profile") setProfileFile(null);
     if (type === "background") setBgFile(null);
     if (type === "myroom") setRoomFile(null);
@@ -82,7 +106,7 @@ export default function ImageSettings({
         {/* 프로필 이미지 */}
         <ImageBox>
           <ImageLabel>{t("image_settings.profile")}</ImageLabel>
-          <StyledImage src={profileImg} alt="프로필 이미지" shape="circle" />
+          <StyledImage src={profileImg || DEFAULT_PROFILE_IMG} alt="프로필 이미지" shape="circle" />
           <ButtonGroup>
             <ImageUploadButton onChange={handleUpload("profile", setProfileImg)} />
             <ActionButton onClick={handleDelete("profile", setProfileImg)}>
@@ -94,7 +118,7 @@ export default function ImageSettings({
         {/* 배경 이미지 */}
         <ImageBox>
           <ImageLabel>{t("image_settings.background")}</ImageLabel>
-          <StyledImage src={bgImg} alt="배경 이미지" shape="rect" />
+          <StyledImage src={bgImg || DEFAULT_BG_IMG} alt="배경 이미지" shape="rect" />
           <ButtonGroup>
             <ImageUploadButton onChange={handleUpload("background", setBgImg)} />
             <ActionButton onClick={handleDelete("background", setBgImg)}>
@@ -106,7 +130,7 @@ export default function ImageSettings({
         {/* 마이룸 이미지 */}
         <ImageBox>
           <ImageLabel>{t("image_settings.myroom")}</ImageLabel>
-          <StyledImage src={roomImg} alt="마이룸 이미지" shape="square" />
+          <StyledImage src={roomImg || DEFAULT_ROOM_IMG} alt="마이룸 이미지" shape="square" />
           <ButtonGroup>
             <ImageUploadButton onChange={handleUpload("myroom", setRoomImg)} />
             <ActionButton onClick={handleDelete("myroom", setRoomImg)}>

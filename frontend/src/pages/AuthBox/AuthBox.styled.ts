@@ -1,14 +1,14 @@
 import styled from 'styled-components';
 import { Link } from "react-router-dom";
 
-export const Container = styled.div`
+export const Container = styled.div<{ bgImage: string }>`
   position: relative;
   width: 100vw;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url('/images/bgimg.jpg') no-repeat center center;
+  background: ${({ bgImage }) => `url(${bgImage}) no-repeat center center`};
   background-size: cover;
   overflow: hidden;
 `;

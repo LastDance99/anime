@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Section,
   SubTitle,
@@ -9,7 +9,6 @@ import {
 } from "./AccountSettings.styled";
 import ChangeButton from "../ChangeButton/ChangeButton";
 import type { TempUser } from "../../../types/user";
-import NicknameModal from "../NicknameModal";
 import PasswordModal from "../PasswordModal";
 import { useTranslation } from "react-i18next";
 
@@ -29,18 +28,7 @@ export default function AccountSettings({
   onChangeNickname,
 }: Props) {
   const { t } = useTranslation();
-  const [nicknameModalOpen, setNicknameModalOpen] = useState(false);
-  const [pwModalOpen, setPwModalOpen] = useState(false);
-
-  const openNicknameModal = () => {
-    setNicknameModalOpen(true);
-    setSubModalOpen(true);
-  };
-
-  const closeNicknameModal = () => {
-    setNicknameModalOpen(false);
-    setSubModalOpen(false);
-  };
+  const [pwModalOpen, setPwModalOpen] = React.useState(false);
 
   const openPwModal = () => {
     setPwModalOpen(true);
@@ -52,9 +40,9 @@ export default function AccountSettings({
     setSubModalOpen(false);
   };
 
-  const handlePasswordSave = (newPassword: string) => {
-    setUser({ ...user, password: newPassword });
-    closePwModal();
+  const handleNicknameClick = () => {
+    setSubModalOpen(true);
+    onChangeNickname(); // SettingsModal 에서 모달 열기
   };
 
   return (
@@ -70,29 +58,13 @@ export default function AccountSettings({
         <Label>{t("account.password")}</Label>
         <Text>********</Text>
         <ChangeButton label={t("account.change_password")} onClick={openPwModal} />
-        {pwModalOpen && (
-          <PasswordModal
-            // currentPassword={user.password}
-            onSave={handlePasswordSave}
-            onClose={closePwModal}
-          />
-        )}
+        {pwModalOpen && <PasswordModal onClose={closePwModal} />}
       </Row>
 
       <Row>
         <Label>{t("account.nickname")}</Label>
         <Text>{user.nickname}</Text>
-        <ChangeButton label={t("account.change_nickname")} onClick={openNicknameModal} />
-        {nicknameModalOpen && (
-          <NicknameModal
-            currentNickname={user.nickname}
-            onSave={(newNick) => {
-              setUser({ ...user, nickname: newNick });
-              closeNicknameModal();
-            }}
-            onClose={closeNicknameModal}
-          />
-        )}
+        <ChangeButton label={t("account.change_nickname")} onClick={handleNicknameClick} />
       </Row>
 
       <Row>

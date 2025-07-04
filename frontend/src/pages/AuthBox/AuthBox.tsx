@@ -16,6 +16,9 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+const MAIN_LOGO_IMG = import.meta.env.VITE_MAIN_LOGO_IMG;
+const bgImage = import.meta.env.VITE_DEFAULT_FIRST_PAGE_IMG;
+
 const languages = [
   { code: "ko", label: "한국어" },
   { code: "en", label: "English" },
@@ -36,7 +39,7 @@ const AuthBox: React.FC = () => {
   const selectedLabel = languages.find((l) => l.code === currentLang)?.label || "";
 
   return (
-    <Container>
+    <Container bgImage={bgImage}>
       <Box>
         <LanguageContainer>
           <LanguageSelected onClick={() => setOpen((v) => !v)}>
@@ -60,7 +63,7 @@ const AuthBox: React.FC = () => {
           )}
         </LanguageContainer>
 
-        <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+        <Logo src={MAIN_LOGO_IMG} alt="AnTada 로고" />
         <Title>{t("auth.welcome")}</Title>
         <SubTitle>{t("auth.subtitle")}</SubTitle>
         <LoginButton as={Link} to="/login">{t("auth.login")}</LoginButton>

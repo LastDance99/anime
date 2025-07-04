@@ -38,6 +38,8 @@ import "dayjs/locale/es";
 
 dayjs.extend(relativeTime);
 
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 type Props = {
   id: number;
   onDeleteSuccess?: (deletedId: number) => void;
@@ -171,13 +173,13 @@ export default function DetailContent({
 
       <UserRow>
         <Profile
-          src={profileImage || "/default_profile.png"}
+          src={profileImage || DEFAULT_PROFILE_IMG}
           alt={`${authorNickname}님의 프로필 이미지`}
           onClick={handleProfileClick}
           style={{ cursor: "pointer" }}
-          onError={(e) => {
-            if (!e.currentTarget.src.includes("/default_profile.png")) {
-              e.currentTarget.src = "/default_profile.png";
+          onError={e => {
+            if (e.currentTarget.src !== DEFAULT_PROFILE_IMG) {
+              e.currentTarget.src = DEFAULT_PROFILE_IMG;
             }
           }}
         />

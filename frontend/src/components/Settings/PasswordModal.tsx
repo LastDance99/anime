@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { changePassword } from "../../api/auth";
+import { changePassword } from "../../api/settings";
 import { useTranslation } from "react-i18next";
 
 type Props = {
-  onSave?: (newPassword: string) => void;
   onClose: () => void;
 };
 

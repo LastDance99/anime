@@ -28,6 +28,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { setAccessToken, setRefreshToken } from "../../utils/token";
 import { useTranslation } from "react-i18next";
 
+const MAIN_LOGO_IMG = import.meta.env.VITE_MAIN_LOGO_IMG;
+
 const languages = [
   { code: "ko", label: "한국어" },
   { code: "en", label: "English" },
@@ -110,7 +112,7 @@ const Login: React.FC = () => {
     <Container>
       <Box>
         <Link to="/">
-          <Logo src="/logos/mainlog.png" alt="AnTada 로고" />
+          <Logo src={MAIN_LOGO_IMG} alt="AnTada 로고" />
         </Link>
         <SubBox>
           <LanguageContainer>

@@ -26,7 +26,7 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
   }>(null);
 
   useEffect(() => {
-    getAnimeFilterMeta("ko")
+    getAnimeFilterMeta()
       .then(data => {
         console.log("필터 옵션:", data);
 

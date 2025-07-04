@@ -1,5 +1,5 @@
-// lib/axios.ts
 import axios from "axios";
+import i18n from "i18next";
 import {
   getAccessToken,
   getRefreshToken,
@@ -16,18 +16,27 @@ const baseURL =
     ? import.meta.env.VITE_API_DEV_COMPANY
     : import.meta.env.VITE_API_DEV_HOME;
 
+// 언어 설정 함수
+const getLanguage = () => i18n.language?.split("-")[0] || "ko";
+
 // 인터셉터 없는 인스턴스 (로그인/회원가입/refresh 용)
 export const noAuthInstance = axios.create({ baseURL });
+noAuthInstance.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  config.headers["Accept-Language"] = getLanguage();
+  return config;
+});
 
 // 인터셉터 붙은 인스턴스 (모든 보호 API)
 const instance = axios.create({ baseURL });
-
 instance.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
-    if (token && config.headers) {
+    config.headers = config.headers || {};
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    config.headers["Accept-Language"] = getLanguage();
     return config;
   },
   (error) => Promise.reject(error)
@@ -43,7 +52,6 @@ instance.interceptors.response.use(
         const refreshToken = getRefreshToken();
         if (!refreshToken) throw new Error("refreshToken 없음");
 
-        // noAuthInstance로 호출!
         const res = await noAuthInstance.post(`/api/users/refresh/`, { refresh: refreshToken });
         if (res.data.refresh) setRefreshToken(res.data.refresh);
         setAccessToken(res.data.access, !!localStorage.getItem("accessToken"));
@@ -52,7 +60,6 @@ instance.interceptors.response.use(
       } catch (refreshErr) {
         removeAccessToken();
         removeRefreshToken();
-        // window.location.href = "/login";
         return Promise.reject(refreshErr);
       }
     }

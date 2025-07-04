@@ -21,6 +21,8 @@ import { addUserComment, deleteUserComment } from "../../../../api/profile";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 interface Props {
   comments: ProfileComment[];
   userId: number;
@@ -103,7 +105,7 @@ export default function ProfileComments({ comments, userId, onRefresh, isMyPage 
             return (
               <ChatItem key={comment.id}>
                 <ProfileImg
-                  src={comment.author?.profile_image || "/images/default.png"}
+                  src={comment.author?.profile_image || DEFAULT_PROFILE_IMG}
                   alt="profile"
                   style={{ cursor: "pointer" }}
                   onClick={() => goToProfile(comment.author?.id)}

@@ -7,24 +7,32 @@ type Props = {
   currentNickname: string;
   onSave: (nickname: string) => void;
   onClose: () => void;
+  timeLeftText: string | null; // ✅ 다국어 지원된 시간 문자열
 };
 
-export default function NicknameModal({ currentNickname, onSave, onClose }: Props) {
+export default function NicknameModal({
+  currentNickname,
+  onSave,
+  onClose,
+  timeLeftText,
+}: Props) {
   const { t } = useTranslation();
   const [value, setValue] = useState(currentNickname);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
     if (value === currentNickname) {
-      return onClose();
+      return onClose(); // 변경 없음 -> 바로 닫기
     }
 
     try {
       await checkNickname(value);
       setError("");
-      onSave(value);
+      onSave(value); // 저장 → 모달 닫힘은 부모에서
     } catch (err: any) {
-      const msg = err.response?.data?.message || t("nickname_modal.error");
+      const data = err.response?.data;
+      const msg =
+        data?.nickname?.[0] || data?.message || t("nickname_modal.error");
       setError(msg);
     }
   };
@@ -32,7 +40,12 @@ export default function NicknameModal({ currentNickname, onSave, onClose }: Prop
   return (
     <Overlay>
       <Modal onClick={(e) => e.stopPropagation()}>
-        <Title>{t("nickname_modal.title")}</Title>
+        <Title>
+          {timeLeftText
+            ? t("nickname_modal.time_limit", { time: timeLeftText })
+            : t("nickname_modal.title")}
+        </Title>
+
         <Input
           value={value}
           onChange={(e) => {
@@ -40,11 +53,15 @@ export default function NicknameModal({ currentNickname, onSave, onClose }: Prop
             setError("");
           }}
           maxLength={20}
+          disabled={!!timeLeftText}
         />
         {error && <ErrorMsg>{error}</ErrorMsg>}
+
         <ButtonGroup>
           <Button onClick={onClose}>{t("common.cancel")}</Button>
-          <Button onClick={handleSubmit}>{t("common.confirm")}</Button>
+          <Button onClick={handleSubmit} disabled={!!timeLeftText}>
+            {t("common.confirm")}
+          </Button>
         </ButtonGroup>
       </Modal>
     </Overlay>
@@ -71,6 +88,9 @@ const Modal = styled.div`
 
 const Title = styled.h3`
   margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
 `;
 
 const Input = styled.input`
@@ -94,14 +114,14 @@ const ButtonGroup = styled.div`
   gap: 10px;
 `;
 
-const Button = styled.button`
+const Button = styled.button<{ disabled?: boolean }>`
   padding: 6px 12px;
   border: none;
   border-radius: 8px;
-  background-color: #f9c2d2;
-  cursor: pointer;
+  background-color: ${({ disabled }) => (disabled ? "#ddd" : "#f9c2d2")};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 
   &:hover {
-    background-color: #f7aac1;
+    background-color: ${({ disabled }) => (disabled ? "#ddd" : "#f7aac1")};
   }
 `;

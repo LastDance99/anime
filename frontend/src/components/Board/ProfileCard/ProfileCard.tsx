@@ -20,6 +20,8 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { boardsProfileInfo } from "../../../api/board";
 import { useTranslation } from "react-i18next";
 
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 interface Props {
   user: User;
 }
@@ -67,7 +69,11 @@ const BoardProfile: React.FC<Props> = ({ user }) => {
         <Avatar>
           {user.profile_image && !isImageError ? (
             <img
-              src={profileImage}
+              src={
+                user.profile_image && !isImageError
+                  ? profileImage
+                  : DEFAULT_PROFILE_IMG
+              }
               alt={user.nickname}
               style={{ width: 80, height: 80, borderRadius: "50%" }}
               onError={() => setImageError(true)}

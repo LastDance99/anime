@@ -23,6 +23,8 @@ import { AnimatePresence } from "framer-motion";
 
 dayjs.extend(relativeTime);
 
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 interface Props {
   nickname: string;
   profile_image: string;
@@ -70,7 +72,7 @@ export default function ActivityPostCard({
       <WrapperBox onClick={handleClick}>
         <FlexBox>
           <TopBox>
-            <ProfileImg src={profile_image} alt={nickname} />
+            <ProfileImg src={profile_image || DEFAULT_PROFILE_IMG} alt={nickname} />
             <Nickname>{nickname}</Nickname>
           </TopBox>
           <div>{post_title}</div>

@@ -23,6 +23,7 @@ type SettingsPageProps = {
   setProfileFile: (file: File | null) => void;
   setBgFile: (file: File | null) => void;
   setRoomFile: (file: File | null) => void;
+  hasChanges: boolean;
 };
 
 export default function SettingsPage({
@@ -37,9 +38,10 @@ export default function SettingsPage({
   setProfileFile,
   setBgFile,
   setRoomFile,
+  hasChanges,
 }: SettingsPageProps) {
   const { t } = useTranslation();
-  const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
+  // const hasChanges = JSON.stringify(user) !== JSON.stringify(tempUser);
 
   const handleTryClose = () => {
     if (hasChanges) {
@@ -68,7 +70,16 @@ export default function SettingsPage({
         setRoomFile={setRoomFile}
       />
       <BottomBar>
-        <ActionButton onClick={onSave}>{t("common.save")}</ActionButton>
+        <ActionButton
+          onClick={onSave}
+          disabled={!hasChanges}
+          style={{
+            opacity: hasChanges ? 1 : 0.5,
+            cursor: hasChanges ? "pointer" : "not-allowed",
+          }}
+        >
+          {t("common.save")}
+        </ActionButton>
         <ActionButton onClick={onClose}>{t("common.close")}</ActionButton>
       </BottomBar>
     </Wrapper>

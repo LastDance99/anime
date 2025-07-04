@@ -10,6 +10,8 @@ import {
   Text, CommentMeta, ReplyList, ReplyItem,
 } from "./CommentListBox.styled";
 
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 // 답글(2뎁스) 렌더링
 function RenderReplies(replies: BoardComment[], t: any) {
   return (
@@ -17,7 +19,7 @@ function RenderReplies(replies: BoardComment[], t: any) {
       {replies.map((r) => (
         <ReplyItem key={r.id}>
           <Profile
-            src={r.author_profile_image || "/images/default-profile.png"}
+            src={r.author_profile_image || DEFAULT_PROFILE_IMG}
             alt={r.author_nickname}
           />
           <CommentContent>

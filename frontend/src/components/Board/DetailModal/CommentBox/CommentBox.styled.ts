@@ -218,7 +218,7 @@ export const TagMention = styled.span`
 
 export const PreviewBox = styled.div`
   position: absolute;
-  bottom: 48px;
+  bottom: 110%;
   left: 0;
   max-width: 100%;
   padding: 8px;

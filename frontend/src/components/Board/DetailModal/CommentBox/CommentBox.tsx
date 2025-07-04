@@ -39,6 +39,8 @@ import "dayjs/locale/ko";
 dayjs.extend(relativeTime);
 dayjs.locale("ko");
 
+const DEFAULT_PROFILE_IMG = import.meta.env.VITE_DEFAULT_PROFILE_IMG;
+
 type Props = {
   contentType: "post" | "gallery";
   contentId: number;
@@ -257,7 +259,10 @@ export default function CommentBox({ contentType, contentId }: Props) {
       <div key={comment.id}>
         <CommentItem style={depth > 0 ? { marginLeft: indent } : undefined} depth={depth}>
           {depth > 0 && <CornerDownRight size={16} style={{ marginRight: 8, color: "#B4B4B4" }} />}
-          <Profile src={comment.author_profile_image || "/default_profile.png"} alt={comment.author_nickname} />
+          <Profile
+            src={comment.author_profile_image || DEFAULT_PROFILE_IMG}
+            alt={comment.author_nickname}
+          />
           <CommentContent>
             <Nickname
               onClick={() => !comment.is_deleted && handleNicknameClick(comment.author_id)}

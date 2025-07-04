@@ -3,7 +3,7 @@ import styled from "styled-components";
 // 큰 박스(배경 포함)
 
 export const Container = styled.div`
-  width: 100vw;
+  width: 100%;
   min-width: 1920px;
   height: 100vh;
   display: flex;
@@ -11,7 +11,7 @@ export const Container = styled.div`
   align-items: center;
 
   ${({ theme }) => theme.media.tablet} {
-    min-width: 100vw;
+    min-width: 100%;
     padding: 0 12px;
   }
 `;
@@ -592,21 +592,22 @@ export const ErrorText = styled.div`
   }
 `;
 
-export const AbsoluteErrorBox = styled.div`
+export const AbsoluteErrorBox = styled.div<{ success?: boolean }>`
   position: absolute;
   top: 50%;
   right: 0;
   transform: translateY(-50%);
   background: ${({ theme }) => theme.colors.background};
-  border: 1px solid #ffd1dc;
-  color: #ff4264;
+  border: 1px solid ${({ success }) => (success ? "#a7e2b8" : "#ffd1dc")};
+  color: ${({ success }) => (success ? "#2ba700" : "#ff4264")};
   font-size: 0.97rem;
   padding: 6px 14px;
   border-radius: 7px;
   white-space: nowrap;
   z-index: 5;
-  box-shadow: 0 2px 8px rgba(255, 182, 193, 0.09);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   pointer-events: none;
+
   ${({ theme }) => theme.media.iosSE} {
     font-size: 0.76rem;
     padding: 4px 7px;
@@ -693,3 +694,4 @@ export const EmailTimer = styled.span`
   letter-spacing: 0.06em;
   text-align: center;
 `;
+

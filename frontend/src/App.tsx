@@ -15,10 +15,12 @@ import ChatbotLayout from "./layouts/ChatbotLayout";
 import RequireAuth from "./components/RequireAuth";
 import ResetConfirmPage from "./pages/ResetConfirmPage";
 import ResetRequestPage from "./pages/ResetRequestPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Routes>
         {/* 🔓 로그인/회원가입/루트는 누구나 접근 가능 */}
         <Route path="/" element={<AuthBox />} />

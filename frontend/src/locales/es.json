@@ -22,6 +22,7 @@
   },
   "nickname_modal": {
     "title": "Cambiar apodo",
+    "time_limit": "{{time}}",
     "error": "Este apodo ya está en uso."
   },
   "image_settings": {
@@ -457,7 +458,8 @@
     "emailPlaceholder": "Dirección de correo electrónico",
     "submit": "Enviar enlace",
     "success": "Se ha enviado un enlace de restablecimiento a tu correo electrónico.",
-    "fail": "No se encontró ningún usuario con ese correo electrónico."
+    "fail": "No se encontró ningún usuario con ese correo electrónico.",
+    "backToLogin": "Volver a la página de inicio de sesión"
   },
   "chat": {
     "welcome": "¡Hola! ¿En qué puedo ayudarte?",
@@ -482,5 +484,13 @@
     "recommend_tool": "🎯 Recomendar anime",
     "generate_image": "🤖 Generar imagen AI",
     "preview_close": "Cerrar vista previa"
+  },
+  "time": {
+    "d": "días",
+    "h": "h",
+    "m": "min",
+    "left_full": "Disponible en {{days}}{{dLabel}} {{hours}}{{hLabel}} {{minutes}}{{mLabel}}",
+    "left_hour_min": "Disponible en {{hours}}{{hLabel}} {{minutes}}{{mLabel}}",
+    "left_min": "Disponible en {{minutes}}{{mLabel}}"
   }
 }

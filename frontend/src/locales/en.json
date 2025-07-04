@@ -22,6 +22,7 @@
   },
   "nickname_modal": {
     "title": "Change Nickname",
+    "time_limit": "{{time}}",
     "error": "This nickname is already in use."
   },
   "image_settings": {
@@ -457,7 +458,8 @@
     "emailPlaceholder": "Email Address",
     "submit": "Send Link",
     "success": "A reset link has been sent to your email.",
-    "fail": "No user found with that email address."
+    "fail": "No user found with that email address.",
+    "backToLogin": "Back to login page"
   },
   "chat": {
     "welcome": "Hello! How can I assist you?",
@@ -482,5 +484,13 @@
     "studio": "Studio",
     "recommend_reason": "Reason for Recommendation",
     "preview_close": "Close preview"
+  },
+  "time": {
+    "d": "d",
+    "h": "h",
+    "m": "m",
+    "left_full": "Available in {{days}}{{dLabel}} {{hours}}{{hLabel}} {{minutes}}{{mLabel}}",
+    "left_hour_min": "Available in {{hours}}{{hLabel}} {{minutes}}{{mLabel}}",
+    "left_min": "Available in {{minutes}}{{mLabel}}"
   }
 }

@@ -18,6 +18,7 @@ export interface User {
   attendance?: number;
   activity?: Activity[];
   is_staff: boolean;
+  nickname_changed_at?: string;
 }
 
 export interface ProfileComment {

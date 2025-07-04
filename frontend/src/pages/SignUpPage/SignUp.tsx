@@ -17,6 +17,8 @@ import {
 } from "../../api/auth";
 import i18n from "i18next";
 
+const MAIN_LOGO_IMG = import.meta.env.VITE_MAIN_LOGO_IMG;
+
 const emailDomains = [
   { value: "naver.com", label: "naver.com" },
   { value: "gmail.com", label: "gmail.com" },
@@ -182,7 +184,7 @@ export default function SignUp() {
   return (
     <Container>
       <MainBox>
-        <Link to="/"><Logo src="/logos/mainlog.png" alt="AnTada 로고" /></Link>
+        <Link to="/"><Logo src={MAIN_LOGO_IMG} alt="AnTada 로고" /></Link>
         <FormBox onSubmit={handleSubmit}>
           {/* 언어 선택 */}
           <LanguageContainer>
@@ -240,7 +242,11 @@ export default function SignUp() {
                 </DomainDropdownList>
               )}
             </DomainDropdownWrap>
-            {!!emailMessage && <EmailErrorBox>{emailMessage}</EmailErrorBox>}
+            {!!emailMessage && (
+              <EmailErrorBox success={emailMessage === t("auth.verified")}>
+                {emailMessage}
+              </EmailErrorBox>
+            )}
           </EmailRow>
 
           {/* 이메일 인증 */}
@@ -286,7 +292,11 @@ export default function SignUp() {
               onChange={e => setNickname(e.target.value)}
               onBlur={handleNicknameCheck}
             />
-            {!!nicknameMessage && <NicknameErrorBox>{nicknameMessage}</NicknameErrorBox>}
+            {!!nicknameMessage && (
+              <NicknameErrorBox success={nicknameMessage === t("auth.error.nicknameAvailable")}>
+                {nicknameMessage}
+              </NicknameErrorBox>
+            )}
           </NicknameBox>
 
           {/* 비밀번호 */}
