@@ -11,19 +11,19 @@ embedding = OpenAIEmbeddings()
 
 # 경로 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-EXCEL_PATH = os.path.join(BASE_DIR, 'cleaned_anime_tags.xlsx')
+EXCEL_PATH = os.path.join(BASE_DIR, 'anime_fianl_true.xlsx')
 
 # 엑셀 로딩
 df = pd.read_excel(EXCEL_PATH)
-df = df[df["description_kr"].notnull()]  # 설명 있는 것만
+df = df[df["description_ko"].notnull()]  # 설명 있는 것만
 
 # Document 리스트로 변환
 docs = [
     Document(
-        page_content=str(row["description_kr"]),
+        page_content=str(row["description_ko"]),
         metadata={
             "title_ko": row.get("title_ko", ""),
-            "title_en": row.get("title_en", ""),
+            "title_es": row.get("title_es", ""),
             "title_romaji": row.get("title_romaji", ""),
             "title_native": row.get("title_native", "")
         }

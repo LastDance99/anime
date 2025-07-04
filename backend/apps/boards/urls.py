@@ -6,7 +6,10 @@ from .views import (
     BoardCommentListCreateView,
     BoardCommentLikeView,
     BoardCommentDeleteView,
-    BoardMiniProfileView
+    BoardMiniProfileView,
+    BoardNoticeListView,
+    BoardPopularListView,
+    BoardRecommendListView,
 )
 
 urlpatterns = [
@@ -30,4 +33,13 @@ urlpatterns = [
 
     # 게시판 미니프로필 조회
     path('postcount/', BoardMiniProfileView.as_view(), name='post-count'),
+
+    # 게시판 공지사항 목록 조회
+    path("notices/", BoardNoticeListView.as_view()),
+
+    # 게시판 인기 게시글 목록 조회
+    path("popular/", BoardPopularListView.as_view()),
+
+    # 게시판 추천 게시글 목록 조회
+    path("recommend/", BoardRecommendListView.as_view()),
 ]

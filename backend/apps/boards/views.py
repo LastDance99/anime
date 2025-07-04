@@ -1,4 +1,6 @@
-from rest_framework.generics import ListCreateAPIView
+import random
+
+from rest_framework.generics import ListCreateAPIView, ListAPIView
 from django.db.models import Count, Q
 from .models import BoardPost, PostLike, BoardComment, CommentLike
 from .serializers import BoardPostSummarySerializer
@@ -8,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
+from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied
 from apps.core.utils.extractor import extract_thumbnail_from_html 
 from apps.core.utils.sanitizer import sanitize_html
@@ -61,13 +64,26 @@ class BoardPostListCreateView(ListCreateAPIView):
         sanitized_content = sanitize_html(content)
         thumbnail_url = extract_thumbnail_from_html(sanitized_content)
 
-        post = serializer.save(content=sanitized_content, thumbnail_url=thumbnail_url)
+        # 공지글 작성 권한 체크
+        is_notice = self.request.data.get("is_notice", False)
+        if isinstance(is_notice, str):
+            is_notice = is_notice.lower() == "true"
+        if is_notice and not self.request.user.is_staff:
+            raise PermissionDenied("공지글 작성은 관리자만 가능합니다.")
 
-        create_user_activity(
-            user=self.request.user,
-            type="post_create",
-            target_id=post.id,
-            target_title=post.title
+        post = serializer.save(
+            content=sanitized_content, 
+            thumbnail_url=thumbnail_url,
+            is_notice=is_notice,
+        )
+
+        # 공지글은 내 활동 기록 제외
+        if not getattr(post, "is_notice", False):
+            create_user_activity(
+                user=self.request.user,
+                type="post_create",
+                target_id=post.id,
+                target_title=post.title
         )
         
 
@@ -86,22 +102,33 @@ class BoardPostDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, context={"request": request})
         return Response(serializer.data)
 
-    # 수정 권한: 작성자 본인만
+    # 수정 권한: 작성자 본인 or (공지글이면 관리자만)
     def perform_update(self, serializer):
         post = self.get_object()
-        if post.author != self.request.user:
-            raise PermissionDenied("게시글 수정 권한이 없습니다.")
+        # 공지글이면 관리자만 수정 가능
+        if post.is_notice:
+            if not request.user.is_staff:
+                raise PermissionDenied("공지글은 관리자만 수정할 수 있습니다.")
+        else:
+            # 일반글/갤러리는 작성자 본인만 수정
+            if post.author != self.request.user:
+                raise PermissionDenied("게시글 수정 권한이 없습니다.")
 
         content = self.request.data.get("content", post.content)
         sanitized_content = sanitize_html(content)
         thumbnail_url = extract_thumbnail_from_html(sanitized_content)
-
         serializer.save(content=sanitized_content, thumbnail_url=thumbnail_url)
 
-    # 삭제 권한: 작성자 본인만
+    # 삭제 권한: 작성자 본인 or (공지글이면 관리자만)
     def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied("게시글 삭제 권한이 없습니다.")
+        # 공지글이면 관리자만 삭제 가능
+        if instance.is_notice:
+            if not self.request.user.is_staff:
+                raise PermissionDenied("공지글은 관리자만 삭제할 수 있습니다.")
+        else:
+            # 일반글/갤러리는 작성자 본인만 삭제
+            if instance.author != self.request.user:
+                raise PermissionDenied("게시글 삭제 권한이 없습니다.")
         instance.delete()
     
 # 게시글 좋아요/좋아요 취소 API
@@ -257,3 +284,43 @@ class BoardMiniProfileView(APIView):
             "attendance_count": attendance_count
         })
     
+# 게시판 공지사항 목록 조회 API
+class BoardNoticeListView(ListAPIView):
+    serializer_class = BoardPostSummarySerializer 
+    def get_queryset(self):
+        qs = BoardPost.objects.filter(is_notice=True).order_by("-created_at")
+        limit = int(self.request.GET.get("limit", 3))
+        return qs[:limit]
+    
+
+# 게시판 인기 게시글 목록 조회 API
+class BoardPopularListView(ListAPIView):
+    serializer_class = BoardPostSummarySerializer
+    def get_queryset(self):
+        period = self.request.GET.get("period", "today")
+        limit = int(self.request.GET.get("limit", 5))
+        qs = BoardPost.objects.filter(is_notice=False)
+        if period == "today":
+            today = timezone.now().date()
+            qs = qs.filter(created_at__date=today)
+        # 조회수, 좋아요 등 순 정렬
+        order = self.request.GET.get("order", "views")
+        if order == "likes":
+            qs = qs.order_by("-like_count")
+        elif order == "comments":
+            qs = qs.order_by("-comment_count")
+        else:
+            qs = qs.order_by("-views")
+        return qs[:limit]
+    
+# 게시판 추천 게시글 목록 조회 API
+class BoardRecommendListView(ListAPIView):
+    serializer_class = BoardPostSummarySerializer
+    def get_queryset(self):
+        limit = int(self.request.GET.get("limit", 5))
+        # 랜덤 추천: 최근 100개 중 랜덤 N개
+        ids = list(BoardPost.objects.filter(is_notice=False).order_by("-created_at").values_list("id", flat=True)[:100])
+        if not ids:
+            return BoardPost.objects.none()
+        chosen = random.sample(ids, min(limit, len(ids)))
+        return BoardPost.objects.filter(id__in=chosen)

@@ -8,17 +8,24 @@ from django.db.models import Avg
 class AnimeSimpleSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     total_animelist_users = serializers.SerializerMethodField() 
+    favorite_count = serializers.IntegerField(read_only=True)
+    avg_rating = serializers.FloatField(read_only=True)
+    popularity_score = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Anime
-        fields = ["id", "title", "cover_image_l", "total_animelist_users"]
+        fields = ["id", "title", "cover_image_l", "total_animelist_users","favorite_count", "avg_rating", "popularity_score"]
 
     def get_lang(self):
         return self.context.get("lang", "ko")
 
     def get_title(self, obj):
-        lang = self.get_lang()
-        return getattr(obj, f"title_{lang}", obj.title_ko)
+        lang = self.get_lang()[:2]
+        return {
+            "ko": obj.title_ko,
+            "en": getattr(obj, "title_romaji", obj.title_ko),
+            "es": getattr(obj, "title_es", obj.title_ko)
+        }.get(lang, obj.title_ko)
 
     def get_total_animelist_users(self, obj):
         return getattr(obj, "user_count", 0)
@@ -43,7 +50,7 @@ class AnimeDetailSerializer(serializers.ModelSerializer):
         model = Anime
         fields = [
             "id", "title", "cover_image_xl", "banner_image", "start_date", "season", "status",
-            "duration", "episodes", "format", "description", "genres", "studios",
+            "duration", "episodes", "format", "description", "genres", "studios", "characters",
             "source", "average_rating", "user_rating", "user_has_in_animelist", "total_animelist_users"
         ]
 

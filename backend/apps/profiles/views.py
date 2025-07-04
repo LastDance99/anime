@@ -13,6 +13,7 @@ from apps.anime.models import AnimeReview, AnimeList
 from django.shortcuts import get_object_or_404
 from apps.anime.serializers import AnimeSimpleSerializer
 from django.db.models import Avg, Max
+from collections import Counter
 from datetime import date
 from .serializers import (
     UserProfileSerializer,
@@ -25,10 +26,8 @@ from .serializers import (
     BoardPostSummarySerializer,
     GallerySummarySerializer,
     MyAnimeListItemSerializer,
+    GenreStatSerializer,
 )
-from rest_framework.permissions import IsAuthenticated
-from django.conf import settings
-from openai import OpenAI
 
 User = get_user_model()
 
@@ -165,6 +164,58 @@ class AttendanceStatsView(APIView):
         serializer = AttendanceStatsSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+# 프로필 내 출석 날짜 목록 조회 및 오늘 출석 체크 뷰
+class UnifiedAttendanceView(APIView):
+    def get(self, request, user_id):
+        summary = request.query_params.get("summary") == "true"
+
+        dates = Attendance.objects.filter(user_id=user_id).values_list("date", flat=True)
+        if summary:
+            total_attendance = len(dates)
+            last_attendance = max(dates) if dates else None
+
+            return Response({
+                "dates": dates,
+                "total_attendance": total_attendance,
+                "last_attendance": last_attendance,
+            })
+
+        return Response(dates)
+    
+# 프로필 장르 통계 조회 뷰
+from django.shortcuts import get_object_or_404
+from collections import Counter
+
+class UserGenreStatsView(APIView):
+    def get(self, request, user_id):
+        # 우선 쿼리파라미터(lang)가 있으면 그걸 사용
+        lang = request.GET.get("lang")
+        # 없으면 해당 유저 DB의 language 필드를 자동으로 사용
+        if not lang:
+            user = get_object_or_404(User, pk=user_id)
+            lang = user.language or "ko"
+
+        genre_field = f"genres_{lang}"
+
+        anime_lists = AnimeList.objects.filter(user_id=user_id).select_related("anime")
+        all_genres = []
+        for al in anime_lists:
+            genres = getattr(al.anime, genre_field, None)
+            if not genres or not isinstance(genres, list):
+                continue
+            all_genres.extend([g.strip() for g in genres if isinstance(g, str)])
+
+        genre_counts = Counter(all_genres)
+        data = [{"genre": g, "count": c} for g, c in genre_counts.items()]
+
+        limit = int(request.GET.get("limit", 0))
+        if limit:
+            data = data[:limit]
+        
+        serializer = GenreStatSerializer(data=data, many=True)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data)
+    
 # 프로필 최애 애니메이션 목록 조회 뷰
 class FavoriteAnimeListView(generics.ListAPIView):
     serializer_class = AnimeSimpleSerializer
@@ -293,38 +344,40 @@ class ProfileContentListView(ListAPIView):
         lang = self.get_serializer_context().get("lang", "ko")
 
         if content_type == "post":
-            # 게시글 탭
             q = request.GET.get('q', '')
-            order = request.GET.get('order', 'latest')
-            qs = BoardPost.objects.filter(author_id=user_id, board_type="post")
+            ordering = request.GET.get("ordering")
+            if ordering is None:
+                ordering = request.GET.get("order", "latest")
+            qs = BoardPost.objects.filter(author_id=user_id, board_type="post", is_notice=False)
             qs = qs.annotate(
                 like_count=Count('likes', distinct=True),
                 comment_count=Count('comments', distinct=True)
             )
             if q:
                 qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
-            if order == "oldest":
+            if ordering == "oldest":
                 qs = qs.order_by('created_at')
-            elif order == "like":
+            elif ordering == "like":
                 qs = qs.order_by('-like_count', '-created_at')
             else:
                 qs = qs.order_by('-created_at')
             return qs
 
         elif content_type == "gallery":
-            # 갤러리 탭
             q = request.GET.get('q', '')
-            order = request.GET.get('order', 'latest')
-            qs = BoardPost.objects.filter(author_id=user_id, board_type="gallery")
+            ordering = request.GET.get("ordering")
+            if ordering is None:
+                ordering = request.GET.get("order", "latest")
+            qs = BoardPost.objects.filter(author_id=user_id, board_type="gallery", is_notice=False)
             qs = qs.annotate(
                 like_count=Count('likes', distinct=True),
                 comment_count=Count('comments', distinct=True)
             )
             if q:
                 qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
-            if order == "oldest":
+            if ordering == "oldest":
                 qs = qs.order_by('created_at')
-            elif order == "like":
+            elif ordering == "like":
                 qs = qs.order_by('-like_count', '-created_at')
             else:
                 qs = qs.order_by('-created_at')
@@ -338,7 +391,7 @@ class ProfileContentListView(ListAPIView):
             year = request.GET.get("year")
             status = request.GET.get("status")
             season = request.GET.get("season")
-            format_ = request.GET.get("format")
+            media_format = request.GET.get("media_format")
             source = request.GET.get("source")
             ordering = request.GET.get("ordering")
 
@@ -364,8 +417,8 @@ class ProfileContentListView(ListAPIView):
                 qs = qs.filter(**{f"anime__status_{lang}": status})
             if season:
                 qs = qs.filter(**{f"anime__season_{lang}": season})
-            if format_:
-                qs = qs.filter(anime__format=format_)
+            if media_format:
+                qs = qs.filter(anime__format=media_format)
             if source:
                 qs = qs.filter(**{f"anime__source_{lang}": source})
 
@@ -385,7 +438,7 @@ class ProfileContentListView(ListAPIView):
             else:
                 qs = qs.order_by('-created_at')
             return qs
-
+        
         # 아무 타입도 아니면 빈 쿼리셋
         return BoardPost.objects.none()
-
+    

@@ -13,11 +13,11 @@ import os
 
 
 from pathlib import Path
+from dotenv import load_dotenv
 from corsheaders.defaults import default_headers
 
-from dotenv import load_dotenv, find_dotenv
+load_dotenv()
 
-load_dotenv(find_dotenv())
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -95,6 +95,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+]
+
+LANGUAGES = [
+    ('ko', 'Korean'),
+    ('en', 'English'),
+    ('es', 'Spanish'),
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -128,9 +135,6 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': os.environ.get('DB_PORT', '5432'),
-        #'OPTIONS': {
-            'client_encoding': 'UTF8',
-        #}
     }
 }
 
@@ -208,6 +212,13 @@ REST_FRAMEWORK = {
     
 }
 
+# 다국어 로케일
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
+
+
+
 # Redis 캐시 설정 CMD > redis-server.exe
 CACHES = {
     "default": {
@@ -277,4 +288,3 @@ STORAGES = {
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

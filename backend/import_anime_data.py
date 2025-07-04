@@ -8,7 +8,23 @@ django.setup()
 
 from apps.anime.models import Anime
 
-df = pd.read_excel('anime_fianl_true.xlsx')  
+df = pd.read_excel('anime_fianl_true.xlsx')
+
+def parse_json_list(x):
+    if pd.isna(x) or x in ['', 'nan', None]:
+        return []
+    # 혹시 이미 리스트 타입이면 그대로 반환
+    if isinstance(x, list):
+        return x
+    try:
+        # 홑따옴표 → 쌍따옴표 변환 (json.loads 호환)
+        x = x.replace("'", '"')
+        value = json.loads(x)
+        if not isinstance(value, list):
+            return []
+        return value
+    except Exception:
+        return []
 
 for _, row in df.iterrows():
     Anime.objects.create(
@@ -41,9 +57,13 @@ for _, row in df.iterrows():
         cover_image_l=row['cover_image_l'],
         cover_image_m=row['cover_image_m'],
         banner_image=row.get('banner_image', ''),
-        genres_ko=json.loads(row['genres_ko']) if pd.notna(row['genres_ko']) and row['genres_ko'] else [],
-        genres_en=json.loads(row['genres_en']) if pd.notna(row['genres_en']) and row['genres_en'] else [],
-        genres_es=json.loads(row['genres_es']) if pd.notna(row['genres_es']) and row['genres_es'] else [],
-        studios=json.loads(row['studios']) if pd.notna(row['studios']) and row['studios'] else [],
+        genres_ko=parse_json_list(row['genres_ko']),
+        genres_en=parse_json_list(row['genres_en']),
+        genres_es=parse_json_list(row['genres_es']),
+        studios=parse_json_list(row['studios']),
+        tags=parse_json_list(row['tags']),
+        characters=parse_json_list(row['characters']),
+        staff=parse_json_list(row['staff']),
     )
 print("✅ 애니 데이터 등록 완료!")
+# python import_anime_data.py

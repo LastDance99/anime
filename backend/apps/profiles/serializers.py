@@ -1,19 +1,22 @@
 from rest_framework import serializers
 from .models import ProfileComment, UserActivity
 from apps.boards.models import BoardPost
-from apps.anime.models import AnimeList, AnimeReview
+from apps.anime.models import AnimeList, AnimeReview, Anime
 from apps.core.utils.sanitizer import sanitize_html
 from django.contrib.auth import get_user_model
+from .utils.localization import get_localized_title
 
 User = get_user_model()
 
 # 유저 프로필 시리얼라이저
 class UserProfileSerializer(serializers.ModelSerializer):
+    is_staff = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = User
         fields = [
             'id', 'email', 'nickname', 'profile_image', 'background_image',
-            'myroom_image', 'about', 'language'
+            'myroom_image', 'about', 'language', 'is_staff',
         ]
 
 # 자기소개 업데이트 시리얼라이저
@@ -36,6 +39,11 @@ class AnimeListStatsSerializer(serializers.Serializer):
 class AttendanceStatsSerializer(serializers.Serializer):
     total_attendance = serializers.IntegerField()
     last_attendance = serializers.DateField(allow_null=True)
+    
+# 애니메이션 장르 통계 시리얼라이저
+class GenreStatSerializer(serializers.Serializer):
+    genre = serializers.CharField()
+    count = serializers.IntegerField()
 
 # 최애 애니메이션 토글 시리얼라이저
 class AnimeFavoriteToggleSerializer(serializers.Serializer):
@@ -96,8 +104,18 @@ class UserActivitySerializer(serializers.ModelSerializer):
         return timesince(obj.created_at) + " 전"
 
     def get_anime_title(self, obj):
+        # 애니 관련 활동에서만 처리
         if obj.type in ["anime_add", "anime_remove", "review_add", "review_remove"]:
-            return obj.target_title
+            try:
+                anime = Anime.objects.get(id=obj.target_id)
+            except Anime.DoesNotExist:
+                return obj.target_title 
+            lang = self.context.get('lang')
+            if not lang and 'request' in self.context and self.context['request'].user.is_authenticated:
+                lang = self.context['request'].user.language
+            if not lang:
+                lang = 'ko'
+            return get_localized_title(anime, lang)
         return None
 
     def get_anime_img(self, obj):
