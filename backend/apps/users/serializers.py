@@ -8,6 +8,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.encoding import force_str
@@ -34,38 +35,33 @@ class UserSignupSerializer(serializers.ModelSerializer):
         try:
             record = EmailVerification.objects.get(email=email)
         except EmailVerification.DoesNotExist:
-            raise serializers.ValidationError("이메일 인증이 필요합니다.")
+            raise serializers.ValidationError(_("이메일 인증이 필요합니다."))
         if not record.is_verified:
-            raise serializers.ValidationError("이메일 인증이 완료되지 않았습니다.")
+            raise serializers.ValidationError(_("이메일 인증이 완료되지 않았습니다."))
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("이미 가입된 이메일입니다.")
+            raise serializers.ValidationError(_("이미 가입된 이메일입니다."))
         return email
 
     def validate_nickname(self, value):
         nickname = value.strip()
-        # 1. 길이 제한 (2~16자)
         if len(nickname) < 2 or len(nickname) > 16:
-            raise serializers.ValidationError("닉네임은 2자 이상 16자 이하로 입력해야 합니다.")
-        # 2. 한글/영문/숫자만 허용 (특수문자, 공백 포함 시 거부)
-        #   - ^ : 시작, $ : 끝
-        #   - 한글: \uac00-\ud7a3, 영문: a-zA-Z, 숫자: 0-9
+            raise serializers.ValidationError(_("닉네임은 2자 이상 16자 이하로 입력해야 합니다."))
         if not re.match(r'^[\uac00-\ud7a3a-zA-Z0-9]+$', nickname):
-            raise serializers.ValidationError("닉네임은 한글, 영문, 숫자만 사용할 수 있습니다. (특수문자/공백 불가)")
-        # 3. 대소문자 구분 없이 중복 체크
+            raise serializers.ValidationError(_("닉네임은 한글, 영문, 숫자만 사용할 수 있습니다. (특수문자/공백 불가)"))
         if User.objects.filter(nickname__iexact=nickname).exists():
-            raise serializers.ValidationError("이미 사용 중인 닉네임입니다.")
+            raise serializers.ValidationError(_("이미 사용 중인 닉네임입니다."))
         return nickname
 
     def validate_password(self, value):
         if len(value) < 8:
-            raise serializers.ValidationError("비밀번호는 최소 8자리여야 합니다.")
+            raise serializers.ValidationError(_("비밀번호는 최소 8자리여야 합니다."))
         if not re.search(r'[A-Za-z]', value) or not re.search(r'\d', value):
-            raise serializers.ValidationError("비밀번호는 영문과 숫자를 모두 포함해야 합니다.")
+            raise serializers.ValidationError(_("비밀번호는 영문과 숫자를 모두 포함해야 합니다."))
         return value
 
     def validate(self, data):
         if data['password'] != data['password2']:
-            raise serializers.ValidationError({"password2": "비밀번호가 일치하지 않습니다."})
+            raise serializers.ValidationError({"password2": _("비밀번호가 일치하지 않습니다.")})
         return data
 
     def create(self, validated_data):
@@ -87,10 +83,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise exceptions.AuthenticationFailed({'email': ["존재하지 않는 이메일입니다."]})
+            raise exceptions.AuthenticationFailed({'email': [_("존재하지 않는 이메일입니다.")]})
 
         if not user.check_password(password):
-            raise exceptions.AuthenticationFailed({'password': ["비밀번호가 올바르지 않습니다."]})
+            raise exceptions.AuthenticationFailed({'password': [_("비밀번호가 올바르지 않습니다.")]})
 
         # 기본 jwt 토큰 발급 로직
         data = super().validate(attrs)
@@ -111,7 +107,7 @@ class LogoutSerializer(serializers.Serializer):
             token = RefreshToken(self.token)
             token.blacklist()  # 토큰 블랙리스트에 등록
         except Exception as e:
-            raise serializers.ValidationError('유효하지 않은 refresh 토큰입니다.')
+            raise serializers.ValidationError(_('유효하지 않은 refresh 토큰입니다.'))
 
 # 4. 비밀번호 재설정용 – 이메일 전송
 class PasswordResetRequestSerializer(serializers.Serializer):
@@ -119,7 +115,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         if not User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("해당 이메일로 등록된 유저가 없습니다.")
+            raise serializers.ValidationError(_("해당 이메일로 등록된 유저가 없습니다."))
         return value
 
     def save(self):
@@ -133,8 +129,8 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         reset_link = f"http://localhost:5173/reset-password/{uid}/{token}/"
 
         send_mail(
-            subject='[안타다] 비밀번호 재설정 링크입니다',
-            message=f'다음 링크를 클릭해 비밀번호를 재설정하세요:\n{reset_link}',
+            subject=_('[안타다] 비밀번호 재설정 링크입니다'),
+            message=_('다음 링크를 클릭해 비밀번호를 재설정하세요:\n%(reset_link)s') % {"reset_link": reset_link},
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
         )
@@ -151,28 +147,28 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             uid = force_str(urlsafe_base64_decode(attrs['uid']))
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            raise serializers.ValidationError("유효하지 않은 사용자입니다.")
+            raise serializers.ValidationError(_("유효하지 않은 사용자입니다."))
 
         token_generator = PasswordResetTokenGenerator()
         if not token_generator.check_token(user, attrs['token']):
-            raise serializers.ValidationError("유효하지 않은 토큰입니다.")
+            raise serializers.ValidationError(_("유효하지 않은 토큰입니다."))
 
         new_password = attrs.get('new_password')
         new_password2 = attrs.get('new_password2')
 
         # 비밀번호 유효성 검사
         if len(new_password) < 8:
-            raise serializers.ValidationError({"new_password": "비밀번호는 최소 8자리여야 합니다."})
+            raise serializers.ValidationError({"new_password": _("비밀번호는 최소 8자리여야 합니다.")})
         if not re.search(r'[A-Za-z]', new_password) or not re.search(r'\d', new_password):
-            raise serializers.ValidationError({"new_password": "비밀번호는 영문과 숫자를 모두 포함해야 합니다."})
+            raise serializers.ValidationError({"new_password": _("비밀번호는 영문과 숫자를 모두 포함해야 합니다.")})
 
         # 비밀번호 확인
         if new_password != new_password2:
-            raise serializers.ValidationError({"new_password2": "비밀번호가 일치하지 않습니다."})
+            raise serializers.ValidationError({"new_password2": _("비밀번호가 일치하지 않습니다.")})
 
         # 기존 비밀번호와 동일한지 확인
         if user.check_password(new_password):
-            raise serializers.ValidationError({"new_password": "기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다."})
+            raise serializers.ValidationError({"new_password": _("기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.")})
 
         attrs['user'] = user
         return attrs
@@ -210,8 +206,8 @@ class EmailVerificationRequestSerializer(serializers.Serializer):
 
         # 이메일 발송
         send_mail(
-            subject="[안타다] 이메일 인증 코드",
-            message=f"인증 코드는 다음과 같습니다: {code}",
+            subject=_("[안타다] 이메일 인증 코드"),
+            message=_("인증 코드는 다음과 같습니다: %(code)s") % {"code": code},
             from_email=None,
             recipient_list=[email],
         )
@@ -229,16 +225,16 @@ class EmailVerificationConfirmSerializer(serializers.Serializer):
         try:
             record = EmailVerification.objects.get(email=email)
         except EmailVerification.DoesNotExist:
-            raise serializers.ValidationError("인증 요청이 존재하지 않습니다.")
+            raise serializers.ValidationError(_("인증 요청이 존재하지 않습니다."))
 
         if record.is_verified:
-            raise serializers.ValidationError("이미 인증된 이메일입니다.")
+            raise serializers.ValidationError(_("이미 인증된 이메일입니다."))
 
         if record.is_expired():
-            raise serializers.ValidationError("인증 코드가 만료되었습니다.")
+            raise serializers.ValidationError(_("인증 코드가 만료되었습니다."))
 
         if record.code != code:
-            raise serializers.ValidationError("인증 코드가 일치하지 않습니다.")
+            raise serializers.ValidationError(_("인증 코드가 일치하지 않습니다."))
 
         attrs["record"] = record
         return attrs

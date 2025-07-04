@@ -536,6 +536,16 @@ def ask_gpt_full_context_v2(excel_data, web_data, question, format_type="UNKNOWN
     clean_answer = remove_placeholder_titles(clean_answer)
     return clean_answer
 
+def is_recommendation_answer(gpt_answer):
+    """
+    1. 리스트형 추천(1. 2. 3. ...이 여러 번 등장)만 추천 답변으로 판단
+    2. - (대시)는 무시 (줄거리, 특성, 요약 등에도 쓰이기 때문)
+    """
+    lines = gpt_answer.split("\n")
+    number_list_count = sum(1 for l in lines if re.match(r"^\d+\.", l.strip()))
+    # 2개 이상 번호 리스트가 있을 때만 추천형으로 본다
+    return number_list_count >= 2
+
 # ───────────── 추천 함수
 import ast
 import random

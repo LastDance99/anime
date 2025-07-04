@@ -5,13 +5,21 @@ import requests
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from openai import OpenAI
 from django_redis import get_redis_connection
 from .utils import (
-    get_system_prompt, is_smalltalk_llm, is_smalltalk, smalltalk_answer, is_policy_question_llm, 
-    policy_rag_answer, classify_question_type, extract_title_from_question,
-    search_excel_candidates, search_web, ask_gpt_full_context_v2, recommend_anime_by_userlist,
+    is_smalltalk_llm, 
+    is_smalltalk, 
+    smalltalk_answer, 
+    is_policy_question_llm, 
+    policy_rag_answer, 
+    classify_question_type, 
+    extract_title_from_question,
+    search_excel_candidates, 
+    search_web, 
+    ask_gpt_full_context_v2, 
+    is_recommendation_answer, 
+    recommend_anime_by_userlist,
 )
 
 REDIS_CHAT_PREFIX = "animebot_chat:"
@@ -43,7 +51,6 @@ def is_smalltalk_combined(question):
     return llm_result == "잡담"
 
 class AnimeBotChatAPIView(APIView):
-    permission_classes = [AllowAny]
 
     def post(self, request):
         user_id = request.user.id
@@ -92,8 +99,13 @@ class AnimeBotChatAPIView(APIView):
 
         web_answer = search_web(search_key)
         gpt_answer = ask_gpt_full_context_v2(
-            excel_answer, web_answer, question, format_type, dialog_context
+            excel_answer, web_answer, question, format_type, dialog_context, lang=lang
         )
+
+        # 커버이미지 노출 조건: 추천/다수형 답변일 때만 cover_image를 막음
+        if is_recommendation_answer(gpt_answer):
+            cover_image = ""
+
         append_dialog_context(user_id, question, gpt_answer)
         return Response({
             "mode": "info",
@@ -158,7 +170,6 @@ def download_and_upload_to_s3(image_url):
     return s3_url
 
 class AnimeBotImageGenerateAPIView(APIView):
-    permission_classes = [AllowAny]
 
     def post(self, request):
         prompt = request.data.get("prompt", "").strip()

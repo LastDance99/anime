@@ -95,6 +95,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+]
+
+LANGUAGES = [
+    ('ko', 'Korean'),
+    ('en', 'English'),
+    ('es', 'Spanish'),
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -204,6 +211,13 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,  
     
 }
+
+# 다국어 로케일
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
+
+
 
 # Redis 캐시 설정 CMD > redis-server.exe
 CACHES = {
