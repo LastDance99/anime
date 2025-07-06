@@ -155,7 +155,7 @@ export default function DetailContent({
     <Wrapper $isNotice={isNotice}>
       <CategoryText $type={isNotice ? "notice" : isGallery ? "gallery" : "board"}>
         {isNotice
-          ? t("board.detail.notice") // 예: "공지"
+          ? t("") // 예: "공지" 공지글을 원하면 추가 -> board.detail.notice
           : isGallery
           ? t("board.detail.gallery") // 예: "갤러리"
           : t("board.detail.post") // 예: "게시글"

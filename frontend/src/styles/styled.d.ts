@@ -56,6 +56,8 @@ declare module 'styled-components' {
     media: {
       mobile: string;
       tablet: string;
+      qhd: string;
+      fhd: string;
 
       iosMax: string;
       iosMid: string;

@@ -4,6 +4,14 @@ export const Section = styled.div`
   width: 100%;
   height: 100%;
   // background: #FCEEF5;
+
+  ${({ theme }) => theme.media.qhd} {
+    padding-top: 180px;
+  }
+
+  ${({ theme }) => theme.media.fhd} {
+    padding-top: 80px;
+  }
 `;
 
 export const Container = styled.div`
@@ -16,7 +24,6 @@ export const Container = styled.div`
   display: flex;
   align-items: center;    /* 수직 중앙정렬 */
   justify-content: center; /* 수평 중앙정렬 */
-  padding-top: 80px;
 `;
 
 export const Wrapper = styled.div`
@@ -28,7 +35,7 @@ export const Wrapper = styled.div`
 
 export const AnimeSectionBox = styled.div`
   width: 930px;
-  // max-height: 920px;
+  // max-height: 100%;
   background: #fff;
   border: 1px solid #FFB6C1;
 `;

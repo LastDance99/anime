@@ -53,6 +53,8 @@ const theme = {
     // 공통
     mobile: "@media (max-width: 768px)",
     tablet: "@media (max-width: 1024px)",
+    qhd: "@media (max-width: 2560px)",
+    fhd: "@media (max-width: 1920px)",
 
     // iOS 디바이스
     iosMax: "@media (max-width: 428px)",     // iPhone Pro Max

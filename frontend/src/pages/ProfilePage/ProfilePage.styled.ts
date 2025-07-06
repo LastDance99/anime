@@ -3,7 +3,8 @@ import styled from "styled-components";
 // 전체 페이지 감싸는 컨테이너
 export const Container = styled.div`
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;      // 위에서 아래로 정렬 (헤더, 내용, 등)
   align-items: center;
