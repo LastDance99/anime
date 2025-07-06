@@ -64,3 +64,9 @@ Author: jinwook
 Message: 스타일 수정 본
 Commit: dae1a1def19aaa380bb2416452415441d7023770
 
+==== New Push ====
+Time: 2025-07-06 09:57:35
+Author: kimdaewon
+Message: 인기작/기대작 렌더링 시 헨타이 장르 필터링 추가
+Commit: fdaebfdb180196682606e32e572b874ab4224082
+
