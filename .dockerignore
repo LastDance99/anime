@@ -1,16 +1,9 @@
-# ==============================
-# 📦 .dockerignore (백엔드/프론트 공통)
-# ==============================
-
-__pycache__/
-*.py[cod]
-*.log
-*.sqlite3
-*.env
-node_modules/
-build/
-dist/
-.DS_Store
-.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/*.pyc
+**/.env
 venv/
-.env.*
+node_modules/
+.git
+.gitignore
+*.xlsx

@@ -1,28 +1,14 @@
-# ==============================
-# 📦 Dockerfile (for Django)
-# ==============================
-# backend/Dockerfile
-
 FROM python:3.11-slim
 
-# 환경변수 설정
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# 작업 디렉토리 설정
 WORKDIR /app
 
-# 의존성 설치
-COPY requirements.txt ./
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# 시스템 패키지 (psycopg2, Pillow 등 빌드 필요시)
+RUN apt-get update && apt-get install -y gcc libpq-dev && rm -rf /var/lib/apt/lists/*
 
-# 프로젝트 복사
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
 
-# 포트 노출 (장고 dev 서버)
-EXPOSE 8000
-
-# 서버 실행 명령
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
-
+# Gunicorn으로 서비스 (프로젝트 폴더명이 config라면 그대로, 다르면 수정)
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
