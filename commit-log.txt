@@ -58,3 +58,9 @@ Author: kimdaewon
 Message: 백엔드 폴더 전체 최신화 및 덮어쓰기
 Commit: f5f515187cd8fa42d1458aea9f7dff947b591c91
 
+==== New Push ====
+Time: 2025-07-06 09:31:28
+Author: jinwook
+Message: 스타일 수정 본
+Commit: dae1a1def19aaa380bb2416452415441d7023770
+
