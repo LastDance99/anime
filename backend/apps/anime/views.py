@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db.models import Q, Avg, Count
+from django.db.models import Q, Avg, Count, F
 from django.db.models.functions import Coalesce
 from .models import Anime, AnimeReview, ReviewLike, AnimeList
 from .serializers import AnimeSimpleSerializer, AnimeDetailSerializer, AnimeReviewSerializer, AnimeReviewCreateSerializer
@@ -9,6 +9,7 @@ from rest_framework import status
 from apps.profiles.models import Attendance
 from apps.profiles.utils.activity import create_user_activity
 from apps.profiles.utils.localization import get_localized_title
+from rest_framework.generics import ListAPIView
 
 # Anime 통합검색 API
 class AnimeSearchView(APIView):
@@ -413,10 +414,6 @@ class AnimeMiniProfileView(APIView):
             "attendance_count": attendance_count
         })
     
-from rest_framework.generics import ListAPIView
-from django.db.models import Count, Avg, F
-from .serializers import AnimeSimpleSerializer
-
 # 인기 점수: 찜(AnimeList, is_favorite=True) 수 + (평균 평점 * 10)
 class PopularAnimeRankingView(ListAPIView):
     serializer_class = AnimeSimpleSerializer
@@ -424,6 +421,7 @@ class PopularAnimeRankingView(ListAPIView):
     def get_queryset(self):
         queryset = (
             Anime.objects
+            .exclude(genres_ko__contains=['헨타이']).exclude(genres_en__contains=['Hentai']).exclude(genres_es__contains=['Hentai'])
             .annotate(
                 favorite_count=Count('animelist', distinct=True),
                 avg_rating=Coalesce(Avg("animereview__rating", distinct=True), 0.0)
@@ -452,6 +450,7 @@ class UpcomingAnimeRankingAPIView(APIView):
             queryset = (
                 Anime.objects
                 .filter(status_ko="아직 방영되지 않음")
+                .exclude(genres_ko__contains=['헨타이']).exclude(genres_en__contains=['Hentai']).exclude(genres_es__contains=['Hentai'])
                 .annotate(
                     favorite_count=Coalesce(Count("animelist", distinct=True), 0),
                     avg_rating=Coalesce(Avg("animereview__rating", distinct=True), 0.0),
