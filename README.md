@@ -2,12 +2,12 @@
 
 ## 📚 프로젝트 소개
 - 일본 애니메이션 기반 종합 커뮤니티 플랫폼
-- 애니 검색, 평점/리뷰, 커뮤니티, 마이룸, 챗봇 등 다양한 기능 제공
+- 애니 정보 검색, 애니 리스트 관리, 평점/리뷰, 커뮤니티, 프로필, AI챗봇기반 애니 대화/추천, 짤 생성 등 다양한 기능 제공
 
 ## 🛠️ 기술 스택
 - **Backend:** Django, Django REST Framework, PostgreSQL
-- **Frontend:** React (별도 저장소)
-- **Infra:** AWS S3 (이미지 저장), Docker + Github Action + AWS (개발/배포)
+- **Frontend:** Typescripts + React + Vite 
+- **Infra:** AWS S3 (이미지 저장), AWS RDS, AWS EC2, Docker 
 
 ## ⚙️ 설치 및 실행 방법
 
